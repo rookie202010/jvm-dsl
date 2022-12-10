@@ -6,7 +6,7 @@ grammar JvmDslParser;
 
 options { tokenVocab=JvmDslLexer; }
 
-program   :    PACKAGE LBRACE
+program   :    PROGRAM LBRACE
                 member*
             RBRACE
             ;
@@ -81,11 +81,12 @@ doWhileStatement :   DO
                 WHILE LPAREN conditionalOrExpression RPAREN;
 //for statement
 forStatement :   FOR LPAREN  varDef   SEMI    conditionalOrExpression   SEMI   assignment RPAREN
-            block
+            block # ForStatementOne
         |   FOR LPAREN  varDef   COLON   literalAndFuncCall RPAREN
-            block
+            block # ForStatementTwo
         |   FOR LPAREN  varDef   COMMA   varDef   COLON   literalAndFuncCall RPAREN
-            block;
+            block # ForStatementThree
+        ;
 
 ifStatement  :    IF LPAREN conditionalOrExpression RPAREN
              block
@@ -174,37 +175,40 @@ unapplyExpression   :   clazzType   LPAREN  literal (COMMA literal)* RPAREN
                     ;
 
 //Type  ex. Int,    Float,  Char,   Set[Int]
-type    :   INT
-        |   FLOAT
-        |   LONG
-        |   DOUBLE
-        |   BOOL
-        |   BYTE
-        |   STRING
-        |   CHAR
-        |   LIST  LBRACK type    RBRACK
-        |   ARRAY   LBRACK type RBRACK
-        |   SET   LBRACK type    RBRACE
-        |   MAP   LBRACK type    COMMA  type  RBRACK
-        |   LPAREN  type    (COMMA   type)+ RPAREN
-        |   OPTION    LBRACK type    RBRACK
-        |   FUTURE    LBRACK type    RBRACK
-        |   type    ARROW   type
-        |   type    ARROW   LPAREN  type    (   COMMA   type)+  RPAREN
-        |   LPAREN  RPAREN  ARROW   type
-        |   LPAREN  RPAREN  ARROW   LPAREN  type    (   COMMA   type)+  RPAREN
-        |   LPAREN  type    (COMMA  type)+ RPAREN   ARROW   type
-        |   LPAREN  type    (COMMA  type)+ RPAREN  ARROW   LPAREN  type    (   COMMA   type)+  RPAREN
-        |   clazzType LBRACK type    (COMMA  type)*  RBRACK
-        |   clazzType
+type    :   INT #   IntType
+        |   FLOAT   #   FloatType
+        |   LONG    #   LongType
+        |   DOUBLE  #   DoubleType
+        |   BOOL    #   BoolType
+        |   BYTE    #   ByteType
+        |   STRING  #   StringType
+        |   CHAR    #   CharType
+        |   VOID    #   VoidType
+        |   LIST  LBRACK type    RBRACK #   ListType
+        |   ARRAY   LBRACK type RBRACK  #   ArrayType
+        |   SET   LBRACK type    RBRACE #   SetType
+        |   MAP   LBRACK type    COMMA  type  RBRACK    #   MapType
+        |   LPAREN  type    (COMMA   type)+ RPAREN  #   TupleType
+        |   OPTION    LBRACK type    RBRACK #   OptionType
+        |   FUTURE    LBRACK type    RBRACK #   FutureType
+        |   type    ARROW   type    #   LambdaOneInOneOutType
+        |   type    ARROW   types  #   LambdaOneInMoreOutType
+        |   LPAREN  RPAREN  ARROW   type    #   LambdaZeroInOneOutType
+        |   LPAREN  RPAREN  ARROW   types  #   LambdaZeroInMoreOutType
+        |   types   ARROW   type    #   LambdaMoreInOneOutType
+        |   types  ARROW   types   #   LambdaMoreInMoreOutType
+        |   clazzType LBRACK type    (COMMA  type)*  RBRACK # ParameterizedClassType
+        |   clazzType   #   ClassType
         ;
+
+types:  LPAREN  type    (COMMA  type)+ RPAREN;
 
 clazzType   :   IDENTIFIER  (DOT IDENTIFIER)* ;
 
 varDef   :   type localVariable    (   ASSIGN (    conditionalOrExpression | lambdaExpression  )  )?;
 
 //Class Declare ex. class Foo(Int a,String b),  class Foo[T,K](T t,K k)
-classDef    :   CLASS IDENTIFIER (LBRACK IDENTIFIER (COMMA IDENTIFIER)* RBRACK)* parameters
+classDef    :   CLASS IDENTIFIER  parameters
                 LBRACE   funcDef* RBRACE
             ;
 
@@ -214,10 +218,9 @@ funcCall    :   singleFuncCall  (DOT singleFuncCall)*   ;
 singleFuncCall   :   (variable DOT)? funcName LPAREN RPAREN
                  |    (variable DOT)? funcName LPAREN expression (COMMA  expression  )*    RPAREN;
 
-funcDef :   DEF   funcName  parameters  ':' type    throwDef?   block;
+funcDef :   DEF   funcName  parameters  ASSIGN type    throwDef?   block;
 
-fieldDef    :   VOLATILE?   varDef
-        ;
+fieldDef    :   VOLATILE?   varDef ;
 
 //Literal
 literalAndFuncCall :   funcCall
@@ -261,8 +264,8 @@ setLiteral :   LBRACE  literalAndFuncCall    (COMMA    literalAndFuncCall    )* 
 optionalLiteral  : QUESTION literalAndFuncCall ;
 
 //map   literal ex. {1:2,3:1}
-mapLiteral :   LBRACE (   literalAndFuncCall    )    ':'    (   literalAndFuncCall   )
-    (COMMA    (  literalAndFuncCall    )    ':' (  literalAndFuncCall  )   )*  RBRACE
+mapLiteral :   LBRACE (   literalAndFuncCall    )    COLON    (   literalAndFuncCall   )
+    (COMMA    (  literalAndFuncCall    )    COLON (  literalAndFuncCall  )   )*  RBRACE
     |   LBRACE RBRACE ;
 //tuple literal ex. (1,"11",1f)
 tupleLiteral   :   LPAREN literalAndFuncCall  (COMMA    literalAndFuncCall)+    RPAREN ;

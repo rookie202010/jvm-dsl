@@ -1,4 +1,4 @@
-// Generated from com.dongjiaqiang.jvm.dsl.core/JvmDslParser.g4 by ANTLR 4.9.3
+// Generated from java-escape by ANTLR 4.11.1
 package com.dongjiaqiang.jvm.dsl.core;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -9,9 +9,9 @@ import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class JvmDslParserLexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.9.3", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -102,9 +102,11 @@ public class JvmDslParserLexer extends Lexer {
 	public ATN getATN() { return _ATN; }
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\2\3\7\b\1\4\2\t\2\3"+
-		"\2\3\2\2\2\3\3\3\3\2\2\2\6\2\3\3\2\2\2\3\5\3\2\2\2\5\6\7<\2\2\6\4\3\2"+
-		"\2\2\3\2\2";
+		"\u0004\u0000\u0001\u0005\u0006\uffff\uffff\u0002\u0000\u0007\u0000\u0001"+
+		"\u0000\u0001\u0000\u0000\u0000\u0001\u0001\u0001\u0001\u0000\u0000\u0004"+
+		"\u0000\u0001\u0001\u0000\u0000\u0000\u0001\u0003\u0001\u0000\u0000\u0000"+
+		"\u0003\u0004\u0005:\u0000\u0000\u0004\u0002\u0001\u0000\u0000\u0000\u0001"+
+		"\u0000\u0000";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

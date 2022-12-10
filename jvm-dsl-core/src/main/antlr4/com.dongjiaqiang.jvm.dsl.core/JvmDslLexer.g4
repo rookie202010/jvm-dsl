@@ -1,7 +1,7 @@
 lexer grammar JvmDslLexer;
 
 //Keywords
-PACKAGE:            'package';
+PROGRAM:            'program';
 ASSERT:             'assert';
 BREAK:              'break';
 CASE:               'case';
@@ -32,6 +32,7 @@ WHILE:              'while';
 DEF:                'def';
 
 FLOAT:              'Float';
+VOID:               'Void';
 INT:                'Int';
 LONG:               'Long';
 DOUBLE:             'Double';
