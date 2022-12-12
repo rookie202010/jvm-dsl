@@ -9,11 +9,48 @@ import java.util.{LinkedList ⇒ Stack}
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 import scala.collection.convert.ImplicitConversionsToScala._
 
+
+class BlockStack{
+
+  private val currentBlockScopes: Stack[BlockScope] = new Stack[BlockScope]()
+
+  def peek():BlockScope={
+    val parent = currentBlockScopes.peekFirst()
+    parent
+  }
+
+  def poll():Unit= {
+    val current = currentBlockScopes.pollFirst()
+    if(nonEmpty()){
+      val parent = currentBlockScopes.peekFirst()
+      parent.addScope(current)
+    }
+  }
+
+  def empty():Boolean={
+      currentBlockScopes.isEmpty
+  }
+
+  def nonEmpty():Boolean={
+      !empty()
+  }
+
+  def push(blockScope: BlockScope):Unit= {
+    currentBlockScopes.addFirst(blockScope)
+  }
+
+  def push():Unit={
+    currentBlockScopes.peekFirst().incSymbols()
+  }
+}
+
 class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extends JvmDslParserBaseListener {
 
   var currentMethodScope: MethodScope = _
-  var currentBlockScopes: Stack[BlockScope] = new Stack[BlockScope]( )
+  var stack: BlockStack = new BlockStack()
   var currentClazzScope: ClazzScope = _
+
+
 
   override def enterProgram(ctx: JvmDslParserParser.ProgramContext): Unit = {
     programScope = new ProgramScope( )
@@ -21,8 +58,9 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
 
   override def enterFieldDef(ctx: JvmDslParserParser.FieldDefContext): Unit = {
     val symbolName = ctx.varDef( ).localVariable( ).IDENTIFIER( ).getText
-    programScope.addScope( symbolName, new FieldScope( programScope.size, symbolName,
+    programScope.addScope( symbolName, new FieldScope( programScope.symbols, symbolName,
       DslType.unapply( ctx.varDef( ).`type`( ) ), Option( ctx.VOLATILE( ) ).isDefined ) )
+    programScope.incSymbols()
   }
 
   override def enterClassDef(ctx: JvmDslParserParser.ClassDefContext): Unit = {
@@ -31,11 +69,16 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
     val symbolName = ctx.IDENTIFIER( ).getText
     programScope.duplicateSymbol( symbolName )
 
-    currentClazzScope = new ClazzScope( programScope.size,symbolName )
+    currentClazzScope = new ClazzScope( programScope.symbols,symbolName )
 
-    ctx.parameters( ).parameter( ).foreach( currentClazzScope.addScope )
+    ctx.parameters( ).parameter( ).foreach( p⇒{
+      currentClazzScope.addScope(p)
+      currentClazzScope.incSymbols()
+    } )
 
     programScope.addScope( symbolName, currentClazzScope )
+
+    programScope.incSymbols()
 
   }
 
@@ -52,12 +95,19 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
 
     val symbolName = ctx.funcName( ).getText
     currentScope.duplicateSymbol( symbolName )
-    val methodScope = new MethodScope( symbolName,currentScope.size,currentScope,DslType.unapply(ctx.`type`()) )
+    val methodScope = new MethodScope( symbolName,currentScope.symbols,currentScope,DslType.unapply(ctx.`type`()) )
     methodScope.addScope(new BlockScope( 0,methodScope ))
-    ctx.parameters( ).parameter( ).foreach( methodScope.addScope )
+
+    ctx.parameters( ).parameter( ).foreach( p⇒{
+      methodScope.addScope(p)
+      methodScope.incSymbols()
+    } )
+
 
     currentScope.addScope( symbolName, methodScope )
     currentMethodScope = methodScope
+
+    currentScope.incSymbols()
   }
 
   override def exitFuncDef(ctx: JvmDslParserParser.FuncDefContext): Unit = {
@@ -65,48 +115,50 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
   }
 
   override def enterBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
-    if (currentBlockScopes.isEmpty) {
-      currentBlockScopes.addFirst( currentMethodScope.blockScope )
+    if (stack.empty()) {
+      stack.push(currentMethodScope.blockScope )
     } else {
-      if (!currentBlockScopes.peekFirst( ).isInstanceOf[ForStatementBlockScope]) {
-        currentBlockScopes.addFirst( new BlockScope( currentBlockScopes.peekFirst().size,currentBlockScopes.peekFirst( ) ) )
+      val parent = stack.peek()
+      if (!parent.isInstanceOf[ForStatementBlockScope]) {
+        stack.push(new BlockScope( parent.symbols,parent ))
+        parent.incSymbols()
       }
     }
   }
 
   override def exitBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
-    val currentScope = currentBlockScopes.pollFirst( )
-    if(currentBlockScopes.isEmpty){
-    //    currentMethodScope.addScope(currentScope)
-    }else{
-        currentBlockScopes.peekFirst().addScope(currentScope)
-    }
+    stack.poll()
   }
 
   override def enterVarDef(ctx: JvmDslParserParser.VarDefContext): Unit = {
-    if (currentBlockScopes.nonEmpty) {
-      val currentScope = currentBlockScopes.peekFirst( )
+    if (stack.nonEmpty()) {
+      val currentScope = stack.peek()
       val dslType = DslType.unapply( ctx.`type`( ) )
       val symbolName = ctx.localVariable( ).IDENTIFIER( ).getText
 
       if(!ctx.getParent.isInstanceOf[ForStatementContext]) {
-        currentScope.addScope( symbolName, new FieldScope( symbolName, dslType, false ) )
+        currentScope.addScope( symbolName, new FieldScope( currentScope.symbols,symbolName, dslType, false ) )
+        currentScope.incSymbols()
       }
     }
 
   }
 
   private def enterForStatement( ctxList:List[JvmDslParserParser.VarDefContext]): Unit = {
-    val blockScope = new ForStatementBlockScope(currentBlockScopes.size(), MutableMap( ),
-      currentBlockScopes.peekFirst( ) )
+    val parent = stack.peek()
 
-    ctxList.foreach(ctx⇒ {
-      val symbolName = ctx.localVariable().IDENTIFIER().getText
-      val dslType = DslType.unapply( ctx.`type`( ) )
-      blockScope.addInitScope(symbolName,new FieldScope(0,symbolName,dslType,false))
-    })
+      val blockScope = new ForStatementBlockScope(parent.symbols, MutableMap(),
+        parent)
 
-    currentBlockScopes.addFirst( blockScope )
+      ctxList.foreach(ctx ⇒ {
+        val symbolName = ctx.localVariable().IDENTIFIER().getText
+        val dslType = DslType.unapply(ctx.`type`())
+        blockScope.addInitScope(symbolName, new FieldScope(0, symbolName, dslType, false))
+        blockScope.incSymbols()
+      })
+    parent.incSymbols()
+      stack.push(blockScope)
+
   }
 
 
@@ -121,5 +173,14 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
   override def enterForStatementThree(ctx: JvmDslParserParser.ForStatementThreeContext): Unit = {
     enterForStatement(ctx.varDef().toList)
   }
+
+  override def exitDoWhileStatement(ctx: JvmDslParserParser.DoWhileStatementContext): Unit = {
+    stack.push()
+  }
+
+  override def exitWhileStatement(ctx: JvmDslParserParser.WhileStatementContext): Unit = {
+    stack.push()
+  }
+
 
 }

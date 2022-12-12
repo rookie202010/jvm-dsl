@@ -8,9 +8,21 @@ import scala.collection.mutable.ArrayBuffer
 
 trait Scope {
 
-  val index:Int
+  /**
+   * 符号数
+   */
+  var symbols:Int = 0
 
-  val size:Int
+  def incSymbols():Unit={
+      symbols=symbols+1
+  }
+
+  /**
+   * 外部作用域索引值
+   *
+   * index of outer scope
+   */
+  val outerScopeIndex:Int
 
   /**
    * 在该作用域内查找给定符号代表的符号类型 类型包括  字段  类 方法

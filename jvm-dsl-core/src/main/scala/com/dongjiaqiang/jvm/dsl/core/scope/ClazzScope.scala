@@ -5,15 +5,14 @@ import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserParser, scope}
 
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
-class ClazzScope(val index:Int,val name:String,
+class ClazzScope(val outerScopeIndex:Int, val name:String,
                  val fields:MutableMap[String,FieldScope],
                  val methods:MutableMap[String,MethodScope]) extends Scope {
-  def this(index:Int,name:String) {
-    this( index,name, MutableMap( ), MutableMap( ) )
+  def this(outScopeIndex:Int, name:String) {
+    this( outScopeIndex,name, MutableMap( ), MutableMap( ) )
   }
 
-
-  override val size: Int = fields.size + methods.size
+ // override def size(): Int = fields.size + methods.size
 
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
     if (fields.contains( symbolName )) {
@@ -38,7 +37,8 @@ class ClazzScope(val index:Int,val name:String,
   override def equals(obj: Any): scala.Boolean =
       obj match {
         case clazzScope: ClazzScope⇒
-          fields.sameElements(clazzScope.fields) && methods.sameElements(clazzScope.methods)
+          fields.sameElements(clazzScope.fields) && methods.sameElements(clazzScope.methods) &&
+            outerScopeIndex == clazzScope.outerScopeIndex
         case _⇒false
       }
 }
