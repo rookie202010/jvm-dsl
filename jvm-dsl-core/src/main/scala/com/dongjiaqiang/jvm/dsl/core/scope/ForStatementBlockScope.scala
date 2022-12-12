@@ -5,8 +5,13 @@ import com.dongjiaqiang.jvm.dsl.core.scope
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
-class ForStatementBlockScope(val initFields:MutableMap[String,FieldScope], val parent: Scope)
-extends BlockScope(parent) {
+class ForStatementBlockScope(override val index:Int,val initFields:MutableMap[String,FieldScope], val parent: Scope)
+extends BlockScope(index,parent) {
+
+
+  override val size: Int = {
+      initFields.size + super.size
+  }
 
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
     if (initFields.contains(symbolName)) {

@@ -8,6 +8,10 @@ import scala.collection.mutable.ArrayBuffer
 
 trait Scope {
 
+  val index:Int
+
+  val size:Int
+
   /**
    * 在该作用域内查找给定符号代表的符号类型 类型包括  字段  类 方法
    *
@@ -55,7 +59,7 @@ trait Scope {
   def addScope(p: ParameterContext): Unit = {
     val symbolName = p.localVariable( ).IDENTIFIER( ).getText
     val dslType = DslType.unapply( p.`type`( ) )
-    addScope( symbolName, new FieldScope( symbolName, dslType, false ) )
+    addScope( symbolName, new FieldScope( 0,symbolName, dslType, false ) )
   }
 
 }

@@ -7,6 +7,7 @@ grammar JvmDslParser;
 options { tokenVocab=JvmDslLexer; }
 
 program   :    PROGRAM LBRACE
+                importDeppendency*
                 member*
             RBRACE
             ;
@@ -15,6 +16,9 @@ member :    funcDef
         |   classDef
         |   fieldDef    SEMI
         ;
+
+importDeppendency   :   importClazzStatement
+                        usingJarStatement   ;
 
 block   :   LBRACE  blockStatements?    RBRACE
         ;
@@ -31,13 +35,10 @@ statement   :   doWhileStatement
             |   forStatement
             |   ifStatement
             |   assignment SEMI
-            |   returnStatement
             |   synchronizedStatement
-            |   throwStatement
+            |   throwReturnOrSideEffectStatement
             |   breakStatement
             |   continueStatement
-            |   importClazzStatement
-            |   usingJarStatement
             |   tryStatement
             |   assertStatement
             |   block
@@ -47,10 +48,8 @@ statement   :   doWhileStatement
 synchronizedStatement   :   SYNCHRONIZED    LPAREN  expression  RPAREN  block
                         ;
 
-throwStatement  :   THROW expression  SEMI
-                ;
+throwReturnOrSideEffectStatement  :   (THROW | RETURN)? expression  SEMI
 
-returnStatement :   RETURN  expression  SEMI
                 ;
 
 breakStatement  :   BREAK   SEMI;
@@ -215,8 +214,14 @@ classDef    :   CLASS IDENTIFIER  parameters
 //Func Call ex. foo(),  bar.foo(1,2)
 funcCall    :   singleFuncCall  (DOT singleFuncCall)*   ;
 
-singleFuncCall   :   (variable DOT)? funcName LPAREN RPAREN
-                 |    (variable DOT)? funcName LPAREN expression (COMMA  expression  )*    RPAREN;
+singleFuncCall   :   (variable DOT)? funcName LPAREN RPAREN #   VarCallNoArgs
+                 |   (variable DOT)? funcName LPAREN expression (COMMA  expression  )*    RPAREN    # VarCallArgs
+                 |   (literal    DOT)?   funcName LPAREN RPAREN # LiteralCallNoArgs
+                 |   (literal    DOT)?   funcName LPAREN expression (COMMA expression )*    RPAREN # LiteralCallArgs
+                 |   (type DOT)?    funcName LPAREN  RPAREN # TypeCallNoArgs
+                 |   (type DOT)?    funcName LPAREN expression (COMMA expression)*  RPAREN # TypeCalArgs
+                 ;
+
 
 funcDef :   DEF   funcName  parameters  ASSIGN type    throwDef?   block;
 

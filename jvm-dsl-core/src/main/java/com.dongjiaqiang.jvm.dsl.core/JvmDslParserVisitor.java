@@ -23,6 +23,12 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMember(JvmDslParserParser.MemberContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link JvmDslParserParser#importDeppendency}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportDeppendency(JvmDslParserParser.ImportDeppendencyContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link JvmDslParserParser#block}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -53,17 +59,11 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSynchronizedStatement(JvmDslParserParser.SynchronizedStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#throwStatement}.
+	 * Visit a parse tree produced by {@link JvmDslParserParser#throwReturnOrSideEffectStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitThrowStatement(JvmDslParserParser.ThrowStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#returnStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitReturnStatement(JvmDslParserParser.ReturnStatementContext ctx);
+	T visitThrowReturnOrSideEffectStatement(JvmDslParserParser.ThrowReturnOrSideEffectStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JvmDslParserParser#breakStatement}.
 	 * @param ctx the parse tree
@@ -556,11 +556,47 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFuncCall(JvmDslParserParser.FuncCallContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#singleFuncCall}.
+	 * Visit a parse tree produced by the {@code VarCallNoArgs}
+	 * labeled alternative in {@link JvmDslParserParser#singleFuncCall}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSingleFuncCall(JvmDslParserParser.SingleFuncCallContext ctx);
+	T visitVarCallNoArgs(JvmDslParserParser.VarCallNoArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code VarCallArgs}
+	 * labeled alternative in {@link JvmDslParserParser#singleFuncCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVarCallArgs(JvmDslParserParser.VarCallArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LiteralCallNoArgs}
+	 * labeled alternative in {@link JvmDslParserParser#singleFuncCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiteralCallNoArgs(JvmDslParserParser.LiteralCallNoArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LiteralCallArgs}
+	 * labeled alternative in {@link JvmDslParserParser#singleFuncCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiteralCallArgs(JvmDslParserParser.LiteralCallArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TypeCallNoArgs}
+	 * labeled alternative in {@link JvmDslParserParser#singleFuncCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeCallNoArgs(JvmDslParserParser.TypeCallNoArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TypeCalArgs}
+	 * labeled alternative in {@link JvmDslParserParser#singleFuncCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeCalArgs(JvmDslParserParser.TypeCalArgsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JvmDslParserParser#funcDef}.
 	 * @param ctx the parse tree

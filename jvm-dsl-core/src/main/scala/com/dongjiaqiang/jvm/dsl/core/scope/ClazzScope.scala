@@ -5,12 +5,15 @@ import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserParser, scope}
 
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
-class ClazzScope(val name:String,
+class ClazzScope(val index:Int,val name:String,
                  val fields:MutableMap[String,FieldScope],
                  val methods:MutableMap[String,MethodScope]) extends Scope {
-  def this(name:String) {
-    this( name, MutableMap( ), MutableMap( ) )
+  def this(index:Int,name:String) {
+    this( index,name, MutableMap( ), MutableMap( ) )
   }
+
+
+  override val size: Int = fields.size + methods.size
 
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
     if (fields.contains( symbolName )) {
