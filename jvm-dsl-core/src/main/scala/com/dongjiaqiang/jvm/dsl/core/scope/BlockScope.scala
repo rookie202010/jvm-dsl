@@ -5,15 +5,14 @@ import com.dongjiaqiang.jvm.dsl.core.scope
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
-class BlockScope(val index:Int,val fields: MutableMap[String, FieldScope],
+class BlockScope(val outerScopeIndex:Int, val fields: MutableMap[String, FieldScope],
                  val parentScope:Scope,
                  val childrenScopes:ArrayBuffer[BlockScope]) extends Scope {
 
+ // override def size(): Int = fields.size + childrenScopes.size
 
-  override val size: Int = fields.size + childrenScopes.size
-
-  def this(index: Int, parentScope: Scope) {
-    this( index, MutableMap( ), parentScope, ArrayBuffer( ) )
+  def this(outScopeIndex: Int, parentScope: Scope) {
+    this( outScopeIndex, MutableMap( ), parentScope, ArrayBuffer( ) )
   }
 
   override def addScope(symbolName: String, fieldScope: FieldScope): Unit = {
@@ -41,7 +40,8 @@ class BlockScope(val index:Int,val fields: MutableMap[String, FieldScope],
   override def equals(obj: Any): scala.Boolean =
     obj match {
       case blockScope: BlockScope ⇒
-        fields.sameElements( blockScope.fields ) && childrenScopes.sameElements( blockScope.childrenScopes )
+        fields.sameElements( blockScope.fields ) && childrenScopes.sameElements( blockScope.childrenScopes ) &&
+          outerScopeIndex == blockScope.outerScopeIndex
       case _ ⇒ false
     }
 }

@@ -2,9 +2,7 @@ package com.dongjiaqiang.jvm.dsl.core.scope
 import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
 import com.dongjiaqiang.jvm.dsl.core.scope
 
-class FieldScope(val index:Int,val symbolName:String, val dslType: DslType, val volatile:Boolean = false) extends Scope {
-
-  override val size: Int = 1
+class FieldScope(val outerScopeIndex:Int, val symbolName:String, val dslType: DslType, val volatile:Boolean = false) extends Scope {
 
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
       if(symbolName==this.symbolName){
@@ -19,7 +17,8 @@ class FieldScope(val index:Int,val symbolName:String, val dslType: DslType, val 
         case fieldScope: FieldScope⇒
             symbolName == fieldScope.symbolName &&
             dslType == fieldScope.dslType &&
-            volatile == fieldScope.volatile
+            volatile == fieldScope.volatile &&
+              outerScopeIndex == fieldScope.outerScopeIndex
         case _⇒false
       }
 

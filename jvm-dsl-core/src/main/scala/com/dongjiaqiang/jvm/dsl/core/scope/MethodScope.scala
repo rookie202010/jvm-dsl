@@ -6,7 +6,7 @@ import com.dongjiaqiang.jvm.dsl.core.scope
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
 class MethodScope(val name:String,
-                  val index:Int,
+                  val outerScopeIndex:Int,
                   val params:MutableMap[String,FieldScope],
                   val returnType:DslType,
                   val throws:ArrayBuffer[ClazzType],
@@ -14,10 +14,10 @@ class MethodScope(val name:String,
                   var blockScope: BlockScope) extends Scope {
 
 
-  override val size: Int = params.size + 1
+  //override def size(): Int = params.size + 1
 
-  def this(name: String, index: Int, parentScope: Scope, returnType: DslType) {
-    this( name: String, index, MutableMap( ), returnType, ArrayBuffer( ), parentScope, null )
+  def this(name: String, outerScopeIndex: Int, parentScope: Scope, returnType: DslType) {
+    this( name: String, outerScopeIndex, MutableMap( ), returnType, ArrayBuffer( ), parentScope, null )
   }
 
 
@@ -52,7 +52,8 @@ class MethodScope(val name:String,
       case methodScope: MethodScope ⇒
         params.sameElements( methodScope.params ) &&
           throws.sameElements( methodScope.throws ) &&
-          blockScope == methodScope.blockScope
+          blockScope == methodScope.blockScope &&
+          outerScopeIndex == methodScope.outerScopeIndex
       case _ ⇒ false
     }
 }

@@ -7,10 +7,9 @@ class ProgramScope(val fields:MutableMap[String,FieldScope],
                    val methods:MutableMap[String,MethodScope]) extends Scope {
 
 
-  override val index: Int = 0
+  override val outerScopeIndex: Int = 0
 
-
-  override val size: Int = fields.size + classes.size + methods.size
+//  override def size(): Int = fields.size + classes.size + methods.size
 
   def this() {
     this( MutableMap( ), MutableMap( ), MutableMap( ) )
