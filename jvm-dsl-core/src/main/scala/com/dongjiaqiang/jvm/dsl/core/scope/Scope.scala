@@ -9,12 +9,16 @@ import scala.collection.mutable.ArrayBuffer
 trait Scope {
 
   /**
-   * 符号数
+   * 作用域内语句数
    */
-  var symbols:Int = 0
+  var statements:Int = 0
 
-  def incSymbols():Unit={
-      symbols=symbols+1
+  def incStatement():Unit={
+      statements=statements+1
+  }
+
+  def incStatement(i:Int):Unit={
+      statements=statements+i
   }
 
   /**
@@ -72,6 +76,7 @@ trait Scope {
     val symbolName = p.localVariable( ).IDENTIFIER( ).getText
     val dslType = DslType.unapply( p.`type`( ) )
     addScope( symbolName, new FieldScope( 0,symbolName, dslType, false ) )
+    incStatement()
   }
 
 }

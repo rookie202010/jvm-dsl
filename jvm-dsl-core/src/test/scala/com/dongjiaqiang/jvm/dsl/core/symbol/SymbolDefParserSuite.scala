@@ -59,6 +59,7 @@ class SymbolDefParserSuite extends AnyFunSuite {
         parseTreeWalker.walk( symbolDefParser, jvmDslParser.program( ) )
 
         val programScope = new ProgramScope( )
+        programScope.incStatement(5)
 
         //define filed ages
         val agesField = new FieldScope( 1,"ages", new MapType( StringType, IntType ) )
@@ -71,13 +72,18 @@ class SymbolDefParserSuite extends AnyFunSuite {
 
         //define class Student
         val studentClazz = new ClazzScope(3, "Student" )
+        studentClazz.incStatement(3)
+
         val studentFormatMethod = new MethodScope( "format",2, studentClazz, StringType )
+        studentFormatMethod.incStatement(1)
+
         studentFormatMethod.addScope( new BlockScope(0, studentFormatMethod ) )
+        studentFormatMethod.blockScope.incStatement()
 
         studentFormatMethod.addScope( "sep", new FieldScope( 0,"sep", StringType ) )
 
         studentClazz.addScope( "age", new FieldScope( 0,"age", IntType ) )
-        studentClazz.addScope( "address", new FieldScope( 1,"address", StringType ) )
+        studentClazz.addScope( "address", new FieldScope( 0,"address", StringType ) )
         studentClazz.addScope( "format", studentFormatMethod )
 
         programScope.addScope( "Student", studentClazz )
@@ -85,12 +91,15 @@ class SymbolDefParserSuite extends AnyFunSuite {
         //define xx method
         val xxMethod = new MethodScope( "xx",0, programScope, StringType )
         xxMethod.addScope( new BlockScope(0, xxMethod ) )
+        xxMethod.blockScope.incStatement()
 
         programScope.addScope( "xx", xxMethod )
 
         //define find method
         val findMethod = new MethodScope( "find",4, programScope, StringType )
+        findMethod.incStatement(1)
         findMethod.addScope( new BlockScope(0, findMethod ) )
+        findMethod.blockScope.incStatement(3)
 
         findMethod.addScope( "name", new FieldScope( 0,"name", StringType ) )
 
@@ -152,6 +161,7 @@ class SymbolDefParserSuite extends AnyFunSuite {
         parseTreeWalker.walk( symbolDefParser, jvmDslParser.program( ) )
 
         val programScope = new ProgramScope( )
+        programScope.incStatement(5)
 
         //define filed ages
         val agesField = new FieldScope( 1,"ages", new MapType( StringType, IntType ) )
@@ -163,16 +173,22 @@ class SymbolDefParserSuite extends AnyFunSuite {
 
         //define class Student
         val studentClazz = new ClazzScope( 3,"Student" )
+        studentClazz.incStatement(3)
+
         val studentFormatMethod = new MethodScope( "format",2, studentClazz, StringType )
+        studentFormatMethod.incStatement()
+
         studentFormatMethod.addScope( new BlockScope( 0,studentFormatMethod ) )
+        studentFormatMethod.blockScope.incStatement(3)
 
         studentFormatMethod.addScope( "sep", new FieldScope( 0,"sep", StringType ) )
 
         studentFormatMethod.blockScope.addScope("add",new FieldScope(0,"add",IntType))
 
         val studentFormatMethodBlock_1 = new BlockScope(1,studentFormatMethod.blockScope)
+        studentFormatMethodBlock_1.incStatement(4)
         studentFormatMethodBlock_1.addScope("sep",new FieldScope(0,"sep",IntType))
-        studentFormatMethodBlock_1.addScope("i",new FieldScope(1,"i",IntType))
+        studentFormatMethodBlock_1.addScope("i",new FieldScope(2,"i",IntType))
 
         studentFormatMethod.blockScope.addScope(studentFormatMethodBlock_1)
 
@@ -185,12 +201,15 @@ class SymbolDefParserSuite extends AnyFunSuite {
         //define xx method
         val xxMethod = new MethodScope( "xx",0, programScope, StringType )
         xxMethod.addScope( new BlockScope(0, xxMethod ) )
+        xxMethod.blockScope.incStatement()
 
         programScope.addScope( "xx", xxMethod )
 
         //define find method
         val findMethod = new MethodScope( "find",4, programScope, StringType )
+        findMethod.incStatement()
         findMethod.addScope( new BlockScope(0, findMethod ) )
+        findMethod.blockScope.incStatement(4)
 
         findMethod.addScope( "name", new FieldScope( 0,"name", StringType ) )
 
@@ -199,12 +218,15 @@ class SymbolDefParserSuite extends AnyFunSuite {
 
         //forStatement block
         val findMethodBlock_1 = new ForStatementBlockScope(1,MutableMap("i"→new FieldScope(0,"i",IntType)),findMethod.blockScope)
+        findMethodBlock_1.incStatement(6)
 
-        val findMethodBlock_11 = new ForStatementBlockScope(1,MutableMap("k"→new FieldScope(0,"k",IntType)),findMethodBlock_1)
-        findMethodBlock_11.addScope("t",new FieldScope(1,"t",IntType))
+        val findMethodBlock_11 = new ForStatementBlockScope(3,MutableMap("k"→new FieldScope(0,"k",IntType)),findMethodBlock_1)
+        findMethodBlock_11.incStatement(4)
+
+        findMethodBlock_11.addScope("t",new FieldScope(3,"t",IntType))
         findMethodBlock_1.addScope(findMethodBlock_11)
 
-        findMethodBlock_1.addScope("j",new FieldScope(2,"j",IntType))
+        findMethodBlock_1.addScope("j",new FieldScope(4,"j",IntType))
         findMethod.blockScope.addScope(findMethodBlock_1)
 
 

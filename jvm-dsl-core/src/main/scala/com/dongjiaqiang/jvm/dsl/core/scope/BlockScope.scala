@@ -41,7 +41,8 @@ class BlockScope(val outerScopeIndex:Int, val fields: MutableMap[String, FieldSc
     obj match {
       case blockScope: BlockScope ⇒
         fields.sameElements( blockScope.fields ) && childrenScopes.sameElements( blockScope.childrenScopes ) &&
-          outerScopeIndex == blockScope.outerScopeIndex
+          outerScopeIndex == blockScope.outerScopeIndex &&
+          statements == blockScope.statements
       case _ ⇒ false
     }
 }
