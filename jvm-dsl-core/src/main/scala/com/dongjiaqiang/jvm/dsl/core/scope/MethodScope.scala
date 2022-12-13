@@ -53,7 +53,8 @@ class MethodScope(val name:String,
         params.sameElements( methodScope.params ) &&
           throws.sameElements( methodScope.throws ) &&
           blockScope == methodScope.blockScope &&
-          outerScopeIndex == methodScope.outerScopeIndex
+          outerScopeIndex == methodScope.outerScopeIndex &&
+          statements == methodScope.statements
       case _ ⇒ false
     }
 }

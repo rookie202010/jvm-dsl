@@ -39,9 +39,14 @@ class BlockStack{
     currentBlockScopes.addFirst(blockScope)
   }
 
-  def push():Unit={
-    currentBlockScopes.peekFirst().incSymbols()
+  def incStatement():Unit={
+    currentBlockScopes.peekFirst().incStatement()
   }
+
+  def incStatement(i:Int): Unit = {
+    currentBlockScopes.peekFirst( ).incStatement(i)
+  }
+
 }
 
 class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extends JvmDslParserBaseListener {
@@ -58,9 +63,9 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
 
   override def enterFieldDef(ctx: JvmDslParserParser.FieldDefContext): Unit = {
     val symbolName = ctx.varDef( ).localVariable( ).IDENTIFIER( ).getText
-    programScope.addScope( symbolName, new FieldScope( programScope.symbols, symbolName,
+    programScope.addScope( symbolName, new FieldScope( programScope.statements, symbolName,
       DslType.unapply( ctx.varDef( ).`type`( ) ), Option( ctx.VOLATILE( ) ).isDefined ) )
-    programScope.incSymbols()
+    programScope.incStatement()
   }
 
   override def enterClassDef(ctx: JvmDslParserParser.ClassDefContext): Unit = {
@@ -69,16 +74,13 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
     val symbolName = ctx.IDENTIFIER( ).getText
     programScope.duplicateSymbol( symbolName )
 
-    currentClazzScope = new ClazzScope( programScope.symbols,symbolName )
+    currentClazzScope = new ClazzScope( programScope.statements,symbolName )
 
-    ctx.parameters( ).parameter( ).foreach( p⇒{
-      currentClazzScope.addScope(p)
-      currentClazzScope.incSymbols()
-    } )
+    ctx.parameters( ).parameter( ).foreach( currentClazzScope.addScope )
 
     programScope.addScope( symbolName, currentClazzScope )
 
-    programScope.incSymbols()
+    programScope.incStatement()
 
   }
 
@@ -95,19 +97,16 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
 
     val symbolName = ctx.funcName( ).getText
     currentScope.duplicateSymbol( symbolName )
-    val methodScope = new MethodScope( symbolName,currentScope.symbols,currentScope,DslType.unapply(ctx.`type`()) )
+    val methodScope = new MethodScope( symbolName,currentScope.statements,currentScope,DslType.unapply(ctx.`type`()) )
     methodScope.addScope(new BlockScope( 0,methodScope ))
 
-    ctx.parameters( ).parameter( ).foreach( p⇒{
-      methodScope.addScope(p)
-      methodScope.incSymbols()
-    } )
+    ctx.parameters( ).parameter( ).foreach(methodScope.addScope)
 
 
     currentScope.addScope( symbolName, methodScope )
     currentMethodScope = methodScope
 
-    currentScope.incSymbols()
+    currentScope.incStatement()
   }
 
   override def exitFuncDef(ctx: JvmDslParserParser.FuncDefContext): Unit = {
@@ -120,8 +119,8 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
     } else {
       val parent = stack.peek()
       if (!parent.isInstanceOf[ForStatementBlockScope]) {
-        stack.push(new BlockScope( parent.symbols,parent ))
-        parent.incSymbols()
+        stack.push(new BlockScope( parent.statements,parent ))
+        parent.incStatement()
       }
     }
   }
@@ -137,50 +136,74 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
       val symbolName = ctx.localVariable( ).IDENTIFIER( ).getText
 
       if(!ctx.getParent.isInstanceOf[ForStatementContext]) {
-        currentScope.addScope( symbolName, new FieldScope( currentScope.symbols,symbolName, dslType, false ) )
-        currentScope.incSymbols()
+        currentScope.addScope( symbolName, new FieldScope( currentScope.statements,symbolName, dslType, false ) )
+        currentScope.incStatement()
       }
     }
 
   }
 
   private def enterForStatement( ctxList:List[JvmDslParserParser.VarDefContext]): Unit = {
-    val parent = stack.peek()
+    val parent = stack.peek( )
 
-      val blockScope = new ForStatementBlockScope(parent.symbols, MutableMap(),
-        parent)
+    val blockScope = new ForStatementBlockScope( parent.statements, MutableMap( ),
+      parent )
 
-      ctxList.foreach(ctx ⇒ {
-        val symbolName = ctx.localVariable().IDENTIFIER().getText
-        val dslType = DslType.unapply(ctx.`type`())
-        blockScope.addInitScope(symbolName, new FieldScope(0, symbolName, dslType, false))
-        blockScope.incSymbols()
-      })
-    parent.incSymbols()
-      stack.push(blockScope)
+    ctxList.foreach( ctx ⇒ {
+      val symbolName = ctx.localVariable( ).IDENTIFIER( ).getText
+      val dslType = DslType.unapply( ctx.`type`( ) )
+      blockScope.addInitScope( symbolName, new FieldScope( 0, symbolName, dslType, false ) )
+      blockScope.incStatement( )
+    } )
+    parent.incStatement( )
+    stack.push( blockScope )
 
   }
 
 
   override def enterForStatementOne(ctx: JvmDslParserParser.ForStatementOneContext): Unit = {
       enterForStatement(List(ctx.varDef()))
+      stack.incStatement()
   }
 
   override def enterForStatementTwo(ctx: JvmDslParserParser.ForStatementTwoContext): Unit = {
     enterForStatement(List(ctx.varDef()))
+    stack.incStatement()
   }
 
   override def enterForStatementThree(ctx: JvmDslParserParser.ForStatementThreeContext): Unit = {
     enterForStatement(ctx.varDef().toList)
+    stack.incStatement()
   }
 
   override def exitDoWhileStatement(ctx: JvmDslParserParser.DoWhileStatementContext): Unit = {
-    stack.push()
+    stack.incStatement()
   }
 
-  override def exitWhileStatement(ctx: JvmDslParserParser.WhileStatementContext): Unit = {
-    stack.push()
+  override def enterWhileStatement(ctx: JvmDslParserParser.WhileStatementContext): Unit = {
+    stack.incStatement()
   }
 
 
+  override def enterAssignment(ctx: JvmDslParserParser.AssignmentContext): Unit = {
+      stack.incStatement()
+  }
+
+
+  override def enterSynchronizedStatement(ctx: JvmDslParserParser.SynchronizedStatementContext): Unit = {
+    stack.incStatement()
+  }
+
+
+  override def enterThrowReturnOrSideEffectStatement(ctx: JvmDslParserParser.ThrowReturnOrSideEffectStatementContext): Unit = {
+    stack.incStatement()
+  }
+
+  override def enterAssertStatement(ctx: JvmDslParserParser.AssertStatementContext): Unit = {
+    stack.incStatement()
+  }
+
+  override def enterIfStatement(ctx: JvmDslParserParser.IfStatementContext): Unit = {
+    stack.incStatement(ctx.block().size()-1)
+  }
 }

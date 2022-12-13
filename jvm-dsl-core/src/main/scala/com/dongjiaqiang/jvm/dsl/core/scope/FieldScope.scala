@@ -18,7 +18,8 @@ class FieldScope(val outerScopeIndex:Int, val symbolName:String, val dslType: Ds
             symbolName == fieldScope.symbolName &&
             dslType == fieldScope.dslType &&
             volatile == fieldScope.volatile &&
-              outerScopeIndex == fieldScope.outerScopeIndex
+              outerScopeIndex == fieldScope.outerScopeIndex &&
+              statements == fieldScope.statements
         case _⇒false
       }
 

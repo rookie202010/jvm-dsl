@@ -31,7 +31,8 @@ extends BlockScope(outerScopeIndex,parent) {
     obj match {
       case forStatementBlockScope: ForStatementBlockScope⇒
           initFields.sameElements(forStatementBlockScope.initFields) && super.equals(obj) &&
-            outerScopeIndex == forStatementBlockScope.outerScopeIndex
+            outerScopeIndex == forStatementBlockScope.outerScopeIndex &&
+            statements == forStatementBlockScope.statements
       case _⇒false
     }
 }

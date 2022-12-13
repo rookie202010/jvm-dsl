@@ -38,7 +38,8 @@ class ClazzScope(val outerScopeIndex:Int, val name:String,
       obj match {
         case clazzScope: ClazzScope⇒
           fields.sameElements(clazzScope.fields) && methods.sameElements(clazzScope.methods) &&
-            outerScopeIndex == clazzScope.outerScopeIndex
+            outerScopeIndex == clazzScope.outerScopeIndex &&
+            statements == clazzScope.statements
         case _⇒false
       }
 }

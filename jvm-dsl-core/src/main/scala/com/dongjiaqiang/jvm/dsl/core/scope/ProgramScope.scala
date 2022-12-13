@@ -48,6 +48,7 @@ class ProgramScope(val fields:MutableMap[String,FieldScope],
       case programScope: ProgramScope ⇒
         (fields sameElements programScope.fields) &&
           (classes sameElements programScope.classes) &&
-          (methods sameElements programScope.methods)
+          (methods sameElements programScope.methods) &&
+        statements == programScope.statements
     }
 }
