@@ -10,9 +10,15 @@ sealed trait Expression extends Statement {
 
 case class LocalVarDef(name:String, dslType: DslType) extends Expression
 
-case class VarRef(name:String) extends Expression
+case class VarRef(name:List[String]) extends Expression
 
 case class Literal(literal:Any,dslType: DslType) extends Expression
+
+case class Lambda(inputs:Array[String], block: Block)
+
+//assign expression
+class Assign(val varRef: VarRef,val right: Expression) extends Expression
+
 
 //unary expression
 sealed trait UnaryExpression extends Expression{
@@ -99,31 +105,31 @@ class VarFuncCall(vars:List[VarRef],
 
 
 //block expression
-class BlockExpression(val expressions:List[Expression]) extends Expression
+class Block(val expressions:List[Expression]) extends Expression
 
 //for statement expression
-class ForLoopExpression(val loopVarDef:LocalVarDef,
-                        val loopVarAssign:Expression,
-                        val loopVarCondition:Expression,
-                        val loopVarUpdate:Expression,
-                        override val expressions: List[Expression]) extends BlockExpression(expressions)
+class ForLoop(val loopVarDef:LocalVarDef,
+              val loopVarAssign:Expression,
+              val loopVarCondition:Expression,
+              val loopVarUpdate:Expression,
+              override val expressions: List[Expression]) extends Block(expressions)
 
-class ForLoopCollectionExpression(val localVarDef: LocalVarDef,
-                                  val looped:Expression,
-                                  override val expressions: List[Expression]) extends BlockExpression(expressions)
+class ForLoopCollection(val localVarDef: LocalVarDef,
+                        val looped:Expression,
+                        override val expressions: List[Expression]) extends Block(expressions)
 
-class ForLoopMapExpression(loopKeyDef:LocalVarDef,
-                                loopValueDef:LocalVarDef,
-                                looped:Expression,
-                                override val expressions: List[Expression]) extends BlockExpression( expressions )
+class ForLoopMap(loopKeyDef:LocalVarDef,
+                 loopValueDef:LocalVarDef,
+                 looped:Expression,
+                 override val expressions: List[Expression]) extends Block( expressions )
 
 //while statement expression
-class WhileExpression(val condition:Expression,
-                      override val expressions: List[Expression]) extends BlockExpression(expressions)
+class While(val condition:Expression,
+            override val expressions: List[Expression]) extends Block(expressions)
 
 //do while statement expression
-class DoWhileExpression(val condition:Expression,
-                        override val expressions: List[Expression]) extends BlockExpression(expressions)
+class DoWhile(val condition:Expression,
+              override val expressions: List[Expression]) extends Block(expressions)
 
 //break statement
 object BreakStatement extends Expression
@@ -142,10 +148,10 @@ class AssertStatement(val expression: Expression) extends Expression
 
 //synchronized statement
 class SynchronizedStatement(val condition:Expression,
-                            override val expressions: List[Expression]) extends BlockExpression(expressions)
+                            override val expressions: List[Expression]) extends Block(expressions)
 
 //try statement
-class TryStatement(val tryBlock:BlockExpression,
-                   val finalBlock:BlockExpression,
-                   override val expressions: List[Expression]) extends BlockExpression( expressions )
+class TryStatement(val tryBlock:Block,
+                   val finalBlock:Block,
+                   override val expressions: List[Expression]) extends Block( expressions )
 

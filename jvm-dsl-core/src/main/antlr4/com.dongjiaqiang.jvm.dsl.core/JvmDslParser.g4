@@ -1,6 +1,6 @@
 grammar JvmDslParser;
 
-import JvmDslLexer;
+//import JvmDslLexer;
 
 //@header {package com.dongjiaqiang.jvm.dsl.core;}
 
@@ -97,7 +97,7 @@ expression  :   lambdaExpression
             ;
 
 
-assignment  :  (    variable    |   (variable LBRACK expression  RBRACK)  )   assignOperator  expression  ;
+assignment  :  (    variable    |   (variable LBRACK expression  RBRACK)  )   assignOperator  expression;
 
 assignOperator :   ASSIGN  |   ADD_ASSIGN  |   SUB_ASSIGN  |   MUL_ASSIGN  |   DIV_ASSIGN  |   AND_ASSIGN  |   OR_ASSIGN   |   XOR_ASSIGN  |   MOD_ASSIGN  |   LSHIFT_ASSIGN   |   RSHIFT_ASSIGN   |   URSHIFT_ASSIGN;
 

@@ -59,35 +59,50 @@ class MethodScope(val name:String,
 
   /**
    *
+   * 1. methodScope in program
    * program {
    *    class A(D d,String b){
    *    }
    *    class D(Long i,Int j){
    *    }
    *
-   *    Int a = 100;
-   *
    *    def method(A a)=Unit{
-   *        Int i1 = a.d.j;
-   *        Int i2 = a.c;
+   *        Int i1 = this.a; //resolved a in programScope
+   *        Int i2 = a; //resolved a in methodScope
+   *        Int i3 = a.c; //unresolved
+   *        Int i4 = b; //unresolved
    *    }
    *
-   *    def method(Int b)=Unit{
-   *        Int j1 = a;
-   *    }
-   *
+   *    Int a = 100;
    * }
-   * resolve ref in current or outer scope
+   *
+   * 2. methodScope in class
+   *
+   * program{
+   *    class D(Long i,Int j){}
+   *    class A(D d,String b){
+   *
+   *        def method(A a)=Unit{
+   *
+   *             Int i1 = a.d.i; //resolved
+   *             Int i2 = a.b.i; //unresolved
+   *        }
+   *
+   *    }
+   * }
+   *
+   * resolve ref in current or parent scope
    *
    * @param index ref index
    * @param refs  ref names
    */
-  override def resolve(index: Int, refs: List[String]): scope.Resolved.Value = {
+  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
       refs match {
         case "this"::refs⇒
-            core.scope.resolve(index,refs,params,skipCurrentScope = true,Some(parentScope))
-        case _ ⇒ core.scope.resolve(index,refs,params,skipCurrentScope = false,Some(parentScope))
+            core.scope.resolveVarRefs(index,refs,this, params,skipCurrentScope = true,backRef = true,Some(parentScope))
+        case _ ⇒ core.scope.resolveVarRefs(index,refs,this, params,skipCurrentScope = false,backRef = true,Some(parentScope))
 
       }
   }
+
 }
