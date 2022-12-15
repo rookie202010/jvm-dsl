@@ -1,6 +1,6 @@
 grammar JvmDslParser;
 
-//import JvmDslLexer;
+import JvmDslLexer;
 
 //@header {package com.dongjiaqiang.jvm.dsl.core;}
 
@@ -68,7 +68,7 @@ tryStatement    :  TRY  block   catches
                 ;
 
 catches :   catcheClause    catcheClause*   ;
-catcheClause :   CATCH   LPAREN  parameter   RPAREN ;
+catcheClause :   CATCH   LPAREN  parameter   RPAREN block ;
 
 //while statement
 whileStatement   : WHILE LPAREN conditionalOrExpression RPAREN
@@ -101,63 +101,106 @@ assignment  :  (    variable    |   (variable LBRACK expression  RBRACK)  )   as
 
 assignOperator :   ASSIGN  |   ADD_ASSIGN  |   SUB_ASSIGN  |   MUL_ASSIGN  |   DIV_ASSIGN  |   AND_ASSIGN  |   OR_ASSIGN   |   XOR_ASSIGN  |   MOD_ASSIGN  |   LSHIFT_ASSIGN   |   RSHIFT_ASSIGN   |   URSHIFT_ASSIGN;
 
+parenExpression :   LPAREN conditionalOrExpression RPAREN;
+
+//or expr a||b
 conditionalOrExpression
-	:	conditionalAndExpression
-	|	conditionalOrExpression OR conditionalAndExpression
+	:	conditionalAndExpression # ConditionalAndExpr
+	|	conditionalOrExpression OR conditionalAndExpression # OrOpExpr
+	|   conditionalAndExpression OR parenExpression # OrOpParenExpr
+	|   parenExpression OR conditionalAndExpression # ParenOrOpExpr
+	|   parenExpression OR parenExpression # ParenOrOpParenExpr
 	;
 
+//and expr a && b
 conditionalAndExpression
-	:	inclusiveOrExpression
-	|	conditionalAndExpression AND inclusiveOrExpression
+	:	inclusiveOrExpression # InclusiveOrExpr
+	|	conditionalAndExpression AND inclusiveOrExpression # AndOpExpr
+	|   conditionalAndExpression AND parenExpression # AndOpParenExpr
+	|   parenExpression AND parenExpression # ParenAndOpParenExpr
 	;
 
-inclusiveOrExpression   :	exclusiveOrExpression
-	                    |	inclusiveOrExpression BITOR exclusiveOrExpression
+//inclusive or expr a|b
+inclusiveOrExpression   :	exclusiveOrExpression # ExclusiveOrExpr
+	                    |	inclusiveOrExpression BITOR exclusiveOrExpression # BitOrOpExpr
+	                    |   inclusiveOrExpression BITOR parenExpression # BitOrParenOpExpr
+	                    |   parenExpression BITOR   inclusiveOrExpression # ParenBitOrOpExpr
+	                    |   parenExpression BITOR   parenExpression # ParenBitOrOpParenExpr
                         ;
 
-exclusiveOrExpression   :	andExpression
-	                    |	exclusiveOrExpression  CARET andExpression
+//exclusive or expr a^b
+exclusiveOrExpression   :	bitAndExpression # BitAndExpr
+	                    |	exclusiveOrExpression  CARET bitAndExpression # CaretOpExpr
+	                    |   exclusiveOrExpression   CARET   parenExpression # CaretOpParenExpr
+	                    |   parenExpression CARET exclusiveOrExpression # ParenCaretOpExpr
+	                    |   parenExpression CARET parenExpression # ParenCaretOpParenExpr
 	                    ;
-
-andExpression   :   equalityExpression
-                |   andExpression   BITAND  equalityExpression
+//bit and expr a&b
+bitAndExpression   :   equalityExpression # EualityExpr
+                |   bitAndExpression   BITAND  equalityExpression # BitAndOpExpr
+                |   bitAndExpression    BITAND parenExpression  # BitAndOpParenExpr
+                |   parenExpression BITAND  bitAndExpression # ParenBitAnOpExpr
+                |   parenExpression BITAND parenExpression # ParenBitAndOpParenExpr
                 ;
 
-equalityExpression  :   relationExpression # Relation
-                    |   equalityExpression  EQUAL relationExpression # Equal
-                    |   equalityExpression  NOTEQUAL    relationExpression # NotEqual
+equalityOperation   :   EQUAL   |   NOTEQUAL;
+
+//equality expr a==b,a!=b
+equalityExpression  :   relationExpression # RelationExpr
+                    |   equalityExpression  equalityOperation relationExpression # EqualExpr
+                    |   equalityOperation   equalityOperation   parenExpression # EqualParenExpr
+                    |   parenExpression equalityOperation   equalityOperation   # ParenEqualExpr
+                    |   parenExpression equalityOperation   parenExpression # ParenEqualParenExpr
                     ;
 
-relationExpression  :   shiftExpression # Shift
-                    |   relationExpression  LT  shiftExpression # Lt
-                    |   relationExpression  GT  shiftExpression # Gt
-                    |   relationExpression  LE  shiftExpression # Le
-                    |   relationExpression  GE  shiftExpression # Ge
-                    |   relationExpression  INSTANCEOF    type # Instanceof
+relationOperation  :   LT  |   GT  |   LE  |   GE  ;
+
+//relation expr a<b,a>b,a<=b,a>=b
+relationExpression  :   shiftExpression # ShiftExpr
+                    |   relationExpression  relationOperation  shiftExpression # RelationOpExpr
+                    |   relationOperation   relationOperation   parenExpression # RelationOpParenExpr
+                    |   parenExpression relationOperation   relationOperation   # ParenRelationOpExpr
+                    |   parenExpression relationOperation   parenExpression #   ParenRelationOpParenExpr
                     ;
 
-shiftExpression     :   additiveExpression # Additive
-                    |   shiftExpression LT LT additiveExpression # LeftShift
-                    |   shiftExpression GT GT additiveExpression # RightShift
-                    |   shiftExpression GT GT GT additiveExpression # UnsignedRightShift
+shiftOperation :   LT LT | GT GT | GT GT GT;
+
+//shift expr a<<b,a>>b,a>>>>b
+shiftExpression     :   additiveExpression # AddExpr
+                    |   shiftExpression shiftOperation additiveExpression # ShiftOpExpr
+                    |   shiftExpression shiftOperation parenExpression # ShiftOpParenExpr
+                    |   parenExpression shiftOperation shiftExpression # ParenShiftOpExpr
+                    |   parenExpression shiftOperation parenExpression # ParenShiftOpParenExpr
                     ;
 
-additiveExpression   :   multiplicativeExpression # Multiplicative
-                    |   additiveExpression   ADD   multiplicativeExpression  # Add
-                    |   additiveExpression   SUB   multiplicativeExpression # Sub
+additiveOperation  :   ADD |   SUB;
+
+//additive expr a+b,a-b
+additiveExpression   :   multiplicativeExpression # MultiExpr
+                    |   additiveExpression   additiveOperation   multiplicativeExpression  # AddOpExpr
+                    |   additiveExpression additiveOperation parenExpression # AddOpParenExpr
+                    |   parenExpression additiveOperation additiveExpression # ParenAddOpExpr
+                    |   parenExpression additiveOperation parenExpression # ParenAddOpParenExpr
                     ;
 
-multiplicativeExpression    :   unaryExpression # Unary
-                            |   multiplicativeExpression    DIV unaryExpression # Div
-                            |   multiplicativeExpression    MUL unaryExpression # Mul
-                            |   multiplicativeExpression    MOD unaryExpression # Mod
+
+multiplicativeOperation    :   DIV |   MUL |   MOD;
+
+//multiplicative expr   a*b,a/b,a%d
+multiplicativeExpression    :   unaryExpression # UnaryExpr
+                            |   multiplicativeExpression  multiplicativeOperation unaryExpression # MultiOpExpr
+                            |   parenExpression multiplicativeOperation parenExpression #  ParenMultiOpParenExpr
+                            |   multiplicativeExpression multiplicativeOperation parenExpression # MultiOpParenExpr
+                            |   parenExpression multiplicativeOperation multiplicativeExpression # ParenMultiOpExpr
                             ;
 
-//unary operator    +1,-2,
-unaryExpression   :   literalAndFuncCall
-                |   LPAREN  SUB  unaryExpression  RPAREN
-                |   BANG    unaryExpression
-                |   LPAREN  type    RPAREN  unaryExpression
+//unary expr    func(a,b) a, (-a), (+a), (a), a instanceof Int, 1,[1,2],!a,(Int)a
+unaryExpression   :   literalAndFuncCall # LiteralAndFuncCallExpr
+                |   LPAREN  additiveOperation  unaryExpression  RPAREN # OppositeExpr
+                |   BANG    unaryExpression # NegateExpr
+                |   LPAREN  type    RPAREN  unaryExpression # CastExpr
+                |   literalAndFuncCall INSTANCEOF    type # InstanceofExpr
+                |   LPAREN unaryExpression RPAREN # ParenExpr
                 ;
 
 lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    ARROW  block

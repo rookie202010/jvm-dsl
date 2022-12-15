@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.core.scope
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
+import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
 import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserParser, scope}
 
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
@@ -12,8 +12,6 @@ class ClazzScope(val outerScopeIndex:Int, val name:String,
     this( outScopeIndex,name, MutableMap( ), MutableMap( ) )
   }
 
- // override def size(): Int = fields.size + methods.size
-
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
     if (fields.contains( symbolName )) {
       SymbolType.FIELD
@@ -24,14 +22,16 @@ class ClazzScope(val outerScopeIndex:Int, val name:String,
     }
   }
 
-  override def addScope(symbolName:String,fieldScope: FieldScope):Unit = {
+  override def addScope(symbolName:String,fieldScope: FieldScope):ClazzScope = {
     duplicateSymbol( symbolName )
     fields.put( symbolName, fieldScope )
+    this
   }
 
-  override def addScope(symbolName:String,methodScope: MethodScope):Unit={
+  override def addScope(symbolName:String,methodScope: MethodScope):ClazzScope={
     duplicateSymbol( symbolName )
     methods.put(symbolName,methodScope)
+    this
   }
 
   override def equals(obj: Any): scala.Boolean =
@@ -42,4 +42,19 @@ class ClazzScope(val outerScopeIndex:Int, val name:String,
             statements == clazzScope.statements
         case _⇒false
       }
+
+  /**
+   * resolve ref in current or outer scope
+   *
+   * @param index ref index
+   * @param refs   ref names
+   */
+  override def resolve(index: Int, refs: List[String]): Resolved.Value = {
+        refs match {
+          case "this"::childRef⇒
+              scope.resolve(index,childRef,fields,skipCurrentScope = false,None)
+          case _⇒
+              scope.resolve(index,refs,fields,skipCurrentScope = false,None)
+        }
+  }
 }

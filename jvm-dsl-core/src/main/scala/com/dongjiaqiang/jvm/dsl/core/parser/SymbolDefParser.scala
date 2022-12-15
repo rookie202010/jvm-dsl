@@ -1,13 +1,13 @@
-package com.dongjiaqiang.jvm.dsl.core.symbol
+package com.dongjiaqiang.jvm.dsl.core.parser
 
-import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.{ForStatementContext, ForStatementOneContext}
-import com.dongjiaqiang.jvm.dsl.core.scope.{BlockScope, ClazzScope, FieldScope, ForStatementBlockScope, MethodScope, ProgramScope, SymbolType}
+import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.ForStatementContext
 import com.dongjiaqiang.jvm.dsl.core.`type`._
+import com.dongjiaqiang.jvm.dsl.core.scope._
 import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserBaseListener, JvmDslParserParser}
 
 import java.util.{LinkedList ⇒ Stack}
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
 import scala.collection.convert.ImplicitConversionsToScala._
+import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
 
 class BlockStack{

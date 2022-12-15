@@ -9,10 +9,6 @@ class ForStatementBlockScope(override val outerScopeIndex:Int, val initFields:Mu
 extends BlockScope(outerScopeIndex,parent) {
 
 
-//  override def size(): Int = {
-//      initFields.size + fields.size + childrenScopes.size
-//  }
-
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
     if (initFields.contains(symbolName)) {
         SymbolType.FIELD

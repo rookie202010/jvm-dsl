@@ -9,26 +9,27 @@ class ProgramScope(val fields:MutableMap[String,FieldScope],
 
   override val outerScopeIndex: Int = 0
 
-//  override def size(): Int = fields.size + classes.size + methods.size
-
   def this() {
     this( MutableMap( ), MutableMap( ), MutableMap( ) )
   }
 
-  override def addScope(symbolName: String, fieldScope: FieldScope): Unit = {
+  override def addScope(symbolName: String, fieldScope: FieldScope): ProgramScope = {
     duplicateSymbol( symbolName )
     fields.put( symbolName, fieldScope )
+    this
   }
 
-  override def addScope(symbolName: String, clazzScope: ClazzScope): Unit = {
+  override def addScope(symbolName: String, clazzScope: ClazzScope): ProgramScope = {
     duplicateSymbol( symbolName )
     classes.put( symbolName, clazzScope )
+    this
   }
 
 
-  override def addScope(symbolName: String, methodScope: MethodScope): Unit = {
+  override def addScope(symbolName: String, methodScope: MethodScope): ProgramScope = {
     duplicateSymbol( symbolName )
     methods.put( symbolName, methodScope )
+    this
   }
 
   override def getSymbolType(symbolName: String): SymbolType.Value = {
@@ -51,4 +52,9 @@ class ProgramScope(val fields:MutableMap[String,FieldScope],
           (methods sameElements programScope.methods) &&
         statements == programScope.statements
     }
+
+  override def resolve(index: Int, refs: List[String]): Resolved.Value = {
+    import com.dongjiaqiang.jvm.dsl.core.scope
+    scope.resolve(index,refs,fields,skipCurrentScope = false,None)
+  }
 }

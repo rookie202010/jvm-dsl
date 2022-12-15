@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.symbol
 
 import com.dongjiaqiang.jvm.dsl.core.`type`.{IntType, MapType, StringType}
+import com.dongjiaqiang.jvm.dsl.core.parser.SymbolDefParser
 import com.dongjiaqiang.jvm.dsl.core.scope.{BlockScope, ClazzScope, FieldScope, ForStatementBlockScope, MethodScope, ProgramScope, Scope}
 import com.dongjiaqiang.jvm.dsl.core.{JvmDslLexer, JvmDslParserLexer, JvmDslParserParser}
 import org.antlr.v4.runtime.tree.ParseTreeWalker
@@ -61,14 +62,13 @@ class SymbolDefParserSuite extends AnyFunSuite {
         val programScope = new ProgramScope( )
         programScope.incStatement(5)
 
-        //define filed ages
-        val agesField = new FieldScope( 1,"ages", new MapType( StringType, IntType ) )
 
-        //define field addresses
-        val addressesField = new FieldScope( 2,"addresses", new MapType( StringType, StringType ), true )
+        programScope.addScope( "ages", new FieldScope( 1,"ages", new MapType( StringType, IntType ) ) )
+          .addScope( "addresses", new FieldScope( 2,"addresses", new MapType( StringType, StringType ), true ) )
+          .addScope("Student",new ClazzScope(3, "Student" )
 
-        programScope.addScope( "ages", agesField )
-        programScope.addScope( "addresses", addressesField )
+            .addScope("format",new MethodScope( "format",2, studentClazz, StringType ))
+          )
 
         //define class Student
         val studentClazz = new ClazzScope(3, "Student" )

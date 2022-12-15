@@ -9,19 +9,19 @@ class BlockScope(val outerScopeIndex:Int, val fields: MutableMap[String, FieldSc
                  val parentScope:Scope,
                  val childrenScopes:ArrayBuffer[BlockScope]) extends Scope {
 
- // override def size(): Int = fields.size + childrenScopes.size
-
   def this(outScopeIndex: Int, parentScope: Scope) {
     this( outScopeIndex, MutableMap( ), parentScope, ArrayBuffer( ) )
   }
 
-  override def addScope(symbolName: String, fieldScope: FieldScope): Unit = {
+  override def addScope(symbolName: String, fieldScope: FieldScope): BlockScope = {
     duplicateSymbol( symbolName )
     fields.put( symbolName, fieldScope )
+    this
   }
 
-  override def addScope(blockScope: BlockScope): Unit = {
+  override def addScope(blockScope: BlockScope): BlockScope = {
     childrenScopes.append( blockScope )
+    this
   }
 
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
@@ -45,4 +45,14 @@ class BlockScope(val outerScopeIndex:Int, val fields: MutableMap[String, FieldSc
           statements == blockScope.statements
       case _ ⇒ false
     }
+
+  /**
+   * resolve ref in current or outer scope
+   *
+   * @param index ref index
+   * @param refs  ref names
+   */
+  override def resolve(index: Int, refs: List[String]): scope.Resolved.Value = {
+      Resolved.FALSE
+  }
 }
