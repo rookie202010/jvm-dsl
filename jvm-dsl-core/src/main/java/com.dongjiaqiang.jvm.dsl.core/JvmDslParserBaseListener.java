@@ -17,7 +17,9 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterProgram(JvmDslParserParser.ProgramContext ctx) { }
+	@Override public void enterProgram(JvmDslParserParser.ProgramContext ctx) {
+
+	}
 	/**
 	 * {@inheritDoc}
 	 *
