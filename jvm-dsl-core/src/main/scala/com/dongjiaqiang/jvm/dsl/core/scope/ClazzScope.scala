@@ -44,17 +44,30 @@ class ClazzScope(val outerScopeIndex:Int, val name:String,
       }
 
   /**
+   *
+   *  clazz scope in program
+   *
+   *  program{
+   *
+   *      class A(B b,Int c){
+   *          def method()=Unit{
+   *              Int i1 = b.i; //resolved
+   *              Int i2 = c.c; //unresolved
+   *              Int i4 = d; //unresolved
+   *          }
+   *      }
+   *      class B(Int i,Int j);
+   *
+   *
+   *  }
+   *
    * resolve ref in current or outer scope
    *
    * @param index ref index
    * @param refs   ref names
    */
-  override def resolve(index: Int, refs: List[String]): Resolved.Value = {
-        refs match {
-          case "this"::childRef⇒
-              scope.resolve(index,childRef,fields,skipCurrentScope = false,None)
-          case _⇒
-              scope.resolve(index,refs,fields,skipCurrentScope = false,None)
-        }
+  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
+      scope.resolveVarRefs(index, refs,this, fields, skipCurrentScope = false, backRef = true, None)
   }
+
 }

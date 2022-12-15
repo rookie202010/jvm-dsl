@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.scope
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.ParameterContext
-import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
+import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
 import com.dongjiaqiang.jvm.dsl.core.exception.SymbolParseException
 
 trait Scope {
@@ -26,7 +26,7 @@ trait Scope {
    * @param index ref index
    * @param refs ref names
    */
-  def resolve(index:Int, refs:List[String]):Resolved.Value
+  def resolveVarRefs(index:Int, refs:List[String]):Resolved
 
   /**
    * 外部作用域索引值

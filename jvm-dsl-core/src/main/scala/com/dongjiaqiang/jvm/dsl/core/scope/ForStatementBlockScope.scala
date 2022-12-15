@@ -2,11 +2,10 @@ package com.dongjiaqiang.jvm.dsl.core.scope
 
 import com.dongjiaqiang.jvm.dsl.core.scope
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
-class ForStatementBlockScope(override val outerScopeIndex:Int, val initFields:MutableMap[String,FieldScope], val parent: Scope)
-extends BlockScope(outerScopeIndex,parent) {
+class ForStatementBlockScope(override val outerScopeIndex:Int, val initFields:MutableMap[String,FieldScope], override val parentScope: Scope, override val topScope:Scope)
+extends BlockScope(outerScopeIndex,parentScope,topScope) {
 
 
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
@@ -31,4 +30,32 @@ extends BlockScope(outerScopeIndex,parent) {
             statements == forStatementBlockScope.statements
       case _⇒false
     }
+
+  /*
+   *
+   *
+   * program{
+   *    def method()=Unit{
+   *        Int i = 100;
+   *        for(Int i=0;i<100;i++){
+   *            Int j = i;
+   *        }
+   *    }
+   * }
+   * resolve ref in current or outer scope
+   *
+   * @param index ref index
+   * @param refs  ref names
+   */
+  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
+    refs match {
+      case "this"::childRef ⇒ scope.resolveVarRefs(index,childRef,this,fields,skipCurrentScope = true,backRef = true,Some(topScope))
+      case _ ⇒
+        val totalFields = MutableMap[String, FieldScope]()
+        totalFields++=fields
+        totalFields++=initFields
+        scope.resolveVarRefs(index,refs,this,totalFields,skipCurrentScope = false,backRef = false,Some(parentScope))
+
+    }
+  }
 }

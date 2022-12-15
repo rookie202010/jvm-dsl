@@ -35,7 +35,7 @@ case class MethodDef(name:String,
                      params:List[FieldDef],
                      returnType:DslType,
                      throws:ArrayBuffer[ClazzType],
-                     body:BlockExpression) extends Def
+                     body:Block) extends Def
 
 /**
  * class def

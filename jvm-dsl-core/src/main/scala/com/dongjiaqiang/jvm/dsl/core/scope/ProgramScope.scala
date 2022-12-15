@@ -1,6 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.scope
 
-import scala.collection.mutable.{ListMap⇒MutableMap}
+import com.dongjiaqiang.jvm.dsl.core.scope
+
+import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
 class ProgramScope(val fields:MutableMap[String,FieldScope],
                    val classes: MutableMap[String,ClazzScope],
@@ -53,8 +55,12 @@ class ProgramScope(val fields:MutableMap[String,FieldScope],
         statements == programScope.statements
     }
 
-  override def resolve(index: Int, refs: List[String]): Resolved.Value = {
+  /**
+   * resolve var refs in program (defined fields)
+   */
+  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
     import com.dongjiaqiang.jvm.dsl.core.scope
-    scope.resolve(index,refs,fields,skipCurrentScope = false,None)
+    scope.resolveVarRefs(index,refs,this, fields,skipCurrentScope = false,backRef = true,None)
   }
+
 }
