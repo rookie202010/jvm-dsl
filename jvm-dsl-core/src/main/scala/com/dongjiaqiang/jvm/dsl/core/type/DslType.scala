@@ -1,20 +1,5 @@
 package com.dongjiaqiang.jvm.dsl.core.`type`
-import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.{ArrayTypeContext, CharTypeContext, ClassTypeContext, DoubleTypeContext, FloatTypeContext, FutureTypeContext,
-  IntTypeContext,
-  LambdaMoreInMoreOutTypeContext, LambdaMoreInOneOutTypeContext, LambdaOneInMoreOutTypeContext,
-  LambdaOneInOneOutTypeContext, LambdaZeroInMoreOutTypeContext, LambdaZeroInOneOutTypeContext, ListTypeContext, LongTypeContext, MapTypeContext, OptionTypeContext,
-  ParameterizedClassTypeContext, SetTypeContext, StringTypeContext, TupleTypeContext}
-import org.antlr.v4.runtime.tree.TerminalNode
-
-import java.lang.Integer
-import java.lang.Long
-import java.lang.Float
-import java.lang.Double
-import java.lang.String
-import java.lang.Character
-import java.lang.Byte
-import java.lang.Boolean
-import java.util
+import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 
 trait DslType {
     val name:String
@@ -59,11 +44,9 @@ object DslType{
             new LambdaType(context.types(0).`type`().map(unapply).toArray,
               context.types(1).`type`().map(unapply).toArray)
           case context:ParameterizedClassTypeContext⇒
-              new ClazzType(context.children.map( _.asInstanceOf[TerminalNode] )
-                .map( _.getText ).mkString(""),context.`type`().map(unapply).toArray)
+              new ClazzType(context.clazzType().IDENTIFIER().getText,context.`type`().map(unapply).toArray)
           case context:ClassTypeContext⇒
-            new ClazzType( context.children.map( _.asInstanceOf[TerminalNode] )
-              .map( _.getText ).mkString(""),Array())
+            new ClazzType(context.clazzType().IDENTIFIER().getText,Array())
         }
     }
 }
@@ -106,13 +89,11 @@ object ByteType extends DslType{
 
 object BoolType extends DslType{
   override val name: String = "Bool"
-
 }
 
-import java.util.{List⇒JavaList}
-import java.util.{Set⇒JavaSet}
-import java.util.{Map⇒JavaMap}
-import java.util.{Optional⇒Option}
+object UnResolvedType extends DslType{
+  override val name: String = "UnResolved"
+}
 
 //collection type
 class ListType(val valueType:DslType) extends DslType{

@@ -17,9 +17,7 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterProgram(JvmDslParserParser.ProgramContext ctx) {
-
-	}
+	@Override public void enterProgram(JvmDslParserParser.ProgramContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -91,13 +89,157 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStatement(JvmDslParserParser.StatementContext ctx) { }
+	@Override public void enterDoWhileExpr(JvmDslParserParser.DoWhileExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStatement(JvmDslParserParser.StatementContext ctx) { }
+	@Override public void exitDoWhileExpr(JvmDslParserParser.DoWhileExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterWhileExpr(JvmDslParserParser.WhileExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhileExpr(JvmDslParserParser.WhileExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterForExpr(JvmDslParserParser.ForExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitForExpr(JvmDslParserParser.ForExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIfExpr(JvmDslParserParser.IfExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIfExpr(JvmDslParserParser.IfExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAssignExpr(JvmDslParserParser.AssignExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAssignExpr(JvmDslParserParser.AssignExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSyncExpr(JvmDslParserParser.SyncExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSyncExpr(JvmDslParserParser.SyncExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterThrowOrSideEffectExpr(JvmDslParserParser.ThrowOrSideEffectExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitThrowOrSideEffectExpr(JvmDslParserParser.ThrowOrSideEffectExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBreakExpr(JvmDslParserParser.BreakExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBreakExpr(JvmDslParserParser.BreakExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterContinueExpr(JvmDslParserParser.ContinueExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitContinueExpr(JvmDslParserParser.ContinueExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTryExpr(JvmDslParserParser.TryExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTryExpr(JvmDslParserParser.TryExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAssertExpr(JvmDslParserParser.AssertExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAssertExpr(JvmDslParserParser.AssertExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBlockExpr(JvmDslParserParser.BlockExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBlockExpr(JvmDslParserParser.BlockExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSemiExor(JvmDslParserParser.SemiExorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSemiExor(JvmDslParserParser.SemiExorContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -319,6 +461,30 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterArrayVariable(JvmDslParserParser.ArrayVariableContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayVariable(JvmDslParserParser.ArrayVariableContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMapVariable(JvmDslParserParser.MapVariableContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMapVariable(JvmDslParserParser.MapVariableContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAssignOperator(JvmDslParserParser.AssignOperatorContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -331,325 +497,805 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConditionalOrExpression(JvmDslParserParser.ConditionalOrExpressionContext ctx) { }
+	@Override public void enterParenExpression(JvmDslParserParser.ParenExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitConditionalOrExpression(JvmDslParserParser.ConditionalOrExpressionContext ctx) { }
+	@Override public void exitParenExpression(JvmDslParserParser.ParenExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConditionalAndExpression(JvmDslParserParser.ConditionalAndExpressionContext ctx) { }
+	@Override public void enterOrOpExpr(JvmDslParserParser.OrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitConditionalAndExpression(JvmDslParserParser.ConditionalAndExpressionContext ctx) { }
+	@Override public void exitOrOpExpr(JvmDslParserParser.OrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInclusiveOrExpression(JvmDslParserParser.InclusiveOrExpressionContext ctx) { }
+	@Override public void enterParenOrOpParenExpr(JvmDslParserParser.ParenOrOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInclusiveOrExpression(JvmDslParserParser.InclusiveOrExpressionContext ctx) { }
+	@Override public void exitParenOrOpParenExpr(JvmDslParserParser.ParenOrOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExclusiveOrExpression(JvmDslParserParser.ExclusiveOrExpressionContext ctx) { }
+	@Override public void enterOrOpParenExpr(JvmDslParserParser.OrOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExclusiveOrExpression(JvmDslParserParser.ExclusiveOrExpressionContext ctx) { }
+	@Override public void exitOrOpParenExpr(JvmDslParserParser.OrOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAndExpression(JvmDslParserParser.AndExpressionContext ctx) { }
+	@Override public void enterConditionalAndExpr(JvmDslParserParser.ConditionalAndExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAndExpression(JvmDslParserParser.AndExpressionContext ctx) { }
+	@Override public void exitConditionalAndExpr(JvmDslParserParser.ConditionalAndExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterRelation(JvmDslParserParser.RelationContext ctx) { }
+	@Override public void enterParenOrOpExpr(JvmDslParserParser.ParenOrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitRelation(JvmDslParserParser.RelationContext ctx) { }
+	@Override public void exitParenOrOpExpr(JvmDslParserParser.ParenOrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNotEqual(JvmDslParserParser.NotEqualContext ctx) { }
+	@Override public void enterInclusiveOrExpr(JvmDslParserParser.InclusiveOrExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNotEqual(JvmDslParserParser.NotEqualContext ctx) { }
+	@Override public void exitInclusiveOrExpr(JvmDslParserParser.InclusiveOrExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEqual(JvmDslParserParser.EqualContext ctx) { }
+	@Override public void enterParenAndOpExpr(JvmDslParserParser.ParenAndOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEqual(JvmDslParserParser.EqualContext ctx) { }
+	@Override public void exitParenAndOpExpr(JvmDslParserParser.ParenAndOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterShift(JvmDslParserParser.ShiftContext ctx) { }
+	@Override public void enterAndOpExpr(JvmDslParserParser.AndOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitShift(JvmDslParserParser.ShiftContext ctx) { }
+	@Override public void exitAndOpExpr(JvmDslParserParser.AndOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLt(JvmDslParserParser.LtContext ctx) { }
+	@Override public void enterParenAndOpParenExpr(JvmDslParserParser.ParenAndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLt(JvmDslParserParser.LtContext ctx) { }
+	@Override public void exitParenAndOpParenExpr(JvmDslParserParser.ParenAndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLe(JvmDslParserParser.LeContext ctx) { }
+	@Override public void enterAndOpParenExpr(JvmDslParserParser.AndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLe(JvmDslParserParser.LeContext ctx) { }
+	@Override public void exitAndOpParenExpr(JvmDslParserParser.AndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInstanceof(JvmDslParserParser.InstanceofContext ctx) { }
+	@Override public void enterBitOrOpExpr(JvmDslParserParser.BitOrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInstanceof(JvmDslParserParser.InstanceofContext ctx) { }
+	@Override public void exitBitOrOpExpr(JvmDslParserParser.BitOrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGt(JvmDslParserParser.GtContext ctx) { }
+	@Override public void enterParenBitOrOpExpr(JvmDslParserParser.ParenBitOrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGt(JvmDslParserParser.GtContext ctx) { }
+	@Override public void exitParenBitOrOpExpr(JvmDslParserParser.ParenBitOrOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGe(JvmDslParserParser.GeContext ctx) { }
+	@Override public void enterExclusiveOrExpr(JvmDslParserParser.ExclusiveOrExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGe(JvmDslParserParser.GeContext ctx) { }
+	@Override public void exitExclusiveOrExpr(JvmDslParserParser.ExclusiveOrExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAdditive(JvmDslParserParser.AdditiveContext ctx) { }
+	@Override public void enterBitOrParenOpExpr(JvmDslParserParser.BitOrParenOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAdditive(JvmDslParserParser.AdditiveContext ctx) { }
+	@Override public void exitBitOrParenOpExpr(JvmDslParserParser.BitOrParenOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterRightShift(JvmDslParserParser.RightShiftContext ctx) { }
+	@Override public void enterParenBitOrOpParenExpr(JvmDslParserParser.ParenBitOrOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitRightShift(JvmDslParserParser.RightShiftContext ctx) { }
+	@Override public void exitParenBitOrOpParenExpr(JvmDslParserParser.ParenBitOrOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLeftShift(JvmDslParserParser.LeftShiftContext ctx) { }
+	@Override public void enterParenCaretOpExpr(JvmDslParserParser.ParenCaretOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLeftShift(JvmDslParserParser.LeftShiftContext ctx) { }
+	@Override public void exitParenCaretOpExpr(JvmDslParserParser.ParenCaretOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUnsignedRightShift(JvmDslParserParser.UnsignedRightShiftContext ctx) { }
+	@Override public void enterParenCaretOpParenExpr(JvmDslParserParser.ParenCaretOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUnsignedRightShift(JvmDslParserParser.UnsignedRightShiftContext ctx) { }
+	@Override public void exitParenCaretOpParenExpr(JvmDslParserParser.ParenCaretOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAdd(JvmDslParserParser.AddContext ctx) { }
+	@Override public void enterCaretOpExpr(JvmDslParserParser.CaretOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAdd(JvmDslParserParser.AddContext ctx) { }
+	@Override public void exitCaretOpExpr(JvmDslParserParser.CaretOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSub(JvmDslParserParser.SubContext ctx) { }
+	@Override public void enterCaretOpParenExpr(JvmDslParserParser.CaretOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSub(JvmDslParserParser.SubContext ctx) { }
+	@Override public void exitCaretOpParenExpr(JvmDslParserParser.CaretOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMultiplicative(JvmDslParserParser.MultiplicativeContext ctx) { }
+	@Override public void enterBitAndExpr(JvmDslParserParser.BitAndExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMultiplicative(JvmDslParserParser.MultiplicativeContext ctx) { }
+	@Override public void exitBitAndExpr(JvmDslParserParser.BitAndExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDiv(JvmDslParserParser.DivContext ctx) { }
+	@Override public void enterBitAndOpParenExpr(JvmDslParserParser.BitAndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDiv(JvmDslParserParser.DivContext ctx) { }
+	@Override public void exitBitAndOpParenExpr(JvmDslParserParser.BitAndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMod(JvmDslParserParser.ModContext ctx) { }
+	@Override public void enterEualityExpr(JvmDslParserParser.EualityExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMod(JvmDslParserParser.ModContext ctx) { }
+	@Override public void exitEualityExpr(JvmDslParserParser.EualityExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMul(JvmDslParserParser.MulContext ctx) { }
+	@Override public void enterParenBitAndOpParenExpr(JvmDslParserParser.ParenBitAndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMul(JvmDslParserParser.MulContext ctx) { }
+	@Override public void exitParenBitAndOpParenExpr(JvmDslParserParser.ParenBitAndOpParenExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUnary(JvmDslParserParser.UnaryContext ctx) { }
+	@Override public void enterParenBitAnOpExpr(JvmDslParserParser.ParenBitAnOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUnary(JvmDslParserParser.UnaryContext ctx) { }
+	@Override public void exitParenBitAnOpExpr(JvmDslParserParser.ParenBitAnOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUnaryExpression(JvmDslParserParser.UnaryExpressionContext ctx) { }
+	@Override public void enterBitAndOpExpr(JvmDslParserParser.BitAndOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUnaryExpression(JvmDslParserParser.UnaryExpressionContext ctx) { }
+	@Override public void exitBitAndOpExpr(JvmDslParserParser.BitAndOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLambdaExpression(JvmDslParserParser.LambdaExpressionContext ctx) { }
+	@Override public void enterEqualityOperation(JvmDslParserParser.EqualityOperationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLambdaExpression(JvmDslParserParser.LambdaExpressionContext ctx) { }
+	@Override public void exitEqualityOperation(JvmDslParserParser.EqualityOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEqualExpr(JvmDslParserParser.EqualExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEqualExpr(JvmDslParserParser.EqualExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenEqualParenExpr(JvmDslParserParser.ParenEqualParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenEqualParenExpr(JvmDslParserParser.ParenEqualParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRelationExpr(JvmDslParserParser.RelationExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRelationExpr(JvmDslParserParser.RelationExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenEqualExpr(JvmDslParserParser.ParenEqualExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenEqualExpr(JvmDslParserParser.ParenEqualExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEqualParenExpr(JvmDslParserParser.EqualParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEqualParenExpr(JvmDslParserParser.EqualParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRelationOperation(JvmDslParserParser.RelationOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRelationOperation(JvmDslParserParser.RelationOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenRelationOpParenExpr(JvmDslParserParser.ParenRelationOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenRelationOpParenExpr(JvmDslParserParser.ParenRelationOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRelationOpParenExpr(JvmDslParserParser.RelationOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRelationOpParenExpr(JvmDslParserParser.RelationOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenRelationOpExpr(JvmDslParserParser.ParenRelationOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenRelationOpExpr(JvmDslParserParser.ParenRelationOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRelationOpExpr(JvmDslParserParser.RelationOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRelationOpExpr(JvmDslParserParser.RelationOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterShiftExpr(JvmDslParserParser.ShiftExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShiftExpr(JvmDslParserParser.ShiftExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterShiftOperation(JvmDslParserParser.ShiftOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShiftOperation(JvmDslParserParser.ShiftOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAddExpr(JvmDslParserParser.AddExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAddExpr(JvmDslParserParser.AddExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterShiftOpExpr(JvmDslParserParser.ShiftOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShiftOpExpr(JvmDslParserParser.ShiftOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenShiftOpExpr(JvmDslParserParser.ParenShiftOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenShiftOpExpr(JvmDslParserParser.ParenShiftOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenShiftOpParenExpr(JvmDslParserParser.ParenShiftOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenShiftOpParenExpr(JvmDslParserParser.ParenShiftOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterShiftOpParenExpr(JvmDslParserParser.ShiftOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShiftOpParenExpr(JvmDslParserParser.ShiftOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAdditiveOperation(JvmDslParserParser.AdditiveOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAdditiveOperation(JvmDslParserParser.AdditiveOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMultiExpr(JvmDslParserParser.MultiExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMultiExpr(JvmDslParserParser.MultiExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenAddOpExpr(JvmDslParserParser.ParenAddOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenAddOpExpr(JvmDslParserParser.ParenAddOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAddOpParenExpr(JvmDslParserParser.AddOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAddOpParenExpr(JvmDslParserParser.AddOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAddOpExpr(JvmDslParserParser.AddOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAddOpExpr(JvmDslParserParser.AddOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenAddOpParenExpr(JvmDslParserParser.ParenAddOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenAddOpParenExpr(JvmDslParserParser.ParenAddOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMultiplicativeOperation(JvmDslParserParser.MultiplicativeOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMultiplicativeOperation(JvmDslParserParser.MultiplicativeOperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMultiOpExpr(JvmDslParserParser.MultiOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMultiOpExpr(JvmDslParserParser.MultiOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenMultiOpExpr(JvmDslParserParser.ParenMultiOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenMultiOpExpr(JvmDslParserParser.ParenMultiOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenMultiOpParenExpr(JvmDslParserParser.ParenMultiOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenMultiOpParenExpr(JvmDslParserParser.ParenMultiOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMultiOpParenExpr(JvmDslParserParser.MultiOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMultiOpParenExpr(JvmDslParserParser.MultiOpParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterUnaryExpr(JvmDslParserParser.UnaryExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUnaryExpr(JvmDslParserParser.UnaryExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLiteralAndFuncCallExpr(JvmDslParserParser.LiteralAndFuncCallExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLiteralAndFuncCallExpr(JvmDslParserParser.LiteralAndFuncCallExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOppositeExpr(JvmDslParserParser.OppositeExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOppositeExpr(JvmDslParserParser.OppositeExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNegateExpr(JvmDslParserParser.NegateExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNegateExpr(JvmDslParserParser.NegateExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCastExpr(JvmDslParserParser.CastExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCastExpr(JvmDslParserParser.CastExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInstanceofExpr(JvmDslParserParser.InstanceofExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceofExpr(JvmDslParserParser.InstanceofExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenExpr(JvmDslParserParser.ParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenExpr(JvmDslParserParser.ParenExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParamsLambdaExpr(JvmDslParserParser.ParamsLambdaExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParamsLambdaExpr(JvmDslParserParser.ParamsLambdaExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMatchCaseExpr(JvmDslParserParser.MatchCaseExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMatchCaseExpr(JvmDslParserParser.MatchCaseExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCaseExpression(JvmDslParserParser.CaseExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCaseExpression(JvmDslParserParser.CaseExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1003,13 +1649,25 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFuncCall(JvmDslParserParser.FuncCallContext ctx) { }
+	@Override public void enterCallChain(JvmDslParserParser.CallChainContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFuncCall(JvmDslParserParser.FuncCallContext ctx) { }
+	@Override public void exitCallChain(JvmDslParserParser.CallChainContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPart(JvmDslParserParser.PartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPart(JvmDslParserParser.PartContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1075,13 +1733,13 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeCalArgs(JvmDslParserParser.TypeCalArgsContext ctx) { }
+	@Override public void enterTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeCalArgs(JvmDslParserParser.TypeCalArgsContext ctx) { }
+	@Override public void exitTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1111,13 +1769,13 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLiteralAndFuncCall(JvmDslParserParser.LiteralAndFuncCallContext ctx) { }
+	@Override public void enterLiteralAndCallChain(JvmDslParserParser.LiteralAndCallChainContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLiteralAndFuncCall(JvmDslParserParser.LiteralAndFuncCallContext ctx) { }
+	@Override public void exitLiteralAndCallChain(JvmDslParserParser.LiteralAndCallChainContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -96,7 +96,7 @@ class MethodScope(val name:String,
    * @param index ref index
    * @param refs  ref names
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
+  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope]= {
       refs match {
         case "this"::refs⇒
             core.scope.resolveVarRefs(index,refs,this, params,skipCurrentScope = true,backRef = true,Some(parentScope))

@@ -8,12 +8,6 @@ package object scope {
     val FIELD, CLAZZ, METHOD, UNDEFINED = Value
   }
 
-
-  trait Resolved
-  case class Undefined(clazzType: ClazzType) extends Resolved
-  case class Success(dslType: DslType) extends Resolved
-  object Failure extends Resolved
-
   import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
   /**
@@ -23,7 +17,7 @@ package object scope {
    * @param params fields in current scope
    * @param skipCurrentScope should skip current scope than resolve in parent scope
    * @param backRef can we backRef
-   * @param parentScope current scope may have parent scop
+   * @param parentScope current scope may have parent scope
    * @return resolved result
    */
   def resolveVarRefs(index: Int,
@@ -32,9 +26,9 @@ package object scope {
                      params: MutableMap[String, FieldScope],
                      skipCurrentScope:Boolean,
                      backRef:Boolean,
-                     parentScope: Option[Scope]): Resolved = {
+                     parentScope: Option[Scope]): Option[FieldScope] = {
     if(skipCurrentScope){
-      return parentScope.map( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) ).getOrElse( Failure )
+      return parentScope.flatMap( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) )
     }
     refs match {
       case ref :: Nil ⇒
@@ -42,14 +36,14 @@ package object scope {
           case Some( fieldScope ) ⇒
             if(!backRef){
               if(index >= fieldScope.outerScopeIndex){
-                Success(fieldScope.dslType)
+                Some(fieldScope)
               }else{
-                parentScope.map( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) ).getOrElse( Failure )
+                parentScope.flatMap( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) )
               }
             }else {
-              Success(fieldScope.dslType)
+              Some(fieldScope)
             }
-          case None ⇒ parentScope.map( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) ).getOrElse( Failure )
+          case None ⇒ parentScope.flatMap( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) )
         }
       case ref :: childRef ⇒
         params.get( ref ) match {
@@ -60,15 +54,15 @@ package object scope {
                   if(index>=fieldScope.outerScopeIndex){
                       fieldScope.resolve(childRef,clazzType)
                   }else{
-                      Failure
+                      None
                   }
                 }else {
                   fieldScope.resolve(childRef, clazzType)
                 }
-              case _ ⇒ Failure
+              case _ ⇒ None
             }
           case None ⇒
-            parentScope.map( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) ).getOrElse( Failure )
+            parentScope.flatMap( _.resolveVarRefs( currentScope.outerScopeIndex, refs ) )
         }
     }
   }

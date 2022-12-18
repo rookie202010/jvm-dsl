@@ -26,7 +26,7 @@ trait Scope {
    * @param index ref index
    * @param refs ref names
    */
-  def resolveVarRefs(index:Int, refs:List[String]):Resolved
+  def resolveVarRefs(index:Int, refs:List[String]):Option[FieldScope]
 
   /**
    * 外部作用域索引值
@@ -87,11 +87,19 @@ trait Scope {
   }
 
 
-  def addScope(p: ParameterContext): Scope = {
+  def addScope(p: ParameterContext,programScope: ProgramScope,belongScope:Scope): Scope = {
     val symbolName = p.localVariable( ).IDENTIFIER( ).getText
     val dslType = DslType.unapply( p.`type`( ) )
-    addScope( symbolName, new FieldScope( 0,symbolName, dslType, false ) )
+    addScope( symbolName, new FieldScope( 0,symbolName, dslType, belongScope,programScope,false ) )
     incStatement()
+    this
+  }
+
+  def addScope(ps:java.util.List[ParameterContext],belongScope:Scope,programScope: ProgramScope):Scope= {
+    import scala.collection.convert.ImplicitConversionsToScala._
+    ps.foreach {
+      p ⇒ addScope( p, programScope,belongScope )
+    }
     this
   }
 

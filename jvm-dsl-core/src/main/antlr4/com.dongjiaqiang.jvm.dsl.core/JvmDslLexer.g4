@@ -50,13 +50,13 @@ ASYNC:              'async';
 
 //Literal
 INT_LITERAL :   DIGIT+ ;
-FLOAT_LITERAL   :   DIGIT+  DOT DIGIT*  ('f'|'F')
+FLOAT_LITERAL   :   DIGIT+  DOT DIGIT+  ('f'|'F')
         |   DOT DIGIT+  ('f'|'F')
         |   DIGIT+ ('f'|'F')    ;
 LONG_LITERAL    :   DIGIT+ ('l'|'L')   ;
-DOUBLE_LITERAL  :   DIGIT+ DOT  DIGIT*  ('d'|'D')?
-        |   DOT DIGIT+  ('d'|'D')?
-        |   DIGIT+  ('d'|'D')?  ;
+DOUBLE_LITERAL  :   DIGIT+ DOT  DIGIT+  ('d'|'D')
+        |   DOT DIGIT+  ('d'|'D')
+        |   DIGIT+  ('d'|'D')  ;
 BOOL_LITERAL    :   'false' | 'true'    ;
 STRING_LITERAL  :   '"' (ESC|~["\\])*?   '"' ;
 CHAR_LITERAL    :   '\'' (ESC| ~['\\] )? '\''  ;

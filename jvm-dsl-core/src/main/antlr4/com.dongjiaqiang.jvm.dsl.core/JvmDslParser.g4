@@ -30,19 +30,19 @@ blockStatement  :   varDef  SEMI
                 |   statement
                 ;
 
-statement   :   doWhileStatement
-            |   whileStatement
-            |   forStatement
-            |   ifStatement
-            |   assignment SEMI
-            |   synchronizedStatement
-            |   throwReturnOrSideEffectStatement
-            |   breakStatement
-            |   continueStatement
-            |   tryStatement
-            |   assertStatement
-            |   block
-            |   SEMI
+statement   :   doWhileStatement # DoWhileExpr
+            |   whileStatement # WhileExpr
+            |   forStatement # ForExpr
+            |   ifStatement # IfExpr
+            |   assignment SEMI # AssignExpr
+            |   synchronizedStatement # SyncExpr
+            |   throwReturnOrSideEffectStatement # ThrowOrSideEffectExpr
+            |   breakStatement # BreakExpr
+            |   continueStatement # ContinueExpr
+            |   tryStatement # TryExpr
+            |   assertStatement # AssertExpr
+            |   block # BlockExpr
+            |   SEMI # SemiExor
             ;
 
 synchronizedStatement   :   SYNCHRONIZED    LPAREN  expression  RPAREN  block
@@ -81,9 +81,9 @@ doWhileStatement :   DO
 //for statement
 forStatement :   FOR LPAREN  varDef   SEMI    conditionalOrExpression   SEMI   assignment RPAREN
             block # ForStatementOne
-        |   FOR LPAREN  varDef   COLON   literalAndFuncCall RPAREN
+        |   FOR LPAREN  varDef   COLON   literalAndCallChain RPAREN
             block # ForStatementTwo
-        |   FOR LPAREN  varDef   COMMA   varDef   COLON   literalAndFuncCall RPAREN
+        |   FOR LPAREN  varDef   COMMA   varDef   COLON   literalAndCallChain RPAREN
             block # ForStatementThree
         ;
 
@@ -97,7 +97,11 @@ expression  :   lambdaExpression
             ;
 
 
-assignment  :  (    variable    |   (variable LBRACK expression  RBRACK)  )   assignOperator  expression;
+assignment  :  (    variable    |   arrayVariable | mapVariable  )   assignOperator  expression;
+
+arrayVariable: variable LBRACK expression  RBRACK;
+
+mapVariable: variable LPAREN expression RPAREN;
 
 assignOperator :   ASSIGN  |   ADD_ASSIGN  |   SUB_ASSIGN  |   MUL_ASSIGN  |   DIV_ASSIGN  |   AND_ASSIGN  |   OR_ASSIGN   |   XOR_ASSIGN  |   MOD_ASSIGN  |   LSHIFT_ASSIGN   |   RSHIFT_ASSIGN   |   URSHIFT_ASSIGN;
 
@@ -107,8 +111,8 @@ parenExpression :   LPAREN conditionalOrExpression RPAREN;
 conditionalOrExpression
 	:	conditionalAndExpression # ConditionalAndExpr
 	|	conditionalOrExpression OR conditionalAndExpression # OrOpExpr
-	|   conditionalAndExpression OR parenExpression # OrOpParenExpr
-	|   parenExpression OR conditionalAndExpression # ParenOrOpExpr
+	|   conditionalOrExpression OR parenExpression # OrOpParenExpr
+	|   parenExpression OR conditionalOrExpression # ParenOrOpExpr
 	|   parenExpression OR parenExpression # ParenOrOpParenExpr
 	;
 
@@ -117,6 +121,7 @@ conditionalAndExpression
 	:	inclusiveOrExpression # InclusiveOrExpr
 	|	conditionalAndExpression AND inclusiveOrExpression # AndOpExpr
 	|   conditionalAndExpression AND parenExpression # AndOpParenExpr
+	|   parenExpression AND conditionalAndExpression # ParenAndOpExpr
 	|   parenExpression AND parenExpression # ParenAndOpParenExpr
 	;
 
@@ -148,8 +153,8 @@ equalityOperation   :   EQUAL   |   NOTEQUAL;
 //equality expr a==b,a!=b
 equalityExpression  :   relationExpression # RelationExpr
                     |   equalityExpression  equalityOperation relationExpression # EqualExpr
-                    |   equalityOperation   equalityOperation   parenExpression # EqualParenExpr
-                    |   parenExpression equalityOperation   equalityOperation   # ParenEqualExpr
+                    |   equalityExpression   equalityOperation   parenExpression # EqualParenExpr
+                    |   parenExpression equalityOperation   equalityExpression   # ParenEqualExpr
                     |   parenExpression equalityOperation   parenExpression # ParenEqualParenExpr
                     ;
 
@@ -158,8 +163,8 @@ relationOperation  :   LT  |   GT  |   LE  |   GE  ;
 //relation expr a<b,a>b,a<=b,a>=b
 relationExpression  :   shiftExpression # ShiftExpr
                     |   relationExpression  relationOperation  shiftExpression # RelationOpExpr
-                    |   relationOperation   relationOperation   parenExpression # RelationOpParenExpr
-                    |   parenExpression relationOperation   relationOperation   # ParenRelationOpExpr
+                    |   relationExpression   relationOperation   parenExpression # RelationOpParenExpr
+                    |   parenExpression relationOperation   relationExpression   # ParenRelationOpExpr
                     |   parenExpression relationOperation   parenExpression #   ParenRelationOpParenExpr
                     ;
 
@@ -195,22 +200,24 @@ multiplicativeExpression    :   unaryExpression # UnaryExpr
                             ;
 
 //unary expr    func(a,b) a, (-a), (+a), (a), a instanceof Int, 1,[1,2],!a,(Int)a
-unaryExpression   :   literalAndFuncCall # LiteralAndFuncCallExpr
+unaryExpression   :   literalAndCallChain # LiteralAndFuncCallExpr
                 |   LPAREN  additiveOperation  unaryExpression  RPAREN # OppositeExpr
                 |   BANG    unaryExpression # NegateExpr
                 |   LPAREN  type    RPAREN  unaryExpression # CastExpr
-                |   literalAndFuncCall INSTANCEOF    type # InstanceofExpr
+                |   literalAndCallChain INSTANCEOF    type # InstanceofExpr
                 |   LPAREN unaryExpression RPAREN # ParenExpr
                 ;
 
-lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    ARROW  block
-                    |   LPAREN RPAREN    ARROW   block
-                    |   localVariable ARROW     block
+lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    ARROW  block # ParamsLambdaExpr
+                    |   LPAREN RPAREN    ARROW   block # NoParamLambdaExpr
+                    |   localVariable ARROW     block  # OneParamLambdaExpr
                     |   localVariable   ARROW   LBRACE
-                        (CASE (baseLiteral  |   unapplyExpression) ARROW     block)+
+                        (CASE caseExpression ARROW     block)+
                         (DEFAULT ARROW  block)?
-                        RBRACE
+                        RBRACE  # MatchCaseExpr
                     ;
+
+caseExpression : literal  |   unapplyExpression;
 
 unapplyExpression   :   clazzType   LPAREN  literal (COMMA literal)* RPAREN
                     |   clazzType
@@ -245,7 +252,7 @@ type    :   INT #   IntType
 
 types:  LPAREN  type    (COMMA  type)+ RPAREN;
 
-clazzType   :   IDENTIFIER  (DOT IDENTIFIER)* ;
+clazzType   :   IDENTIFIER;
 
 varDef   :   type localVariable    (   ASSIGN (    conditionalOrExpression | lambdaExpression  )  )?;
 
@@ -255,14 +262,16 @@ classDef    :   CLASS IDENTIFIER  parameters
             ;
 
 //Func Call ex. foo(),  bar.foo(1,2)
-funcCall    :   singleFuncCall  (DOT singleFuncCall)*   ;
+callChain    :   (funcCall|literal)  (DOT    part    )*   ;
 
-singleFuncCall   :   (variable DOT)? funcName LPAREN RPAREN #   VarCallNoArgs
+part:   variable   |   funcCall;
+
+funcCall   :        (variable DOT)? funcName LPAREN RPAREN #   VarCallNoArgs
                  |   (variable DOT)? funcName LPAREN expression (COMMA  expression  )*    RPAREN    # VarCallArgs
-                 |   (literal    DOT)?   funcName LPAREN RPAREN # LiteralCallNoArgs
+                 |  (literal    DOT)?   funcName LPAREN RPAREN # LiteralCallNoArgs
                  |   (literal    DOT)?   funcName LPAREN expression (COMMA expression )*    RPAREN # LiteralCallArgs
                  |   (type DOT)?    funcName LPAREN  RPAREN # TypeCallNoArgs
-                 |   (type DOT)?    funcName LPAREN expression (COMMA expression)*  RPAREN # TypeCalArgs
+                 |   (type DOT)?    funcName LPAREN expression (COMMA expression)*  RPAREN # TypeCallArgs
                  ;
 
 
@@ -271,7 +280,7 @@ funcDef :   DEF   funcName  parameters  ASSIGN type    throwDef?   block;
 fieldDef    :   VOLATILE?   varDef ;
 
 //Literal
-literalAndFuncCall :   funcCall
+literalAndCallChain :   callChain
         |   literal
         ;
 
@@ -299,27 +308,27 @@ numberLiteral   :   INT_LITERAL
                 |   DOUBLE_LITERAL  ;
 
 //list literal  ex. [], [1,2,3],    [[1,1],[2,1,1],[3,3,1,1]]
-listLiteral:    |   LBRACK literalAndFuncCall    (COMMA    literalAndFuncCall    )* RBRACK
+listLiteral:    |   LBRACK literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACK
                 |   LBRACK RBRACK ;
 
 asyncLiteral:   |   ASYNC   (LPAREN  variable  RPAREN)? block;
 
 //set literal   ex. (), (1,3,2)
-setLiteral :   LBRACE  literalAndFuncCall    (COMMA    literalAndFuncCall    )* RBRACE
+setLiteral :   LBRACE  literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACE
            |   LBRACE   RBRACE;
 
 //optional literal  ex. ?12,    ?a
-optionalLiteral  : QUESTION literalAndFuncCall ;
+optionalLiteral  : QUESTION literalAndCallChain ;
 
 //map   literal ex. {1:2,3:1}
-mapLiteral :   LBRACE (   literalAndFuncCall    )    COLON    (   literalAndFuncCall   )
-    (COMMA    (  literalAndFuncCall    )    COLON (  literalAndFuncCall  )   )*  RBRACE
+mapLiteral :   LBRACE (   literalAndCallChain    )    COLON    (   literalAndCallChain   )
+    (COMMA    (  literalAndCallChain    )    COLON (  literalAndCallChain  )   )*  RBRACE
     |   LBRACE RBRACE ;
 //tuple literal ex. (1,"11",1f)
-tupleLiteral   :   LPAREN literalAndFuncCall  (COMMA    literalAndFuncCall)+    RPAREN ;
+tupleLiteral   :   LPAREN literalAndCallChain  (COMMA    literalAndCallChain)+    RPAREN ;
 
 //class literal ex. new Foo(a,b)
-classLiteral    :  NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN literalAndFuncCall   (COMMA    literalAndFuncCall)*   RPAREN
+classLiteral    :  NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN literalAndCallChain   (COMMA    literalAndCallChain)*   RPAREN
                 |  NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN RPAREN
                 ;
 

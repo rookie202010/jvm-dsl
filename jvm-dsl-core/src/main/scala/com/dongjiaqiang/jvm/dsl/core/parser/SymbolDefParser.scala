@@ -64,7 +64,7 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
   override def enterFieldDef(ctx: JvmDslParserParser.FieldDefContext): Unit = {
     val symbolName = ctx.varDef( ).localVariable( ).IDENTIFIER( ).getText
     programScope.addScope( symbolName, new FieldScope( programScope.statements, symbolName,
-      DslType.unapply( ctx.varDef( ).`type`( ) ),programScope, Option( ctx.VOLATILE( ) ).isDefined ) )
+      DslType.unapply( ctx.varDef( ).`type`( ) ),programScope,programScope, Option( ctx.VOLATILE( ) ).isDefined ) )
     programScope.incStatement()
   }
 
@@ -76,7 +76,7 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
 
     currentClazzScope = new ClazzScope( programScope.statements,symbolName )
 
-    ctx.parameters( ).parameter( ).foreach( currentClazzScope.addScope )
+    currentClazzScope.addScope(ctx.parameters().parameter(),currentClazzScope,programScope)
 
     programScope.addScope( symbolName, currentClazzScope )
 
@@ -100,8 +100,7 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
     val methodScope = new MethodScope( symbolName,currentScope.statements,currentScope,DslType.unapply(ctx.`type`()) )
     methodScope.addScope(new BlockScope( 0,methodScope,currentScope ))
 
-    ctx.parameters( ).parameter( ).foreach(methodScope.addScope)
-
+    methodScope.addScope(ctx.parameters().parameter(),methodScope,programScope)
 
     currentScope.addScope( symbolName, methodScope )
     currentMethodScope = methodScope
@@ -137,7 +136,7 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
       val symbolName = ctx.localVariable( ).IDENTIFIER( ).getText
 
       if(!ctx.getParent.isInstanceOf[ForStatementContext]) {
-        currentScope.addScope( symbolName, new FieldScope( currentScope.statements,symbolName, dslType, programScope,false ) )
+        currentScope.addScope( symbolName, new FieldScope( currentScope.statements,symbolName, dslType, currentScope,programScope,false ) )
         currentScope.incStatement()
       }
     }
@@ -154,7 +153,7 @@ class SymbolDefParser(var programScope:ProgramScope = new ProgramScope()) extend
     ctxList.foreach( ctx ⇒ {
       val symbolName = ctx.localVariable( ).IDENTIFIER( ).getText
       val dslType = DslType.unapply( ctx.`type`( ) )
-      blockScope.addInitScope( symbolName, new FieldScope( 0, symbolName, dslType, programScope,false ) )
+      blockScope.addInitScope( symbolName, new FieldScope( 0, symbolName, dslType, blockScope,programScope,false ) )
       blockScope.incStatement( )
     } )
     parent.incStatement( )

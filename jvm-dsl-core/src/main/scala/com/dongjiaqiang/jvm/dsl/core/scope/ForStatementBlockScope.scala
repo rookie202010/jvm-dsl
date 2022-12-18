@@ -47,7 +47,7 @@ extends BlockScope(outerScopeIndex,parentScope,topScope) {
    * @param index ref index
    * @param refs  ref names
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
+  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
     refs match {
       case "this"::childRef ⇒ scope.resolveVarRefs(index,childRef,this,fields,skipCurrentScope = true,backRef = true,Some(topScope))
       case _ ⇒

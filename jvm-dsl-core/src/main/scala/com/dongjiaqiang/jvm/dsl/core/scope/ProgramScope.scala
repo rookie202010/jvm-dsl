@@ -58,7 +58,7 @@ class ProgramScope(val fields:MutableMap[String,FieldScope],
   /**
    * resolve var refs in program (defined fields)
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
+  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
     import com.dongjiaqiang.jvm.dsl.core.scope
     scope.resolveVarRefs(index,refs,this, fields,skipCurrentScope = false,backRef = true,None)
   }

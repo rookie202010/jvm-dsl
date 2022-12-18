@@ -7,6 +7,7 @@ import scala.collection.immutable.Stream.Empty
 class FieldScope(val outerScopeIndex:Int,
                  val symbolName:String,
                  val dslType: DslType,
+                 val belongScope:Scope,
                  val programScope: ProgramScope,
                  val volatile:Boolean = false) extends Scope {
 
@@ -62,35 +63,35 @@ class FieldScope(val outerScopeIndex:Int,
    * @param refs  localRefs names
    * @return
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Resolved = {
+  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
     refs match {
       case ref :: Nil ⇒
         if (ref == symbolName) {
-          Success(dslType)
+          Some(this)
         } else {
-          Failure
+          None
         }
       case ref :: childRef ⇒
         if(ref != symbolName){
-            Failure
+            None
         }else {
           dslType match {
             case clazzType: ClazzType ⇒
               resolve(childRef, clazzType)
-            case _ ⇒ Failure
+            case _ ⇒ None
           }
         }
     }
   }
 
-  def resolve(childRef: List[String], dslType: ClazzType): Resolved = {
+  def resolve(childRef: List[String], dslType: ClazzType): Option[FieldScope] = {
     programScope.classes.get( dslType.clazzName ) match {
       case Some( clazzScope ) ⇒
         val fields = clazzScope.fields
         if (childRef.size == 1) {
           fields.get( childRef.head ) match {
-            case Some( fieldScope ) ⇒ Success(fieldScope.dslType)
-            case None ⇒ Failure
+            case Some( fieldScope ) ⇒ Some(fieldScope)
+            case None ⇒ None
           }
         } else {
           fields.get( childRef.head ) match {
@@ -98,12 +99,12 @@ class FieldScope(val outerScopeIndex:Int,
               fieldScope.dslType match {
                 case childDslType: ClazzType ⇒
                   resolve( childRef.tail, childDslType )
-                case _ ⇒ Failure
+                case _ ⇒ None
               }
-            case None ⇒ Failure
+            case None ⇒ None
           }
         }
-      case None ⇒ Undefined(dslType)
+      case None ⇒ Some(this)
     }
   }
 
