@@ -157,13 +157,6 @@ class And(val left:Expression, val right:Expression) extends BinaryExpression //
 //or expression
 class Or(val left:Expression, val right:Expression) extends BinaryExpression // a || b
 
-
-//if expression
-case class If(left:Expression,
-              mid:Expression,
-              right:Option[Expression]) extends Expression
-
-
 //call chains expression
 class FuncCallChain(val head:FuncCall, val tails:List[Part]) extends Expression
 
@@ -207,27 +200,26 @@ class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends E
 
 //for statement expression
 class ForLoop(val loopVarDef:LocalVarDef,
-              val loopVarAssign:Expression,
               val loopVarCondition:Expression,
               val loopVarUpdate:Expression,
-              override val expressions:ArrayBuffer[Expression]) extends Block(expressions)
+              override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
 class ForLoopCollection(val localVarDef: LocalVarDef,
                         val looped:Expression,
-                        override val expressions:ArrayBuffer[Expression]) extends Block(expressions)
+                        override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
 class ForLoopMap(loopKeyDef:LocalVarDef,
                  loopValueDef:LocalVarDef,
                  looped:Expression,
-                 override val expressions:ArrayBuffer[Expression]) extends Block( expressions )
+                 override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block( expressions )
 
 //while statement expression
-class While(val condition:Expression,
-            override val expressions:ArrayBuffer[Expression]) extends Block(expressions)
+class WhileCondition(val expression: Expression) extends Expression
+class WhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions)
 
 //do while statement expression
-class DoWhile(val condition:Expression,
-              override val expressions:ArrayBuffer[Expression]) extends Block(expressions)
+class DoWhileCondition(val expression: Expression) extends Expression
+class DoWhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions)
 
 //break statement
 object Break extends Expression
@@ -245,11 +237,16 @@ class Return(val expression: Expression) extends Expression
 class Assert(val expression: Expression) extends Expression
 
 //synchronized statement
-class Synchronized(val condition:Expression,
-                   override val expressions:ArrayBuffer[Expression]) extends Block(expressions)
+class SyncCondition(val expression: Expression) extends Expression
+class SyncBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+
+//if statement
+class IfCondition(val expression: Expression,val first:Boolean) extends Expression
+class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
 //try statement
-class Try(val tryBlock:Block,
-          val finalBlock:Block,
-          override val expressions:ArrayBuffer[Expression]) extends Block( expressions )
+class TryBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+class CatchCondition(val expression: Expression) extends Expression
+class CatchBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 

@@ -15,7 +15,7 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext,Expression] 
     if (r.literal( ) != null) {
       LiteralGenerator.generate( expressionContext, r.literal( ) )
     } else {
-      CallChain.generate( expressionContext, r.callChain( ) )
+      CallChainGenerator.generate( expressionContext, r.callChain( ) )
     }
   }
 

@@ -4,7 +4,7 @@ import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
 import com.dongjiaqiang.jvm.dsl.core.expression._
 
-object UnaryIExpressionGenerator extends IExpressionGenerator[UnaryExpressionContext,Expression]{
+object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionContext,Expression]{
 
   override def generate(expressionContext:ExpressionContext,
                         ruleContext: UnaryExpressionContext): Expression = {
@@ -21,7 +21,7 @@ object UnaryIExpressionGenerator extends IExpressionGenerator[UnaryExpressionCon
       case c: InstanceofExprContext ⇒
         val dslType = DslType.unapply( c.`type`( ) )
         val expression = if (c.literalAndCallChain( ).callChain( ) != null) {
-          CallChain.generate( expressionContext, c.literalAndCallChain( ).callChain( ) )
+          CallChainGenerator.generate( expressionContext, c.literalAndCallChain( ).callChain( ) )
         } else {
           LiteralGenerator.generate( expressionContext, c.literalAndCallChain( ).literal( ) )
         }
@@ -30,7 +30,7 @@ object UnaryIExpressionGenerator extends IExpressionGenerator[UnaryExpressionCon
         if (c.literalAndCallChain( ).literal( ) != null) {
           LiteralGenerator.generate( expressionContext, c.literalAndCallChain( ).literal( ) )
         } else {
-          CallChain.generate( expressionContext, c.literalAndCallChain( ).callChain( ) )
+          CallChainGenerator.generate( expressionContext, c.literalAndCallChain( ).callChain( ) )
         }
     }
   }

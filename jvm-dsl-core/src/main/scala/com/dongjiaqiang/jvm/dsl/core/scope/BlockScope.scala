@@ -36,6 +36,7 @@ class BlockScope(val outerScopeIndex:Int, val fields: MutableMap[String, FieldSc
     } else {
       SymbolType.UNDEFINED
     }
+    
   }
 
   override def equals(obj: Any): scala.Boolean =

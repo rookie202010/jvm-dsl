@@ -2,6 +2,7 @@ package com.dongjiaqiang.jvm.dsl.core.scope
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.ParameterContext
 import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
+import com.dongjiaqiang.jvm.dsl.core.config.SymbolParserConfig
 import com.dongjiaqiang.jvm.dsl.core.exception.SymbolParseException
 
 trait Scope {
