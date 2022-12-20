@@ -5,12 +5,41 @@ import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
 import com.dongjiaqiang.jvm.dsl.core.scope
 
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
-class MethodScope(val name:String,
-                  val outerScopeIndex:Int,
-                  val params:MutableMap[String,FieldScope],
-                  val returnType:DslType,
-                  val throws:ArrayBuffer[ClazzType],
-                  val parentScope:Scope,
+
+/**
+ * program{
+ *
+ * Int i = 100;
+ * Int j = 200;
+ *
+ * def foo(Int i)=Int{ //name = foo, outerScopeIndex = 2, parentScope is programScope
+ * return i;
+ * }
+ *
+ * class Foo(Int k,Int z){
+ * def foo1()=Int{ //name = foo1, outerScopeIndex = 2, parentScope is classScope foo
+ * return k;
+ * }
+ *
+ * def foo2()=Int{ //name = foo2, outerScopeIndex = 3, parentScope is classScope foo
+ * return z;
+ * }
+ * }
+ *
+ *
+ *
+ * }
+ *
+ *
+ * method scope
+ *
+ */
+class MethodScope(val name: String,
+                  val outerScopeIndex: Int,
+                  val params: MutableMap[String, FieldScope],
+                  val returnType: DslType,
+                  val throws: ArrayBuffer[ClazzType],
+                  val parentScope: Scope,
                   var blockScope: BlockScope) extends Scope {
 
   def this(name: String, outerScopeIndex: Int, parentScope: Scope, returnType: DslType) {

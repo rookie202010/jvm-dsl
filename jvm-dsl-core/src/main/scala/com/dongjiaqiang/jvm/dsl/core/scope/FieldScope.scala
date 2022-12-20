@@ -2,8 +2,36 @@ package com.dongjiaqiang.jvm.dsl.core.scope
 import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
 import com.dongjiaqiang.jvm.dsl.core.scope
 
-import scala.collection.immutable.Stream.Empty
-
+/**
+ * program{
+ *
+ * Int a = 1;  // outerScopeIndex = 0, symbolName = a,dslType = IntType,belong to programScope
+ *
+ * def foo(Long a)=Unit{ // outerScopeIndex = 0,symbolName = a,dslType = LongType,belong to methodScope foo
+ * a = 10;
+ *
+ * {
+ * c = 100;
+ * a = 200;
+ * String s; //outerScopeIndex = 2,symbolName = s,dslType = StringType,belong to blockScope block1
+ * } // block1
+ *
+ * Int c = 10; //outerScopeIndex = 2,symbolName = c,dslType = IntType,belong to blockScope block0
+ *
+ * } //block0
+ *
+ * Int b = 1; // outerScopeIndex = 2, symbolName = b,dslType = IntType,belong to programScope
+ *
+ * class Foo(Int a,Long b){
+ * //outerScopeIndex = 0,symbolName = a,dslType = IntType,belong to clazzScope Foo
+ * //outerScopeIndex = 0,symbolName = b,dslType = LongType,belong to clazzScope Foo
+ * }
+ *
+ * }
+ *
+ *
+ * field scope
+ */
 class FieldScope(val outerScopeIndex:Int,
                  val symbolName:String,
                  val dslType: DslType,

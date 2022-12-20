@@ -1,7 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.core.scope
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
-import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserParser, scope}
+import com.dongjiaqiang.jvm.dsl.core.scope
 
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 

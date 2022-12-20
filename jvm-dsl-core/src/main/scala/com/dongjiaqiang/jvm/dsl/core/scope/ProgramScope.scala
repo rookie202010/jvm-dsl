@@ -1,12 +1,14 @@
 package com.dongjiaqiang.jvm.dsl.core.scope
 
-import com.dongjiaqiang.jvm.dsl.core.scope
+import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
-
-class ProgramScope(val fields:MutableMap[String,FieldScope],
-                   val classes: MutableMap[String,ClazzScope],
-                   val methods:MutableMap[String,MethodScope]) extends Scope {
+class ProgramScope(val fields: MutableMap[String, FieldScope],
+                   val classes: MutableMap[String, ClazzScope],
+                   val methods: MutableMap[String, MethodScope],
+                   val importClasses: ArrayBuffer[String] = ArrayBuffer( ),
+                   val importClassesFromPackage: MutableMap[String, String] = MutableMap( ),
+                   val importPackages: MutableMap[String, String] = MutableMap( )
+                  ) extends Scope {
 
 
   override val outerScopeIndex: Int = 0

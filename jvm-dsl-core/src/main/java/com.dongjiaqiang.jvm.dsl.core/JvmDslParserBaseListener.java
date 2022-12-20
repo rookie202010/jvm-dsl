@@ -299,25 +299,36 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitImportClazzStatement(JvmDslParserParser.ImportClazzStatementContext ctx) { }
+	@Override
+	public void exitImportClazzStatement(JvmDslParserParser.ImportClazzStatementContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUsingJarStatement(JvmDslParserParser.UsingJarStatementContext ctx) { }
+	@Override
+	public void enterUsingPackageStatement(JvmDslParserParser.UsingPackageStatementContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUsingJarStatement(JvmDslParserParser.UsingJarStatementContext ctx) { }
+	@Override
+	public void exitUsingPackageStatement(JvmDslParserParser.UsingPackageStatementContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAssertStatement(JvmDslParserParser.AssertStatementContext ctx) { }
+	@Override
+	public void enterAssertStatement(JvmDslParserParser.AssertStatementContext ctx) {
+	}
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1925,43 +1936,61 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterImportClazz(JvmDslParserParser.ImportClazzContext ctx) { }
+	@Override public void enterImportClazz(JvmDslParserParser.ImportClazzContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitImportClazz(JvmDslParserParser.ImportClazzContext ctx) { }
+	@Override
+	public void exitImportClazz(JvmDslParserParser.ImportClazzContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJarPath(JvmDslParserParser.JarPathContext ctx) { }
+	@Override
+	public void enterPackagePath(JvmDslParserParser.PackagePathContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJarPath(JvmDslParserParser.JarPathContext ctx) { }
+	@Override
+	public void exitPackagePath(JvmDslParserParser.PackagePathContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJarName(JvmDslParserParser.JarNameContext ctx) { }
+	@Override
+	public void enterPackageName(JvmDslParserParser.PackageNameContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJarName(JvmDslParserParser.JarNameContext ctx) { }
+	@Override
+	public void exitPackageName(JvmDslParserParser.PackageNameContext ctx) {
+	}
+
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParameters(JvmDslParserParser.ParametersContext ctx) { }
+	@Override
+	public void enterParameters(JvmDslParserParser.ParametersContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

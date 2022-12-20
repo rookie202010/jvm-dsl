@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.core
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
+import com.dongjiaqiang.jvm.dsl.core.`type`.ClazzType
 
 package object scope {
 
@@ -8,7 +8,7 @@ package object scope {
     val FIELD, CLAZZ, METHOD, UNDEFINED = Value
   }
 
-  import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
+  import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
   /**
    * resolve refs like i, a.b in current scope

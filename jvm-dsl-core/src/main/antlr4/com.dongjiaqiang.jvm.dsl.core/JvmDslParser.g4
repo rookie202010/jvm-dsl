@@ -18,7 +18,7 @@ member :    funcDef
         ;
 
 importDeppendency   :   importClazzStatement
-                        usingJarStatement   ;
+                        usingPackageStatement   ;
 
 block   :   LBRACE  blockStatements?    RBRACE
         ;
@@ -57,9 +57,9 @@ breakStatement  :   BREAK   SEMI;
 continueStatement  :   CONTINUE    SEMI;
 
 importClazzStatement :   IMPORT importClazz  SEMI
-                     |   IMPORT importClazz FROM jarName SEMI;
+                     |   IMPORT importClazz FROM packageName SEMI;
 
-usingJarStatement: USING  JAR   jarPath  AS jarName  SEMI;
+usingPackageStatement: USING  PACKAGE   packagePath  AS packageName  SEMI;
 
 assertStatement :   ASSERT conditionalOrExpression SEMI;
 
@@ -338,11 +338,11 @@ localVariable   :   IDENTIFIER;
 //global variable   or  class instance member
 variable :  IDENTIFIER  (DOT IDENTIFIER)* ;
 
-importClazz :    IDENTIFIER  (DOT IDENTIFIER)* MUL?;
+importClazz :    IDENTIFIER  (DOT IDENTIFIER)* ;
 
-jarPath:    STRING_LITERAL;
+packagePath:    STRING_LITERAL;
 
-jarName:    IDENTIFIER;
+packageName:    IDENTIFIER;
 
 parameters    :   LPAREN parameter  (COMMA parameter)* RPAREN
               |   LPAREN    RPAREN;

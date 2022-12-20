@@ -15,7 +15,7 @@ FINALLY:            'finally';
 FOR:                'for';
 IF:                 'if';
 USING:              'using';
-JAR:                'jar';
+PACKAGE:            'package';
 AS:                 'as';
 FROM:               'from';
 IMPORT:             'import';

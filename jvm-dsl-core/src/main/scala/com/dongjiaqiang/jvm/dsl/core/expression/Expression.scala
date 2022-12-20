@@ -1,17 +1,17 @@
 package com.dongjiaqiang.jvm.dsl.core.expression
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.{BoolType, CharType, ClazzType, DoubleType, DslType, FloatType, FutureType, IntType, ListType, LongType, MapType, OptionType, SetType, StringType, TupleType}
-import com.dongjiaqiang.jvm.dsl.core.scope.{FieldScope, MethodScope}
+import com.dongjiaqiang.jvm.dsl.core.`type`._
+import com.dongjiaqiang.jvm.dsl.core.scope.FieldScope
 
 import scala.collection.mutable.ArrayBuffer
 
-sealed trait Expression{
+sealed trait Expression {
 
 }
 
 //value expression
 
-case class LocalVarDef(name:String, dslType: DslType,assigned: Option[Expression]) extends Expression
+case class LocalVarDef(name: String, dslType: DslType, assigned: Option[Expression]) extends Expression
 
 case class VarRef(name:List[String],fieldScope: FieldScope) extends Expression
 case class ArrayVarRef(indexExpression:Expression,override val name:List[String],override  val fieldScope: FieldScope) extends VarRef(name, fieldScope)
@@ -202,9 +202,8 @@ class VarCall(val varRef:VarRef,
               override val params:List[Expression]) extends FuncCall
 
 
-
 //block expression
-class Block(val expressions:ArrayBuffer[Expression]) extends Expression
+class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Expression
 
 //for statement expression
 class ForLoop(val loopVarDef:LocalVarDef,
