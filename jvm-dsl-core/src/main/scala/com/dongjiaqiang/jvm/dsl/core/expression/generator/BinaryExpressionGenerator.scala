@@ -284,10 +284,10 @@ object MultiplicativeGenerator extends IExpressionGenerator[MultiplicativeExpres
                         ruleContext: MultiplicativeExpressionContext): Expression = {
       ruleContext match {
         case c:UnaryExprContext⇒
-            UnaryIExpressionGenerator.generate(expressionContext,c.unaryExpression())
+            UnaryExpressionGenerator.generate(expressionContext,c.unaryExpression())
         case c:MultiOpExprContext⇒
             generator(generate(expressionContext, c.multiplicativeExpression()),
-              UnaryIExpressionGenerator.generate(expressionContext,c.unaryExpression()),
+              UnaryExpressionGenerator.generate(expressionContext,c.unaryExpression()),
               c.multiplicativeOperation())
         case c:MultiOpParenExprContext⇒
             val left = generate(expressionContext, c.multiplicativeExpression())

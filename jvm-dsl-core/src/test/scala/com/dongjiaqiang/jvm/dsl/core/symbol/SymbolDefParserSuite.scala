@@ -13,24 +13,24 @@ import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
 class SymbolDefParserSuite extends AnyFunSuite {
 
-    test( "define empty program" ) {
-        val input =
-            """program {
+  test("define empty program") {
+    val input =
+      """program {
 
         }
         """
-        val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-        val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-        val symbolDefParser = new SymbolDefParser( )
-        ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
-        assert( symbolDefParser.programScope.fields.isEmpty )
-        assert( symbolDefParser.programScope.classes.isEmpty )
-        assert( symbolDefParser.programScope.methods.isEmpty )
-    }
+    val jvmDslLexer = new JvmDslLexer(CharStreams.fromReader(new StringReader(input)))
+    val jvmDslParser = new JvmDslParserParser(new CommonTokenStream(jvmDslLexer))
+    val symbolDefParser = new SymbolDefParser()
+    ParseTreeWalker.DEFAULT.walk(symbolDefParser, jvmDslParser.program())
+    assert(symbolDefParser.programScope.fields.isEmpty)
+    assert(symbolDefParser.programScope.classes.isEmpty)
+    assert(symbolDefParser.programScope.methods.isEmpty)
+  }
 
-    test( "define program no nesting" ) {
-        val input =
-            """program{
+  test("define program no nesting") {
+    val input =
+      """program{
 
           def xx()=String{
           return "xx";
@@ -52,70 +52,72 @@ class SymbolDefParserSuite extends AnyFunSuite {
            }
         }
         """
-        val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-        val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-        val symbolDefParser = new SymbolDefParser( )
+    val jvmDslLexer = new JvmDslLexer(CharStreams.fromReader(new StringReader(input)))
+    val jvmDslParser = new JvmDslParserParser(new CommonTokenStream(jvmDslLexer))
+    val symbolDefParser = new SymbolDefParser()
 
-        val parseTreeWalker = new ParseTreeWalker
-        parseTreeWalker.walk( symbolDefParser, jvmDslParser.program( ) )
+    val parseTreeWalker = new ParseTreeWalker
+    parseTreeWalker.walk(symbolDefParser, jvmDslParser.program())
 
-        val programScope = new ProgramScope( )
-        programScope.incStatement( 5 )
+    val programScope = new ProgramScope()
+    programScope.incStatement(5)
 
-        //define xx method
-        val xxMethod = new MethodScope( "xx", 0, programScope, StringType )
-        xxMethod.addScope( new BlockScope( 0, xxMethod, programScope ) )
-        xxMethod.blockScope.incStatement( )
+    //define xx method
+    val xxMethod = new MethodScope("xx", 0, programScope, StringType)
+    xxMethod.addScope(new BlockScope(0, xxMethod, programScope))
+    xxMethod.blockScope.incStatement()
+    programScope.addScope("xx", xxMethod)
 
-        programScope.addScope( "xx", xxMethod )
+    //define ages addresses fields
+    programScope.addScope("ages",
+      new FieldScope(1, "ages", new MapType(StringType, IntType), programScope, programScope))
+      .addScope("addresses",
+        new FieldScope(2, "addresses", new MapType(StringType, StringType), programScope, programScope, true))
 
-        //define ages addresses fields
-        programScope.addScope( "ages",
-            new FieldScope( 1, "ages", new MapType( StringType, IntType ), programScope, programScope ) )
-          .addScope( "addresses",
-              new FieldScope( 2, "addresses", new MapType( StringType, StringType ), programScope, programScope, true ) )
 
-        //define class Student
-        val studentClazz = new ClazzScope( 3, "Student" )
-        studentClazz.incStatement( 3 )
+    //define class Student
+    val studentClazz = new ClazzScope(3, "Student")
+    studentClazz.incStatement(3)
 
-        val studentFormatMethod = new MethodScope( "format", 2, studentClazz, StringType )
-        studentFormatMethod.incStatement( 1 )
+    //define age and address fields
+    studentClazz.addScope("age", new FieldScope(0, "age", IntType, studentClazz, programScope))
+    studentClazz.addScope("address", new FieldScope(0, "address", StringType, studentClazz, programScope))
 
-        studentFormatMethod.addScope( new BlockScope( 0, studentFormatMethod, studentClazz ) )
-        studentFormatMethod.blockScope.incStatement( )
+    //define format method
+    val studentFormatMethod = new MethodScope("format", 2, studentClazz, StringType)
+    studentFormatMethod.incStatement(1)
+    studentFormatMethod.addScope("sep",
+      new FieldScope(0, "sep", StringType, studentFormatMethod, programScope))
+    studentFormatMethod.addScope(new BlockScope(0, studentFormatMethod, studentClazz))
+    studentFormatMethod.blockScope.incStatement()
+    studentClazz.addScope("format", studentFormatMethod)
 
-        studentFormatMethod.addScope( "sep",
-            new FieldScope( 0, "sep", StringType, studentFormatMethod, programScope ) )
+    programScope.addScope("Student", studentClazz)
 
-        studentClazz.addScope( "age", new FieldScope( 0, "age", IntType, studentClazz, programScope ) )
-        studentClazz.addScope( "address", new FieldScope( 0, "address", StringType, studentClazz, programScope ) )
-        studentClazz.addScope( "format", studentFormatMethod )
 
-        programScope.addScope( "Student", studentClazz )
+    //define find method
+    val findMethod = new MethodScope("find", 4, programScope, StringType)
+    findMethod.incStatement(1)
 
-        //define find method
-        val findMethod = new MethodScope( "find", 4, programScope, StringType )
-        findMethod.incStatement( 1 )
-        findMethod.addScope( new BlockScope( 0, findMethod, programScope ) )
-        findMethod.blockScope.incStatement( 3 )
+    findMethod.addScope("name",
+      new FieldScope(0, "name", StringType, findMethod, programScope))
 
-        findMethod.addScope( "name",
-            new FieldScope( 0, "name", StringType, findMethod, programScope ) )
+    findMethod.addScope(new BlockScope(0, findMethod, programScope))
+    findMethod.blockScope.incStatement(3)
 
-        findMethod.blockScope.addScope( "age",
-            new FieldScope( 0, "age", IntType, findMethod.blockScope, programScope ) )
-        findMethod.blockScope.addScope( "address",
-            new FieldScope( 1, "address", StringType, findMethod.blockScope, programScope ) )
+    findMethod.blockScope.addScope("age",
+      new FieldScope(0, "age", IntType, findMethod.blockScope, programScope))
+    findMethod.blockScope.addScope("address",
+      new FieldScope(1, "address", StringType, findMethod.blockScope, programScope))
 
-        programScope.addScope( "find", findMethod )
+    programScope.addScope("find", findMethod)
 
-        assert( symbolDefParser.programScope == programScope )
-    }
+    assert(symbolDefParser.programScope == programScope)
+  }
 
-    test( "define program one level of nesting" ) {
-        val input =
-            """program{
+  test("define program one level of nesting") {
+    val input =
+      """program{
 
               def xx()=String{
               return "xx";
@@ -155,97 +157,103 @@ class SymbolDefParserSuite extends AnyFunSuite {
                }
             }
             """
-        val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-        val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-        val symbolDefParser = new SymbolDefParser( )
+    val jvmDslLexer = new JvmDslLexer(CharStreams.fromReader(new StringReader(input)))
+    val jvmDslParser = new JvmDslParserParser(new CommonTokenStream(jvmDslLexer))
+    val symbolDefParser = new SymbolDefParser()
 
-        val parseTreeWalker = new ParseTreeWalker
-        parseTreeWalker.walk( symbolDefParser, jvmDslParser.program( ) )
+    val parseTreeWalker = new ParseTreeWalker
+    parseTreeWalker.walk(symbolDefParser, jvmDslParser.program())
 
-        val programScope = new ProgramScope( )
-        programScope.incStatement( 5 )
+    val programScope = new ProgramScope()
+    programScope.incStatement(5)
 
-        //define filed ages
-        val agesField = new FieldScope( 1, "ages",
-            new MapType( StringType, IntType ), programScope, programScope )
-        //define field addresses
-        val addressesField = new FieldScope( 2, "addresses",
-            new MapType( StringType, StringType ), programScope, programScope, true )
+    //define xx method
+    val xxMethod = new MethodScope("xx", 0, programScope, StringType)
+    xxMethod.addScope(new BlockScope(0, xxMethod, programScope))
+    xxMethod.blockScope.incStatement()
+    programScope.addScope("xx", xxMethod)
 
-        programScope.addScope( "ages", agesField )
-        programScope.addScope( "addresses", addressesField )
+    //define filed ages
+    val agesField = new FieldScope(1, "ages",
+      new MapType(StringType, IntType), programScope, programScope)
+    //define field addresses
+    val addressesField = new FieldScope(2, "addresses",
+      new MapType(StringType, StringType), programScope, programScope, true)
 
-        //define class Student
-        val studentClazz = new ClazzScope( 3, "Student" )
-        studentClazz.incStatement( 3 )
+    programScope.addScope("ages", agesField)
+    programScope.addScope("addresses", addressesField)
 
-        val studentFormatMethod = new MethodScope( "format", 2, studentClazz, StringType )
-        studentFormatMethod.incStatement( )
+    //define class Student
+    val studentClazz = new ClazzScope(3, "Student")
+    studentClazz.incStatement(3)
 
-        studentFormatMethod.addScope( new BlockScope( 0, studentFormatMethod, studentClazz ) )
-        studentFormatMethod.blockScope.incStatement( 3 )
-
-        studentFormatMethod.addScope( "sep",
-            new FieldScope( 0, "sep", StringType, studentFormatMethod, programScope ) )
-
-        studentFormatMethod.blockScope.addScope( "add",
-            new FieldScope( 0, "add", IntType, studentFormatMethod.blockScope, programScope ) )
-
-        val studentFormatMethodBlock_1 = new BlockScope( 1, studentFormatMethod.blockScope, studentClazz )
-        studentFormatMethodBlock_1.incStatement( 4 )
-        studentFormatMethodBlock_1.addScope( "sep", new FieldScope( 0, "sep", IntType, studentFormatMethodBlock_1, programScope ) )
-        studentFormatMethodBlock_1.addScope( "i", new FieldScope( 2, "i", IntType, studentFormatMethodBlock_1, programScope ) )
-
-        studentFormatMethod.blockScope.addScope( studentFormatMethodBlock_1 )
-
-        studentClazz.addScope( "age", new FieldScope( 0, "age", IntType, studentClazz, programScope ) )
-        studentClazz.addScope( "address", new FieldScope( 0, "address", StringType, studentClazz, programScope ) )
-        studentClazz.addScope( "format", studentFormatMethod )
-
-        programScope.addScope( "Student", studentClazz )
-
-        //define xx method
-        val xxMethod = new MethodScope( "xx", 0, programScope, StringType )
-        xxMethod.addScope( new BlockScope( 0, xxMethod, programScope ) )
-        xxMethod.blockScope.incStatement( )
-
-        programScope.addScope( "xx", xxMethod )
-
-        //define find method
-        val findMethod = new MethodScope( "find", 4, programScope, StringType )
-        findMethod.incStatement( )
-        findMethod.addScope( new BlockScope( 0, findMethod, programScope ) )
-        findMethod.blockScope.incStatement( 4 )
-
-        findMethod.addScope( "name", new FieldScope( 0, "name", StringType, findMethod, programScope ) )
-
-        findMethod.blockScope.addScope( "age",
-            new FieldScope( 0, "age", IntType, findMethod.blockScope, programScope ) )
-        findMethod.blockScope.addScope( "address",
-            new FieldScope( 2, "address", StringType, findMethod.blockScope, programScope ) )
-
-        //forStatement block
-        val findMethodBlock_1 = new ForStatementBlockScope( 1,
-            MutableMap( "i" → new FieldScope( 0, "i", IntType, findMethodBlock_1, programScope ) ),
-            findMethod.blockScope, programScope )
-        findMethodBlock_1.incStatement( 6 )
-
-        val findMethodBlock_11 = new ForStatementBlockScope( 3, MutableMap( "k" →
-          new FieldScope( 0, "k", IntType, findMethodBlock_11, programScope ) ),
-            findMethodBlock_1, programScope )
-        findMethodBlock_11.incStatement( 4 )
-
-        findMethodBlock_11.addScope( "t",
-            new FieldScope( 3, "t", IntType, findMethodBlock_11, programScope ) )
-        findMethodBlock_1.addScope( findMethodBlock_11 )
-
-        findMethodBlock_1.addScope( "j",
-            new FieldScope( 4, "j", IntType, findMethodBlock_1, programScope ) )
-        findMethod.blockScope.addScope( findMethodBlock_1 )
+    //define field age and address
+    studentClazz.addScope("age", new FieldScope(0, "age", IntType, studentClazz, programScope))
+    studentClazz.addScope("address", new FieldScope(0, "address", StringType, studentClazz, programScope))
 
 
-        programScope.addScope( "find", findMethod )
+    val studentFormatMethod = new MethodScope("format", 2, studentClazz, StringType)
+    studentFormatMethod.incStatement()
+    studentFormatMethod.addScope("sep",
+      new FieldScope(0, "sep", StringType, studentFormatMethod, programScope))
 
-        assert( symbolDefParser.programScope == programScope )
-    }
+
+    studentFormatMethod.addScope(new BlockScope(0, studentFormatMethod, studentClazz))
+    studentFormatMethod.blockScope.incStatement(3)
+
+    studentFormatMethod.blockScope.addScope("add",
+      new FieldScope(0, "add", IntType, studentFormatMethod.blockScope, programScope))
+
+    val studentFormatMethodBlock_1 = new BlockScope(1, studentFormatMethod.blockScope, studentClazz)
+    studentFormatMethodBlock_1.incStatement(4)
+    studentFormatMethodBlock_1.addScope("sep", new FieldScope(0, "sep", IntType, studentFormatMethodBlock_1, programScope))
+    studentFormatMethodBlock_1.addScope("i", new FieldScope(2, "i", IntType, studentFormatMethodBlock_1, programScope))
+
+    studentFormatMethod.blockScope.addScope(studentFormatMethodBlock_1)
+
+    studentClazz.addScope("format", studentFormatMethod)
+
+    programScope.addScope("Student", studentClazz)
+
+    //define find method
+    val findMethod = new MethodScope("find", 4, programScope, StringType)
+    findMethod.incStatement()
+    findMethod.addScope(new BlockScope(0, findMethod, programScope))
+    findMethod.blockScope.incStatement(4)
+
+    //define field name
+    findMethod.addScope("name", new FieldScope(0, "name", StringType, findMethod, programScope))
+
+    //define field age
+    findMethod.blockScope.addScope("age",
+      new FieldScope(0, "age", IntType, findMethod.blockScope, programScope))
+
+    //forStatement block Int i=0;i<100;i=i+1...
+    val findMethodBlock_1 = new ForStatementBlockScope(1,
+      MutableMap("i" → new FieldScope(0, "i", IntType, findMethodBlock_1, programScope)),
+      findMethod.blockScope, programScope)
+    findMethodBlock_1.incStatement(6)
+
+    //forStatement block Int k=0;i<10;k=k+i...
+    val findMethodBlock_11 = new ForStatementBlockScope(3, MutableMap("k" →
+      new FieldScope(0, "k", IntType, findMethodBlock_11, programScope)),
+      findMethodBlock_1, programScope)
+    findMethodBlock_11.incStatement(4)
+
+    findMethodBlock_11.addScope("t",
+      new FieldScope(3, "t", IntType, findMethodBlock_11, programScope))
+    findMethodBlock_1.addScope(findMethodBlock_11)
+
+    findMethodBlock_1.addScope("j",
+      new FieldScope(4, "j", IntType, findMethodBlock_1, programScope))
+    findMethod.blockScope.addScope(findMethodBlock_1)
+
+
+    //define field address
+    findMethod.blockScope.addScope("address",
+      new FieldScope(2, "address", StringType, findMethod.blockScope, programScope))
+    programScope.addScope("find", findMethod)
+
+    assert(symbolDefParser.programScope == programScope)
+  }
 }

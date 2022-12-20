@@ -20,6 +20,7 @@
         <scalatest.version>3.3.0-SNAP3</scalatest.version>
         <scala.version>2.12.15</scala.version>
         <commons.lang3.version>3.10</commons.lang3.version>
+        <config.version>1.4.2</config.version>
     </properties>
 
     <build>
@@ -93,6 +94,12 @@
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>janino</artifactId>
                 <version>${janino.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.typesafe</groupId>
+                <artifactId>config</artifactId>
+                <version>${config.version}</version>
             </dependency>
 
             <dependency>

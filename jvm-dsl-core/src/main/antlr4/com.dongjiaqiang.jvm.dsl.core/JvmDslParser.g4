@@ -26,8 +26,8 @@ block   :   LBRACE  blockStatements?    RBRACE
 blockStatements :   blockStatement+
                 ;
 
-blockStatement  :   varDef  SEMI
-                |   statement
+blockStatement  :   varDef  SEMI  # VarDefExpr
+                |   statement # StatementExpr
                 ;
 
 statement   :   doWhileStatement # DoWhileExpr
