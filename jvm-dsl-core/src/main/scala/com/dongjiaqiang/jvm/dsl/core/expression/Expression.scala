@@ -246,7 +246,7 @@ class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) 
 
 //try statement
 class TryBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
-class CatchCondition(val expression: Expression) extends Expression
+class CatchParameter(val expression: LocalVarDef) extends Expression
 class CatchBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 

@@ -303,9 +303,9 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
         if (parseContext.get() == ContextType.TRY) {
           parseContext.mayNextRule[ParameterContext]
             .foreach(p ⇒ {
-              updateExpression(_ ⇒ {
-                LocalVarDef(p.localVariable().IDENTIFIER().getText,
-                  DslType.unapply(p.`type`()), None)
+               updateExpression(_ ⇒ {
+                new CatchParameter(LocalVarDef(p.localVariable().IDENTIFIER().getText,
+                  DslType.unapply(p.`type`()), None))
               })
             })
         }

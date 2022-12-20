@@ -129,8 +129,7 @@ class BlockStack{
  *
  */
 
-class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( ),
-                      val config: SymbolParserConfig) extends JvmDslParserBaseListener {
+class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) extends JvmDslParserBaseListener {
 
   var currentMethodScope: MethodScope = _
   var stack: BlockStack = new BlockStack( )
