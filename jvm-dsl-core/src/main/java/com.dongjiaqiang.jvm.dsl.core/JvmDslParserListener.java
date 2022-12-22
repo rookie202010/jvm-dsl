@@ -48,35 +48,62 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	 */
 	void exitBlock(JvmDslParserParser.BlockContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#blockStatements}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlockStatements(JvmDslParserParser.BlockStatementsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#blockStatements}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlockStatements(JvmDslParserParser.BlockStatementsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#blockStatement}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlockStatement(JvmDslParserParser.BlockStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#blockStatement}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlockStatement(JvmDslParserParser.BlockStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code DoWhileExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterDoWhileExpr(JvmDslParserParser.DoWhileExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code DoWhileExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
+     * Enter a parse tree produced by {@link JvmDslParserParser#blockStatements}.
+     * @param ctx the parse tree
+     */
+    void enterBlockStatements(JvmDslParserParser.BlockStatementsContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#blockStatements}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitBlockStatements(JvmDslParserParser.BlockStatementsContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code VarDefExpr}
+     * labeled alternative in {@link JvmDslParserParser#blockStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterVarDefExpr(JvmDslParserParser.VarDefExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code VarDefExpr}
+     * labeled alternative in {@link JvmDslParserParser#blockStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitVarDefExpr(JvmDslParserParser.VarDefExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code StatementExpr}
+     * labeled alternative in {@link JvmDslParserParser#blockStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterStatementExpr(JvmDslParserParser.StatementExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code StatementExpr}
+     * labeled alternative in {@link JvmDslParserParser#blockStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitStatementExpr(JvmDslParserParser.StatementExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code DoWhileExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterDoWhileExpr(JvmDslParserParser.DoWhileExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code DoWhileExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     * @param ctx the parse tree
 	 */
 	void exitDoWhileExpr(JvmDslParserParser.DoWhileExprContext ctx);
 	/**
@@ -202,30 +229,37 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	/**
 	 * Enter a parse tree produced by the {@code BlockExpr}
 	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlockExpr(JvmDslParserParser.BlockExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code BlockExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlockExpr(JvmDslParserParser.BlockExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code SemiExor}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterSemiExor(JvmDslParserParser.SemiExorContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code SemiExor}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitSemiExor(JvmDslParserParser.SemiExorContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#synchronizedStatement}.
-	 * @param ctx the parse tree
+     * @param ctx the parse tree
+     */
+    void enterBlockExpr(JvmDslParserParser.BlockExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code BlockExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitBlockExpr(JvmDslParserParser.BlockExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code SemiExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterSemiExpr(JvmDslParserParser.SemiExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code SemiExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitSemiExpr(JvmDslParserParser.SemiExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#synchronizedStatement}.
+     * @param ctx the parse tree
 	 */
 	void enterSynchronizedStatement(JvmDslParserParser.SynchronizedStatementContext ctx);
 	/**
@@ -255,20 +289,25 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	void exitBreakStatement(JvmDslParserParser.BreakStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link JvmDslParserParser#continueStatement}.
-	 * @param ctx the parse tree
-	 */
-	void enterContinueStatement(JvmDslParserParser.ContinueStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#continueStatement}.
-	 * @param ctx the parse tree
-	 */
-	void exitContinueStatement(JvmDslParserParser.ContinueStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#importClazzStatement}.
-	 * @param ctx the parse tree
-	 */
-	void enterImportClazzStatement(JvmDslParserParser.ImportClazzStatementContext ctx);
-	/**
+     * @param ctx the parse tree
+     */
+    void enterContinueStatement(JvmDslParserParser.ContinueStatementContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#continueStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitContinueStatement(JvmDslParserParser.ContinueStatementContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#importClazzStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterImportClazzStatement(JvmDslParserParser.ImportClazzStatementContext ctx);
+
+    /**
      * Exit a parse tree produced by {@link JvmDslParserParser#importClazzStatement}.
      *
      * @param ctx the parse tree
@@ -295,13 +334,16 @@ public interface JvmDslParserListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void enterAssertStatement(JvmDslParserParser.AssertStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#assertStatement}.
-	 * @param ctx the parse tree
-	 */
-	void exitAssertStatement(JvmDslParserParser.AssertStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#tryStatement}.
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#assertStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitAssertStatement(JvmDslParserParser.AssertStatementContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#tryStatement}.
 	 * @param ctx the parse tree
 	 */
 	void enterTryStatement(JvmDslParserParser.TryStatementContext ctx);
@@ -1803,24 +1845,30 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	void enterLocalVariable(JvmDslParserParser.LocalVariableContext ctx);
 	/**
 	 * Exit a parse tree produced by {@link JvmDslParserParser#localVariable}.
-	 * @param ctx the parse tree
-	 */
-	void exitLocalVariable(JvmDslParserParser.LocalVariableContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#variable}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariable(JvmDslParserParser.VariableContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#variable}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariable(JvmDslParserParser.VariableContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#importClazz}.
-	 * @param ctx the parse tree
-	 */
-	void enterImportClazz(JvmDslParserParser.ImportClazzContext ctx);
+     * @param ctx the parse tree
+     */
+    void exitLocalVariable(JvmDslParserParser.LocalVariableContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#variable}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterVariable(JvmDslParserParser.VariableContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#variable}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitVariable(JvmDslParserParser.VariableContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#importClazz}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterImportClazz(JvmDslParserParser.ImportClazzContext ctx);
 
     /**
      * Exit a parse tree produced by {@link JvmDslParserParser#importClazz}.
@@ -1863,8 +1911,9 @@ public interface JvmDslParserListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void enterParameters(JvmDslParserParser.ParametersContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#parameters}.
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#parameters}.
 	 * @param ctx the parse tree
 	 */
 	void exitParameters(JvmDslParserParser.ParametersContext ctx);

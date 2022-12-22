@@ -42,10 +42,10 @@ statement   :   doWhileStatement # DoWhileExpr
             |   tryStatement # TryExpr
             |   assertStatement # AssertExpr
             |   block # BlockExpr
-            |   SEMI # SemiExor
+            |   SEMI # SemiExpr
             ;
 
-synchronizedStatement   :   SYNCHRONIZED    LPAREN  expression  RPAREN  block
+synchronizedStatement   :   SYNCHRONIZED    LPAREN  conditionalOrExpression  RPAREN  block
                         ;
 
 throwReturnOrSideEffectStatement  :   (THROW | RETURN)? expression  SEMI
@@ -79,13 +79,10 @@ doWhileStatement :   DO
                 block
                 WHILE LPAREN conditionalOrExpression RPAREN;
 //for statement
-forStatement :   FOR LPAREN  varDef   SEMI    conditionalOrExpression   SEMI   assignment RPAREN
-            block # ForStatementOne
-        |   FOR LPAREN  varDef   COLON   literalAndCallChain RPAREN
-            block # ForStatementTwo
-        |   FOR LPAREN  varDef   COMMA   varDef   COLON   literalAndCallChain RPAREN
-            block # ForStatementThree
-        ;
+forStatement :   FOR LPAREN  varDef   SEMI    conditionalOrExpression   SEMI   assignment RPAREN block # ForStatementOne
+             |   FOR LPAREN  varDef   COLON   literalAndCallChain RPAREN block # ForStatementTwo
+             |   FOR LPAREN  varDef   COMMA   varDef   COLON   literalAndCallChain RPAREN block # ForStatementThree
+             ;
 
 ifStatement  :    IF LPAREN conditionalOrExpression RPAREN
              block
@@ -99,9 +96,9 @@ expression  :   lambdaExpression
 
 assignment  :  (    variable    |   arrayVariable | mapVariable  )   assignOperator  expression;
 
-arrayVariable: variable LBRACK expression  RBRACK;
+arrayVariable: variable LBRACK conditionalOrExpression  RBRACK;
 
-mapVariable: variable LPAREN expression RPAREN;
+mapVariable: variable LPAREN conditionalOrExpression RPAREN;
 
 assignOperator :   ASSIGN  |   ADD_ASSIGN  |   SUB_ASSIGN  |   MUL_ASSIGN  |   DIV_ASSIGN  |   AND_ASSIGN  |   OR_ASSIGN   |   XOR_ASSIGN  |   MOD_ASSIGN  |   LSHIFT_ASSIGN   |   RSHIFT_ASSIGN   |   URSHIFT_ASSIGN;
 
@@ -254,7 +251,7 @@ types:  LPAREN  type    (COMMA  type)+ RPAREN;
 
 clazzType   :   IDENTIFIER;
 
-varDef   :   type localVariable    (   ASSIGN (    conditionalOrExpression | lambdaExpression  )  )?;
+varDef   :   type localVariable    (   ASSIGN expression  )?;
 
 //Class Declare ex. class Foo(Int a,String b),  class Foo[T,K](T t,K k)
 classDef    :   CLASS IDENTIFIER  parameters
