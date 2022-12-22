@@ -1,11 +1,12 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.{ExpressionContext ⇒ ExprContext}
-import com.dongjiaqiang.jvm.dsl.core.expression.Expression
+import com.dongjiaqiang.jvm.dsl.core.expression.{Block, Expression}
 import com.dongjiaqiang.jvm.dsl.core.scope.Scope
 import org.antlr.v4.runtime.RuleContext
+import java.util.{LinkedList ⇒ Stack}
 
-case class ExpressionContext(currentExpressionIndex:Int, contextScope:Scope, topScope:Scope)
+case class ExpressionContext(currentExpressionIndex:Int, contextScope:Scope, topScope:Scope,lambdaBlockStack:Stack[Block])
 trait IExpressionGenerator[T<:RuleContext,R<:Expression] {
     def generate(expressionContext:ExpressionContext,
                  ruleContext: T):R

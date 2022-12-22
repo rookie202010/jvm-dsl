@@ -125,8 +125,8 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   var currentBlock: Block = _
   var blockStack: Stack[Block] = new Stack[Block]( )
 
-  //lambda expression
-  var lambdaContext: Boolean = false
+  //lambda block
+  val lambdaBlockStack:Stack[Block] = new Stack[Block]()
 
   override def enterProgram(ctx: JvmDslParserParser.ProgramContext): Unit = {
     program = Program( programScope, MutableMap( ), MutableMap( ) )
@@ -509,11 +509,6 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
     updateExpression( c ⇒ {
       VariableGenerator.generate( c, ctx.varDef( ).expression( ) )
     } )
-  }
-
-  //lambda expression
-  override def enterParamsLambdaExpr(ctx: ParamsLambdaExprContext): Unit = {
-    lambdaContext = true
   }
 
 
