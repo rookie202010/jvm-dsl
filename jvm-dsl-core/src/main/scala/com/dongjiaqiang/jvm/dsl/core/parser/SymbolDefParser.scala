@@ -2,7 +2,6 @@ package com.dongjiaqiang.jvm.dsl.core.parser
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.ForStatementContext
 import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.core.config.SymbolParserConfig
 import com.dongjiaqiang.jvm.dsl.core.scope._
 import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserBaseListener, JvmDslParserParser}
 
@@ -208,11 +207,6 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
   override def enterBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
-    //ignore lambda field define in program
-    if (currentMethodScope == null) {
-      return
-    }
-
     if (stack.empty( )) {
       stack.push( currentMethodScope.blockScope )
     } else {
