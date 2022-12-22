@@ -46,7 +46,6 @@ SET:                'Set';
 MAP:                'Map';
 OPTION:             'Option';
 FUTURE:             'Future';
-ASYNC:              'async';
 
 //Literal
 INT_LITERAL :   DIGIT+ ;

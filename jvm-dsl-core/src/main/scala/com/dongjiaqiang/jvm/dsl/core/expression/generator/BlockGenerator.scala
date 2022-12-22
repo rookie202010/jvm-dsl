@@ -5,7 +5,9 @@ import com.dongjiaqiang.jvm.dsl.core.expression.Block
 
 object BlockGenerator extends IExpressionGenerator[BlockContext, Block] {
   override def generate(expressionContext: ExpressionContext, ruleContext: BlockContext): Block = {
-    new Block( )
+    val block = new Block( )
+    expressionContext.lambdaBlockStack.push(block)
+    block
   }
 }
 

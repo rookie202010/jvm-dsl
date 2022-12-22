@@ -1,6 +1,6 @@
 grammar JvmDslParser;
 
-//import JvmDslLexer;
+import JvmDslLexer;
 
 //@header {package com.dongjiaqiang.jvm.dsl.core;}
 
@@ -21,6 +21,9 @@ importDeppendency   :   importClazzStatement
                         usingPackageStatement   ;
 
 block   :   LBRACE  blockStatements?    RBRACE
+        ;
+
+lambdaBlock   :   LBRACE  blockStatements?    RBRACE
         ;
 
 blockStatements :   blockStatement+
@@ -90,6 +93,7 @@ ifStatement  :    IF LPAREN conditionalOrExpression RPAREN
              (  ELSE    block   )   ?  ;
 
 expression  :   lambdaExpression
+            |   blockExpression
             |   conditionalOrExpression
             ;
 
@@ -205,20 +209,38 @@ unaryExpression   :   literalAndCallChain # LiteralAndFuncCallExpr
                 |   LPAREN unaryExpression RPAREN # ParenExpr
                 ;
 
-lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    ARROW  block # ParamsLambdaExpr
-                    |   LPAREN RPAREN    ARROW   block # NoParamLambdaExpr
-                    |   localVariable ARROW     block  # OneParamLambdaExpr
+lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    ARROW  lambdaBlock # ParamsLambdaExpr
+                    |   LPAREN RPAREN    ARROW   lambdaBlock # NoParamLambdaExpr
+                    |   localVariable ARROW     lambdaBlock  # OneParamLambdaExpr
                     |   localVariable   ARROW   LBRACE
-                        (CASE caseExpression ARROW     block)+
-                        (DEFAULT ARROW  block)?
+                        (CASE caseExpression ARROW     lambdaBlock)+
+                        (DEFAULT ARROW  lambdaBlock)?
                         RBRACE  # MatchCaseExpr
                     ;
 
-caseExpression : literal  |   unapplyExpression;
+caseExpression :   baseLiteral
+        |   unapplyClazzExpression
+        |   localVariable
+        |   unapplyListExpression
+        |   unapplySetExpression
+        |   unapplyMapExpression
+        |   unapplyTupleExpression
+        ;
 
-unapplyExpression   :   clazzType   LPAREN  literal (COMMA literal)* RPAREN
+unapplyListExpression:    |   LBRACK caseExpression   (COMMA    caseExpression    )* RBRACK
+                |   LBRACK RBRACK ;
+unapplyClazzExpression   :   clazzType   LPAREN  caseExpression (COMMA caseExpression)* RPAREN
                     |   clazzType
                     ;
+unapplySetExpression :   LBRACE  caseExpression   (COMMA    caseExpression    )* RBRACE
+           |   LBRACE   RBRACE;
+
+unapplyMapExpression :   LBRACE (   caseExpression    )    COLON    (   caseExpression   )
+    (COMMA    (  caseExpression    )    COLON (  caseExpression  )   )*  RBRACE
+    |   LBRACE RBRACE ;
+
+unapplyTupleExpression   :   LPAREN caseExpression  (COMMA    caseExpression)+    RPAREN ;
+
 
 //Type  ex. Int,    Float,  Char,   Set[Int]
 type    :   INT #   IntType
@@ -289,7 +311,6 @@ literal :   baseLiteral
         |   setLiteral
         |   mapLiteral
         |   tupleLiteral
-        |   asyncLiteral
         ;
 
 baseLiteral :   numberLiteral
@@ -308,7 +329,10 @@ numberLiteral   :   INT_LITERAL
 listLiteral:    |   LBRACK literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACK
                 |   LBRACK RBRACK ;
 
-asyncLiteral:   |   ASYNC   (LPAREN  variable  RPAREN)? block;
+blockExpression:    |   IDENTIFIER (LPAREN  variable  RPAREN)? lambdaBlock;
+//asyncExpression:   |   ASYNC   (LPAREN  variable  RPAREN)? lambdaBlock;
+//tryExpression:  | TRYEXPR lambdaBlock;
+
 
 //set literal   ex. (), (1,3,2)
 setLiteral :   LBRACE  literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACE
