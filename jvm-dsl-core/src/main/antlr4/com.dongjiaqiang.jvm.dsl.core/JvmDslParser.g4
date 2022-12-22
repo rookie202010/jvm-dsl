@@ -273,7 +273,7 @@ types:  LPAREN  type    (COMMA  type)+ RPAREN;
 
 clazzType   :   IDENTIFIER;
 
-varDef   :   type localVariable    (   ASSIGN expression  )?;
+varDef   :   parameter    (   ASSIGN expression  )?;
 
 //Class Declare ex. class Foo(Int a,String b),  class Foo[T,K](T t,K k)
 classDef    :   CLASS IDENTIFIER  parameters
@@ -330,8 +330,6 @@ listLiteral:    |   LBRACK literalAndCallChain    (COMMA    literalAndCallChain 
                 |   LBRACK RBRACK ;
 
 blockExpression:    |   IDENTIFIER (LPAREN  variable  RPAREN)? lambdaBlock;
-//asyncExpression:   |   ASYNC   (LPAREN  variable  RPAREN)? lambdaBlock;
-//tryExpression:  | TRYEXPR lambdaBlock;
 
 
 //set literal   ex. (), (1,3,2)
