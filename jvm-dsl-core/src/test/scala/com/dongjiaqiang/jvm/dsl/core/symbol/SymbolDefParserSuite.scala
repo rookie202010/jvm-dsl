@@ -230,14 +230,16 @@ class SymbolDefParserSuite extends AnyFunSuite {
 
     //forStatement block Int i=0;i<100;i=i+1...
     val findMethodBlock_1 = new ForStatementBlockScope(1,
-      MutableMap("i" → new FieldScope(0, "i", IntType, findMethodBlock_1, programScope)),
+      MutableMap(),
       findMethod.blockScope, programScope)
+    findMethodBlock_1.initFields.put("i", new FieldScope(0, "i", IntType, findMethodBlock_1, programScope))
     findMethodBlock_1.incStatement(6)
 
     //forStatement block Int k=0;i<10;k=k+i...
-    val findMethodBlock_11 = new ForStatementBlockScope(3, MutableMap("k" →
-      new FieldScope(0, "k", IntType, findMethodBlock_11, programScope)),
+    val findMethodBlock_11 = new ForStatementBlockScope(3, MutableMap(),
       findMethodBlock_1, programScope)
+    findMethodBlock_11.initFields.put("k",
+      new FieldScope(0, "k", IntType, findMethodBlock_11, programScope))
     findMethodBlock_11.incStatement(4)
 
     findMethodBlock_11.addScope("t",

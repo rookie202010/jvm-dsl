@@ -7,7 +7,8 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
                    val methods: MutableMap[String, MethodScope],
                    val importClasses: ArrayBuffer[String] = ArrayBuffer( ),
                    val importClassesFromPackage: MutableMap[String, String] = MutableMap( ),
-                   val importPackages: MutableMap[String, String] = MutableMap( )
+                   val importPackages: MutableMap[String, String] = MutableMap( ),
+                   val lambdaBlockScope:ArrayBuffer[BlockScope] = ArrayBuffer()
                   ) extends Scope {
 
 

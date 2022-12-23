@@ -26,6 +26,8 @@ block   :   LBRACE  blockStatements?    RBRACE
 lambdaBlock   :   LBRACE  blockStatements?    RBRACE
         ;
 
+matchCaseBlock  :   LBRACE  blockStatements?    RBRACE;
+
 blockStatements :   blockStatement+
                 ;
 
@@ -94,6 +96,7 @@ ifStatement  :    IF LPAREN conditionalOrExpression RPAREN
              (  ELSE    block   )   ?  ;
 
 expression  :   lambdaExpression
+            |   matchCaseExpression
             |   blockExpression
             |   conditionalOrExpression
             ;
@@ -213,11 +216,13 @@ unaryExpression   :   literalAndCallChain # LiteralAndFuncCallExpr
 lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    ARROW  lambdaBlock # ParamsLambdaExpr
                     |   LPAREN RPAREN    ARROW   lambdaBlock # NoParamLambdaExpr
                     |   localVariable ARROW     lambdaBlock  # OneParamLambdaExpr
-                    |   localVariable   ARROW   LBRACE
-                        (CASE caseExpression ARROW     lambdaBlock)+
-                        (DEFAULT ARROW  lambdaBlock)?
-                        RBRACE  # MatchCaseExpr
                     ;
+
+matchCaseExpression :  localVariable   ARROW   LBRACE
+                       (CASE caseExpression ARROW     matchCaseBlock)+
+                       (DEFAULT ARROW  matchCaseBlock)?
+                       RBRACE  # MatchCaseExpr;
+
 
 caseExpression  :   unapplyExpression
                 | typeMatchExpression;
@@ -225,6 +230,7 @@ caseExpression  :   unapplyExpression
 unapplyExpression :   baseLiteral
         |   unapplyClazzExpression
         |   localVariable
+        |   unapplyHeadTailExpression
         |   unapplyListExpression
         |   unapplySetExpression
         |   unapplyMapExpression
@@ -235,6 +241,9 @@ typeMatchExpression :   localVariable ':' type;
 
 unapplyListExpression:    |   LBRACK unapplyExpression   (COMMA    unapplyExpression    )* RBRACK
                 |   LBRACK RBRACK ;
+
+unapplyHeadTailExpression:  |   localVariable ':'   ':' localVariable;
+
 unapplyClazzExpression   :   clazzType   LPAREN  unapplyExpression (COMMA unapplyExpression)* RPAREN
                     |   clazzType
                     ;
