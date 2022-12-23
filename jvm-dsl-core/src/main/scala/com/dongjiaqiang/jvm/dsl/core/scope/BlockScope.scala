@@ -2,16 +2,16 @@ package com.dongjiaqiang.jvm.dsl.core.scope
 
 import com.dongjiaqiang.jvm.dsl.core.scope
 
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
-class BlockScope(val outerScopeIndex:Int, val fields: MutableMap[String, FieldScope],
-                 val parentScope:Scope,
-                 val topScope:Scope,
-                 val childrenScopes:ArrayBuffer[BlockScope]) extends Scope {
+class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldScope],
+                 val parentScope: Scope,
+                 val topScope: Scope,
+                 val lambdaScopes: ArrayBuffer[BlockScope] = ArrayBuffer( ),
+                 val childrenScopes: ArrayBuffer[BlockScope]) extends Scope {
 
   def this(outScopeIndex: Int, parentScope: Scope,topScope:Scope) {
-    this( outScopeIndex, MutableMap( ), parentScope,topScope, ArrayBuffer( ) )
+    this( outScopeIndex, MutableMap( ), parentScope, topScope, childrenScopes = ArrayBuffer( ) )
   }
 
   override def addScope(symbolName: String, fieldScope: FieldScope): BlockScope = {

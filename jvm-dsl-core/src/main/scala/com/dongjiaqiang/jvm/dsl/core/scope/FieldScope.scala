@@ -1,5 +1,5 @@
 package com.dongjiaqiang.jvm.dsl.core.scope
-import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
+import com.dongjiaqiang.jvm.dsl.core.`type`.{AnyType, ClazzType, DslType, UnResolvedType}
 import com.dongjiaqiang.jvm.dsl.core.scope
 
 /**
@@ -105,7 +105,8 @@ class FieldScope(val outerScopeIndex:Int,
         }else {
           dslType match {
             case clazzType: ClazzType ⇒
-              resolve(childRef, clazzType)
+              resolve( childRef, clazzType )
+            case UnResolvedType | AnyType ⇒ Some( this )
             case _ ⇒ None
           }
         }

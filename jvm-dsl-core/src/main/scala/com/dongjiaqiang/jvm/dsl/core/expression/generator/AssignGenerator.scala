@@ -2,23 +2,24 @@ package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 
 object AssignGenerator extends IExpressionGenerator[AssignmentContext,Assign] {
-  override def generate(expressionContext: ExpressionContext, ruleContext: AssignmentContext): Assign = {
+  override def generate(exprContext: ExprContext, ruleContext: AssignmentContext): Assign = {
     if (ruleContext.variable( ) != null) {
-      val variable = VariableGenerator.generate( expressionContext, ruleContext.variable( ) )
-      new Assign( variable, ExpressionGenerator.generate( expressionContext, ruleContext.expression( ) ) )
+      val variable = VarGenerator.generate( exprContext, ruleContext.variable( ) )
+      new Assign( variable, ExpressionGenerator.generate( exprContext, ruleContext.expression( ) ) )
     } else if (ruleContext.arrayVariable( ) != null) {
-      val variable = VariableGenerator.generate( expressionContext, ruleContext.arrayVariable( ).variable( ) )
-      val indexExpr = ExpressionGenerator.generate( expressionContext, ruleContext.arrayVariable( ).expression( ) )
+      val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
+      val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
       new Assign( ArrayVarRef( indexExpr, variable.name, variable.fieldScope ),
-        ExpressionGenerator.generate( expressionContext, ruleContext.expression( ) ) )
+        ExpressionGenerator.generate( exprContext, ruleContext.expression( ) ) )
     } else {
-      val variable = VariableGenerator.generate( expressionContext, ruleContext.mapVariable( ).variable( ) )
-      val indexExpr = ExpressionGenerator.generate( expressionContext, ruleContext.mapVariable( ).expression( ) )
-      new Assign( ArrayVarRef( indexExpr, variable.name, variable.fieldScope ),
-        ExpressionGenerator.generate( expressionContext, ruleContext.expression( ) ) )
+      val variable = VarGenerator.generate( exprContext, ruleContext.mapVariable( ).variable( ) )
+      val indexExpr = OrGenerator.generate( exprContext, ruleContext.mapVariable( ).conditionalOrExpression( ) )
+      new Assign( MapVarRef( indexExpr, variable.name, variable.fieldScope ),
+        ExpressionGenerator.generate( exprContext, ruleContext.expression( ) ) )
     }
   }
 }

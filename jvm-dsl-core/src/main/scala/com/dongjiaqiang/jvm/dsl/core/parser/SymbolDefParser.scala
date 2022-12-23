@@ -19,23 +19,31 @@ class BlockStack{
     parent
   }
 
-  def poll():Unit= {
-    val current = currentBlockScopes.pollFirst()
-    if(nonEmpty()){
-      val parent = currentBlockScopes.peekFirst()
-      parent.addScope(current)
+  def poll(): Unit = {
+    val current = currentBlockScopes.pollFirst( )
+    if (nonEmpty( )) {
+      val parent = currentBlockScopes.peekFirst( )
+      parent.addScope( current )
     }
   }
 
-  def empty():Boolean={
-      currentBlockScopes.isEmpty
+  def pollLambda(): Unit = {
+    val current = currentBlockScopes.pollFirst( )
+    if (nonEmpty( )) {
+      val parent = currentBlockScopes.peekFirst( )
+      parent.lambdaScopes.append( current )
+    }
   }
 
-  def nonEmpty():Boolean={
-      !empty()
+  def empty(): Boolean = {
+    currentBlockScopes.isEmpty
   }
 
-  def push(blockScope: BlockScope):Unit= {
+  def nonEmpty(): Boolean = {
+    !empty( )
+  }
+
+  def push(blockScope: BlockScope): Unit = {
     currentBlockScopes.addFirst(blockScope)
   }
 
@@ -156,9 +164,9 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
   override def enterFieldDef(ctx: JvmDslParserParser.FieldDefContext): Unit = {
-    val symbolName = ctx.varDef( ).localVariable( ).IDENTIFIER( ).getText
+    val symbolName = ctx.varDef( ).parameter( ).localVariable( ).IDENTIFIER( ).getText
     programScope.addScope( symbolName, new FieldScope( programScope.statements, symbolName,
-      DslType.unapply( ctx.varDef( ).`type`( ) ), programScope, programScope, Option( ctx.VOLATILE( ) ).isDefined ) )
+      DslType.unapply( ctx.varDef( ).parameter( ).`type`( ) ), programScope, programScope, Option( ctx.VOLATILE( ) ).isDefined ) )
     programScope.incStatement( )
   }
 
@@ -220,16 +228,91 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
   override def exitBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
-    stack.poll()
+    stack.poll( )
   }
 
-  override def enterVarDef(ctx: JvmDslParserParser.VarDefContext): Unit = {
-    if (stack.nonEmpty()) {
-      val currentScope = stack.peek()
-      val dslType = DslType.unapply( ctx.`type`( ) )
-      val symbolName = ctx.localVariable( ).IDENTIFIER( ).getText
 
-      if(!ctx.getParent.isInstanceOf[ForStatementContext]) {
+  //start handle lambdaBlock
+  private def enterLambdaExpr(variableList: List[JvmDslParserParser.LocalVariableContext]): Unit = {
+    val parent = stack.peek( )
+    val topScope = Option.apply( currentClazzScope ).getOrElse( programScope )
+    val blockScope = new BlockScope( parent.statements, parent, topScope )
+    variableList.zipWithIndex.foreach {
+      case (lvc, index) ⇒
+        blockScope.addScope( lvc.IDENTIFIER( ).getText,
+          new FieldScope( index, lvc.IDENTIFIER( ).getText, UnResolvedType, blockScope, programScope, false ) )
+    }
+    stack.push( blockScope )
+  }
+
+  override def enterParamsLambdaExpr(ctx: JvmDslParserParser.ParamsLambdaExprContext): Unit = {
+    enterLambdaExpr( ctx.localVariable( ).toList )
+  }
+
+  override def exitParamsLambdaExpr(ctx: JvmDslParserParser.ParamsLambdaExprContext): Unit = {
+    stack.pollLambda( )
+  }
+
+  override def enterNoParamLambdaExpr(ctx: JvmDslParserParser.NoParamLambdaExprContext): Unit = {
+    enterLambdaExpr( List( ) )
+  }
+
+  override def exitNoParamLambdaExpr(ctx: JvmDslParserParser.NoParamLambdaExprContext): Unit = {
+    stack.pollLambda( )
+  }
+
+  override def enterOneParamLambdaExpr(ctx: JvmDslParserParser.OneParamLambdaExprContext): Unit = {
+    enterLambdaExpr( List( ctx.localVariable( ) ) )
+  }
+
+  override def exitOneParamLambdaExpr(ctx: JvmDslParserParser.OneParamLambdaExprContext): Unit = {
+    stack.pollLambda( )
+  }
+
+  override def enterBlockExpression(ctx: JvmDslParserParser.BlockExpressionContext): Unit = {
+    enterLambdaExpr( List( ) )
+  }
+
+  override def exitBlockExpression(ctx: JvmDslParserParser.BlockExpressionContext): Unit = {
+    stack.pollLambda( )
+  }
+
+  override def enterMatchCaseExpr(ctx: JvmDslParserParser.MatchCaseExprContext): Unit = {
+    val parent = stack.peek( )
+    val topScope = Option.apply( currentClazzScope ).getOrElse( programScope )
+
+    if (ctx.DEFAULT( ) != null) {
+
+    } else {
+      ctx.caseExpression( ).zip( ctx.lambdaBlock( ) ).foreach {
+        case (caseExpr, block) ⇒ {
+          if (caseExpr.typeMatchExpression( ) != null) {
+            val blockScope = new BlockScope( parent.statements, parent, topScope )
+            val fieldName = caseExpr.typeMatchExpression( ).localVariable( ).IDENTIFIER( ).getText
+
+            val fieldScope = new FieldScope( 0,
+              fieldName,
+              DslType.unapply( caseExpr.typeMatchExpression( ).`type`( ) ), blockScope, programScope )
+            blockScope.addScope( fieldName, fieldScope )
+          } else {
+
+
+          }
+        }
+      }
+    }
+  }
+
+  //end handle lambda block
+
+
+  override def enterVarDef(ctx: JvmDslParserParser.VarDefContext): Unit = {
+    if (stack.nonEmpty( )) {
+      val currentScope = stack.peek( )
+      val dslType = DslType.unapply( ctx.parameter( ).`type`( ) )
+      val symbolName = ctx.parameter( ).localVariable( ).IDENTIFIER( ).getText
+
+      if (!ctx.getParent.isInstanceOf[ForStatementContext]) {
         currentScope.addScope( symbolName,
           new FieldScope( currentScope.statements, symbolName, dslType, currentScope, programScope, false ) )
         currentScope.incStatement( )
@@ -246,9 +329,9 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
       parent,topScope)
 
     ctxList.foreach( ctx ⇒ {
-      val symbolName = ctx.localVariable( ).IDENTIFIER( ).getText
-      val dslType = DslType.unapply( ctx.`type`( ) )
-      blockScope.addInitScope( symbolName, new FieldScope( 0, symbolName, dslType, blockScope,programScope,false ) )
+      val symbolName = ctx.parameter( ).localVariable( ).IDENTIFIER( ).getText
+      val dslType = DslType.unapply( ctx.parameter( ).`type`( ) )
+      blockScope.addInitScope( symbolName, new FieldScope( 0, symbolName, dslType, blockScope, programScope, false ) )
       blockScope.incStatement( )
     } )
     parent.incStatement( )
