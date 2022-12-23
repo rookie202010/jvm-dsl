@@ -3,34 +3,35 @@ package com.dongjiaqiang.jvm.dsl.core.expression.generator
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionContext,Expression]{
 
-  override def generate(expressionContext:ExpressionContext,
+  override def generate(exprContext: ExprContext,
                         ruleContext: UnaryExpressionContext): Expression = {
     ruleContext match {
       case c: CastExprContext ⇒
         val dslType = DslType.unapply( c.`type`( ) )
-        new Cast( generate( expressionContext, c.unaryExpression( ) ), dslType )
+        new Cast( generate( exprContext, c.unaryExpression( ) ), dslType )
       case c: NegateExprContext ⇒
-        new Negate( generate( expressionContext, c.unaryExpression( ) ) )
+        new Negate( generate( exprContext, c.unaryExpression( ) ) )
       case c: OppositeExprContext ⇒
-        new Opposite( generate( expressionContext, c.unaryExpression( ) ) )
+        new Opposite( generate( exprContext, c.unaryExpression( ) ) )
       case c: ParenExprContext ⇒
-        new Paren( generate( expressionContext, c.unaryExpression( ) ) )
+        new Paren( generate( exprContext, c.unaryExpression( ) ) )
       case c: InstanceofExprContext ⇒
         val dslType = DslType.unapply( c.`type`( ) )
         val expression = if (c.literalAndCallChain( ).callChain( ) != null) {
-          CallChainGenerator.generate( expressionContext, c.literalAndCallChain( ).callChain( ) )
+          CallChainGenerator.generate( exprContext, c.literalAndCallChain( ).callChain( ) )
         } else {
-          LiteralGenerator.generate( expressionContext, c.literalAndCallChain( ).literal( ) )
+          LiteralGenerator.generate( exprContext, c.literalAndCallChain( ).literal( ) )
         }
         new Instanceof( expression, dslType )
       case c: LiteralAndFuncCallExprContext ⇒
         if (c.literalAndCallChain( ).literal( ) != null) {
-          LiteralGenerator.generate( expressionContext, c.literalAndCallChain( ).literal( ) )
+          LiteralGenerator.generate( exprContext, c.literalAndCallChain( ).literal( ) )
         } else {
-          CallChainGenerator.generate( expressionContext, c.literalAndCallChain( ).callChain( ) )
+          CallChainGenerator.generate( exprContext, c.literalAndCallChain( ).callChain( ) )
         }
     }
   }

@@ -51,6 +51,7 @@ statement   :   doWhileStatement # DoWhileExpr
 synchronizedStatement   :   SYNCHRONIZED    LPAREN  conditionalOrExpression  RPAREN  block
                         ;
 
+
 throwReturnOrSideEffectStatement  :   (THROW | RETURN)? expression  SEMI
 
                 ;
@@ -218,7 +219,10 @@ lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    A
                         RBRACE  # MatchCaseExpr
                     ;
 
-caseExpression :   baseLiteral
+caseExpression  :   unapplyExpression
+                | typeMatchExpression;
+
+unapplyExpression :   baseLiteral
         |   unapplyClazzExpression
         |   localVariable
         |   unapplyListExpression
@@ -227,19 +231,21 @@ caseExpression :   baseLiteral
         |   unapplyTupleExpression
         ;
 
-unapplyListExpression:    |   LBRACK caseExpression   (COMMA    caseExpression    )* RBRACK
+typeMatchExpression :   localVariable ':' type;
+
+unapplyListExpression:    |   LBRACK unapplyExpression   (COMMA    unapplyExpression    )* RBRACK
                 |   LBRACK RBRACK ;
-unapplyClazzExpression   :   clazzType   LPAREN  caseExpression (COMMA caseExpression)* RPAREN
+unapplyClazzExpression   :   clazzType   LPAREN  unapplyExpression (COMMA unapplyExpression)* RPAREN
                     |   clazzType
                     ;
-unapplySetExpression :   LBRACE  caseExpression   (COMMA    caseExpression    )* RBRACE
+unapplySetExpression :   LBRACE  unapplyExpression   (COMMA    unapplyExpression    )* RBRACE
            |   LBRACE   RBRACE;
 
-unapplyMapExpression :   LBRACE (   caseExpression    )    COLON    (   caseExpression   )
-    (COMMA    (  caseExpression    )    COLON (  caseExpression  )   )*  RBRACE
+unapplyMapExpression :   LBRACE (   unapplyExpression    )    COLON    (   unapplyExpression   )
+    (COMMA    (  unapplyExpression    )    COLON (  unapplyExpression  )   )*  RBRACE
     |   LBRACE RBRACE ;
 
-unapplyTupleExpression   :   LPAREN caseExpression  (COMMA    caseExpression)+    RPAREN ;
+unapplyTupleExpression   :   LPAREN unapplyExpression  (COMMA    unapplyExpression)+    RPAREN ;
 
 
 //Type  ex. Int,    Float,  Char,   Set[Int]

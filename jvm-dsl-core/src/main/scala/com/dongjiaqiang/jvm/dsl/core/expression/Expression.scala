@@ -9,16 +9,68 @@ sealed trait Expression {
 
 }
 
-//value expression
+//var expression
 
-case class LocalVarDef(name: String, dslType: DslType, assigned: Option[Expression]) extends Expression
+/**
+ * program{
+ * def method()=Unit{
+ *
+ * Int i = foo()*10; //LocalVarDef
+ * Long j; //LocalVarDef
+ * }
+ * }
+ */
+case class LocalVarDef(fieldScope: FieldScope, assigned: Option[Expression]) extends Expression
 
-case class VarRef(name:List[String],fieldScope: FieldScope) extends Expression
-case class ArrayVarRef(indexExpression:Expression,override val name:List[String],override  val fieldScope: FieldScope) extends VarRef(name, fieldScope)
-case class MapVarRef(indexExpression:Expression,override val name:List[String],override  val fieldScope: FieldScope) extends VarRef(name, fieldScope)
+/**
+ * program{
+ * Foo foo = new Foo(a,b);
+ *
+ * def method()=Unit{
+ * Int i = foo()*10; //LocalVarDef
+ * foo.a * 10; // foo.a => VarDef
+ * i*10; // i => VarDef
+ * }
+ * }
+ */
+case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
+
+/**
+ * program{
+ * Array[Foo] fooArray = [new Foo(2,3),new Foo(1,2)];
+ *
+ * def method()=Unit{
+ * Int i =0;
+ * Foo b = fooArray[i];  // fooArray[i] => ArrayVarRef
+ * }
+ *
+ * }
+ */
+case class ArrayVarRef(indexExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+
+/**
+ *
+ * program{
+ * Map[Int,Foo] fooMap = {0:new Foo(2,3),1:new Foo(1,2)};
+ *
+ * def method()=Unit{
+ * Int i =0;
+ * Foo b = fooMap(i);  // fooMap(i) => MapVarRef
+ * }
+ */
+case class MapVarRef(KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+
+
+/**
+ * a=>{
+ * case d:Int=> {}
+ * case d=> {}
+ * }
+ */
+case class MatchVar(name: String, dslType: DslType) extends Expression;
 
 //literal expression
-abstract class Literal[T,D<:DslType](val literal:T) extends Expression{
+abstract class Literal[T, D <: DslType](val literal: T) extends Expression {
     val dslType: D
 }
 
@@ -76,26 +128,27 @@ class ListLiteral(literal:Array[Expression],
                   override val dslType:ListType) extends Literal[Array[Expression],ListType](literal)
 
 class SetLiteral(literal: Array[Expression],
-                 override val dslType: SetType) extends Literal[Array[Expression],SetType](literal)
+                 override val dslType: SetType) extends Literal[Array[Expression], SetType]( literal )
 
 class TupleLiteral(literal: Array[Expression],
-                   override val dslType:TupleType) extends Literal[Array[Expression],TupleType](literal)
+                   override val dslType: TupleType) extends Literal[Array[Expression], TupleType]( literal )
 
-class MapLiteral(literal:Array[(Expression,Expression)],
-                 override val dslType: MapType) extends Literal[Array[(Expression,Expression)],MapType](literal)
+class MapLiteral(literal: Array[(Expression, Expression)],
+                 override val dslType: MapType) extends Literal[Array[(Expression, Expression)], MapType]( literal )
 
-class AsyncLiteral(literal:Block,executor:VarRef,
-                   override val dslType: FutureType) extends Literal[Block,FutureType](literal)
+class Async(body: Block, executor: FieldScope, val dslType: FutureType) extends Expression
+
+class Try(body: Block, val dslType: TryType) extends Expression
 
 //lambda expression
 
-case class Lambda(inputs:Array[String], block: Block) extends Expression
+case class Lambda(inputs: Array[String], block: Block) extends Expression
 
 //match case expression
-case class MatchCase(matched:String,cases:List[(Expression,Block)],default:Option[Block]) extends Expression
+case class MatchCase(matched: String, cases: List[(Expression, Block)], default: Option[Block]) extends Expression
 
 //unapply clazz literal expression
-case class UnapplyClazzLiteral(clazzType: ClazzType,literals:Array[Expression]) extends Expression
+case class UnapplyClazzLiteral(clazzType: ClazzType, literals: Array[Expression]) extends Expression
 
 //assign expression
 class Assign(val varRef: VarRef,val right: Expression) extends Expression
@@ -245,8 +298,10 @@ class IfCondition(val expression: Expression,val first:Boolean) extends Expressi
 class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
 //try statement
-class TryBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
-class CatchParameter(val expression: LocalVarDef) extends Expression
-class CatchBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+class TryBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions )
+
+class CatchParameter(val name: String, val dslType: DslType) extends Expression
+
+class CatchBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions )
 class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 

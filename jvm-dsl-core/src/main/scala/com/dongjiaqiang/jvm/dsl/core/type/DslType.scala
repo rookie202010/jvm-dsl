@@ -87,16 +87,20 @@ object ByteType extends DslType{
 
 }
 
-object BoolType extends DslType{
+object BoolType extends DslType {
   override val name: String = "Bool"
 }
 
-object UnResolvedType extends DslType{
+object UnResolvedType extends DslType {
   override val name: String = "UnResolved"
 }
 
+object AnyType extends DslType {
+  override val name: String = "Any"
+}
+
 //collection type
-class ListType(val valueType:DslType) extends DslType{
+class ListType(val valueType: DslType) extends DslType {
   override val name: String = "List"
 
   override def equals(obj: Any): scala.Boolean =
@@ -161,25 +165,36 @@ class TupleType(val valueTypes:Array[DslType]) extends DslType{
     }
 }
 
-class FutureType(val valueType:DslType) extends DslType{
+class FutureType(val valueType: DslType) extends DslType {
   override val name: String = "Future"
 
   override def equals(obj: Any): scala.Boolean =
-      obj match {
-        case futureType: FutureType⇒
-            valueType==futureType.valueType
-        case _ ⇒ false
-      }
+    obj match {
+      case futureType: FutureType ⇒
+        valueType == futureType.valueType
+      case _ ⇒ false
+    }
 }
 
-class LambdaType(val inputTypes:Array[DslType], val outputTypes:Array[DslType]) extends DslType {
+class TryType(val valueType: DslType) extends DslType {
+  override val name: String = "Try"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case tryType: TryType ⇒
+        valueType == tryType.valueType
+      case _ ⇒ false
+    }
+}
+
+class LambdaType(val inputTypes: Array[DslType], val outputTypes: Array[DslType]) extends DslType {
   override val name: String = "Lambda"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
       case lambdaType: LambdaType ⇒
-        inputTypes.sameElements(lambdaType.inputTypes) &&
-          outputTypes.sameElements(lambdaType.outputTypes)
+        inputTypes.sameElements( lambdaType.inputTypes ) &&
+          outputTypes.sameElements( lambdaType.outputTypes )
       case _ ⇒ false
     }
 }
