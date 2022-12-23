@@ -46,7 +46,7 @@ case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
  *
  * }
  */
-case class ArrayVarRef(indexExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+class ArrayVarRef(indexExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
 
 /**
  *
@@ -58,7 +58,7 @@ case class ArrayVarRef(indexExpression: Expression, override val name: List[Stri
  * Foo b = fooMap(i);  // fooMap(i) => MapVarRef
  * }
  */
-case class MapVarRef(KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+class MapVarRef(KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
 
 
 /**

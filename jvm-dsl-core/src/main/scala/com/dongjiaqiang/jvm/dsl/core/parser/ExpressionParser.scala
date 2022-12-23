@@ -442,9 +442,9 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   override def enterForExpr(ctx: JvmDslParserParser.ForExprContext): Unit = {
     parseContext.set(List(ctx.forStatement()))
     parseContext.set(ctx.forStatement() match {
-      case ForStatementOneContext ⇒ ContextType.FOR_LOOP
-      case ForStatementTwoContext ⇒ ContextType.FOR_LOOP_COLLECTION
-      case ForStatementThreeContext ⇒ ContextType.FOR_LOOP_MAP
+      case _:ForStatementOneContext ⇒ ContextType.FOR_LOOP
+      case _:ForStatementTwoContext ⇒ ContextType.FOR_LOOP_COLLECTION
+      case _:ForStatementThreeContext ⇒ ContextType.FOR_LOOP_MAP
     })
   }
 

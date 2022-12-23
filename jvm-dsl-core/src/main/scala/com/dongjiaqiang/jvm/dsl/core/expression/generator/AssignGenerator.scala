@@ -13,12 +13,12 @@ object AssignGenerator extends IExpressionGenerator[AssignmentContext,Assign] {
     } else if (ruleContext.arrayVariable( ) != null) {
       val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
       val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
-      new Assign( ArrayVarRef( indexExpr, variable.name, variable.fieldScope ),
+      new Assign( new ArrayVarRef( indexExpr, variable.name, variable.fieldScope ),
         ExpressionGenerator.generate( exprContext, ruleContext.expression( ) ) )
     } else {
       val variable = VarGenerator.generate( exprContext, ruleContext.mapVariable( ).variable( ) )
       val indexExpr = OrGenerator.generate( exprContext, ruleContext.mapVariable( ).conditionalOrExpression( ) )
-      new Assign( MapVarRef( indexExpr, variable.name, variable.fieldScope ),
+      new Assign( new MapVarRef( indexExpr, variable.name, variable.fieldScope ),
         ExpressionGenerator.generate( exprContext, ruleContext.expression( ) ) )
     }
   }

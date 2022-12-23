@@ -102,15 +102,6 @@ object MapLiteralGenerator extends IExpressionGenerator[MapLiteralContext,MapLit
   }
 }
 
-object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionContext, Async] {
-  override def generate(exprContext: ExprContext, ruleContext: BlockExpressionContext): Async = {
-    val blockType = ruleContext.IDENTIFIER( ).getText
-    val variable = Option.apply( ruleContext.variable( ) ).map( r ⇒ VariableGenerator.generate( exprContext, r ) )
-    val lambdaBlock = LambdaBlockGenerator.generate( exprContext, ruleContext.lambdaBlock( ) )
-    new Async( lambdaBlock, executor, new FutureType( UnResolvedType ) )
-  }
-}
-
 object BaseLiteralGenerator extends IExpressionGenerator[BaseLiteralContext,Expression] {
   override def generate(exprContext: ExprContext, ruleContext: BaseLiteralContext): Expression = {
     if (ruleContext.numberLiteral( ) != null) {

@@ -11,17 +11,18 @@ object LambdaGenerator extends IExpressionGenerator[LambdaExpressionContext, Exp
 
   def generator(exprContext: ExprContext,
                 c: CaseExpressionContext): Expression = {
-    if (c.baseLiteral( ) != null) {
-      BaseLiteralGenerator.generate( exprContext, c.baseLiteral( ) )
-    } else if (c.localVariable( ) != null) {
-      c.localVariable( ).IDENTIFIER( ).getText
-    } else {
-      val clazzType = new ClazzType( c.unapplyExpression( ).clazzType( ).IDENTIFIER( ).getText,
-        (0 until c.unapplyExpression( ).literal( ).size( )).map( _ ⇒ UnResolvedType ).toArray )
-      val literals = c.unapplyExpression( ).literal( )
-        .map( l ⇒ LiteralGenerator.generate( expressionContext, l ) ).toArray
-      UnapplyClazzLiteral( clazzType, literals )
-    }
+//    if (c != null) {
+//      BaseLiteralGenerator.generate( exprContext, c.baseLiteral( ) )
+//    } else if (c.localVariable( ) != null) {
+//      c.localVariable( ).IDENTIFIER( ).getText
+//    } else {
+//      val clazzType = new ClazzType( c.unapplyExpression( ).clazzType( ).IDENTIFIER( ).getText,
+//        (0 until c.unapplyExpression( ).literal( ).size( )).map( _ ⇒ UnResolvedType ).toArray )
+//      val literals = c.unapplyExpression( ).literal( )
+//        .map( l ⇒ LiteralGenerator.generate( expressionContext, l ) ).toArray
+//      UnapplyClazzLiteral( clazzType, literals )
+//    }
+    null
   }
 
   override def generate(exprContext: ExprContext,
