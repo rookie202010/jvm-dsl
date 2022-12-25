@@ -61,14 +61,6 @@ class ArrayVarRef(indexExpression: Expression, override val name: List[String], 
 class MapVarRef(KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
 
 
-/**
- * a=>{
- * case d:Int=> {}
- * case d=> {}
- * }
- */
-case class MatchVar(name: String, dslType: DslType) extends Expression;
-
 //literal expression
 abstract class Literal[T, D <: DslType](val literal: T) extends Expression {
     val dslType: D
@@ -144,18 +136,54 @@ class Try(body: Block, val dslType: TryType) extends Expression
 
 case class Lambda(inputs: Array[String], block: Block) extends Expression
 
-//match case expression
-case class MatchCase(matched: String, cases: List[(Expression, Block)], default: Option[Block]) extends Expression
 
-//unapply clazz literal expression
-case class UnapplyClazzLiteral(clazzType: ClazzType, literals: Array[Expression]) extends Expression
+/**
+ * a=>{
+ * case d:Int=> {}
+ * }
+ */
+case class MatchType(name: String, dslType: DslType) extends Expression
+
+/**
+ * a=>{
+ * case one:two:tail=>{}
+ * }
+ */
+case class MatchHead(head: Array[String], tail: String) extends Expression
+
+/**
+ * a=>{
+ * case [1,2,b]=>{}
+ * }
+ */
+case class MatchList(expressions: Array[Expression]) extends Expression
+
+/**
+ * a=>{
+ * case (a1,a2,a3)=>{}
+ * }
+ */
+case class MatchTuple(expression: Array[Expression]) extends Expression
+
+case class MatchIdentify(identify: String) extends Expression
+
+/**
+ *
+ * a=>{
+ * case Foo(d,c,b)=>{}
+ * }
+ */
+case class MatchClass(expression: Array[Expression]) extends Expression
+
+//match case expression
+case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default: Option[Block]) extends Expression
 
 //assign expression
-class Assign(val varRef: VarRef,val right: Expression) extends Expression
+class Assign(val varRef: VarRef, val right: Expression) extends Expression
 
 
 //unary expression
-sealed trait UnaryExpression extends Expression{
+sealed trait UnaryExpression extends Expression {
     val child:Expression
 }
 

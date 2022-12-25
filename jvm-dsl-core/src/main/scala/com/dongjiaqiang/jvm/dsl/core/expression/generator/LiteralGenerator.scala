@@ -12,10 +12,11 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext,Expression] 
 
   def expression(exprContext: ExprContext,
                  r: LiteralAndCallChainContext): Expression = {
-    if (r.literal( ) != null) {
-      LiteralGenerator.generate( exprContext, r.literal( ) )
-    } else {
-      CallChainGenerator.generate( exprContext, r.callChain( ) )
+    r match {
+      case c: LiteralExprContext ⇒
+        LiteralGenerator.generate( exprContext, c.literal( ) )
+      case _ ⇒
+        CallChainGenerator.generate( exprContext, r )
     }
   }
 

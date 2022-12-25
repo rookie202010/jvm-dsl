@@ -11,8 +11,10 @@ object ExpressionGenerator extends IExpressionGenerator[ExpressionContext, Expre
       LambdaGenerator.generate( exprContext, ruleContext.lambdaExpression( ) )
     } else if (ruleContext.blockExpression( ) != null) {
       BlockExpressionGenerator.generate( exprContext, ruleContext.blockExpression( ) )
-    } else {
+    } else if (ruleContext.conditionalOrExpression( ) != null) {
       OrGenerator.generate( exprContext, ruleContext.conditionalOrExpression( ) )
+    } else {
+      MatchCaseExpressionGenerator.generate( exprContext, ruleContext.matchCaseExpression( ) )
     }
   }
 }

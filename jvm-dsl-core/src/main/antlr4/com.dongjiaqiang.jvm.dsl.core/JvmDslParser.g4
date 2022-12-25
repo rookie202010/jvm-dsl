@@ -1,6 +1,6 @@
 grammar JvmDslParser;
 
-import JvmDslLexer;
+//import JvmDslLexer;
 
 //@header {package com.dongjiaqiang.jvm.dsl.core;}
 
@@ -221,7 +221,7 @@ lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    A
 matchCaseExpression :  localVariable   ARROW   LBRACE
                        (CASE caseExpression ARROW     matchCaseBlock)+
                        (DEFAULT ARROW  matchCaseBlock)?
-                       RBRACE  # MatchCaseExpr;
+                       RBRACE;
 
 
 caseExpression  :   unapplyExpression
@@ -229,30 +229,22 @@ caseExpression  :   unapplyExpression
 
 unapplyExpression :   baseLiteral
         |   unapplyClazzExpression
-        |   localVariable
-        |   unapplyHeadTailExpression
+        |   matchVariable
+        |   unapplyHeadExpression
         |   unapplyListExpression
-        |   unapplySetExpression
-        |   unapplyMapExpression
         |   unapplyTupleExpression
         ;
 
-typeMatchExpression :   localVariable ':' type;
+matchVariable   :  IDENTIFIER;
+typeMatchExpression :   matchVariable ':' type;
 
 unapplyListExpression:    |   LBRACK unapplyExpression   (COMMA    unapplyExpression    )* RBRACK
-                |   LBRACK RBRACK ;
+                     ;
 
-unapplyHeadTailExpression:  |   localVariable ':'   ':' localVariable;
+unapplyHeadExpression:  |   matchVariable '::' matchVariable   ('::' matchVariable)*;
 
 unapplyClazzExpression   :   clazzType   LPAREN  unapplyExpression (COMMA unapplyExpression)* RPAREN
-                    |   clazzType
                     ;
-unapplySetExpression :   LBRACE  unapplyExpression   (COMMA    unapplyExpression    )* RBRACE
-           |   LBRACE   RBRACE;
-
-unapplyMapExpression :   LBRACE (   unapplyExpression    )    COLON    (   unapplyExpression   )
-    (COMMA    (  unapplyExpression    )    COLON (  unapplyExpression  )   )*  RBRACE
-    |   LBRACE RBRACE ;
 
 unapplyTupleExpression   :   LPAREN unapplyExpression  (COMMA    unapplyExpression)+    RPAREN ;
 
@@ -295,8 +287,8 @@ classDef    :   CLASS IDENTIFIER  parameters
                 LBRACE   funcDef* RBRACE
             ;
 
-//Func Call ex. foo(),  bar.foo(1,2)
-callChain    :   (funcCall|literal)  (DOT    part    )*   ;
+funcCallChain   : funcCall  (DOT    part    )*;
+literalCallChain :  literal (DOT    part)+;
 
 part:   variable   |   funcCall;
 
@@ -314,8 +306,9 @@ funcDef :   DEF   funcName  parameters  ASSIGN type    throwDef?   block;
 fieldDef    :   VOLATILE?   varDef ;
 
 //Literal
-literalAndCallChain :   callChain
-        |   literal
+literalAndCallChain :   funcCallChain   # FuncCallChainExpr
+        |   literalCallChain    #   LiteralCallChainExpr
+        |   literal #   LiteralExpr
         ;
 
 literal :   baseLiteral

@@ -11,16 +11,18 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#program}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitProgram(JvmDslParserParser.ProgramContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#member}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
+     * Visit a parse tree produced by {@link JvmDslParserParser#program}.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitProgram(JvmDslParserParser.ProgramContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#member}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
     T visitMember(JvmDslParserParser.MemberContext ctx);
 
     /**
@@ -46,6 +48,14 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
      * @return the visitor result
      */
     T visitLambdaBlock(JvmDslParserParser.LambdaBlockContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#matchCaseBlock}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitMatchCaseBlock(JvmDslParserParser.MatchCaseBlockContext ctx);
 
     /**
      * Visit a parse tree produced by {@link JvmDslParserParser#blockStatements}.
@@ -94,16 +104,19 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
     /**
      * Visit a parse tree produced by the {@code ForExpr}
      * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitForExpr(JvmDslParserParser.ForExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code IfExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitForExpr(JvmDslParserParser.ForExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code IfExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
 	T visitIfExpr(JvmDslParserParser.IfExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code AssignExpr}
@@ -126,23 +139,29 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitThrowOrSideEffectExpr(JvmDslParserParser.ThrowOrSideEffectExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code BreakExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBreakExpr(JvmDslParserParser.BreakExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ContinueExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitContinueExpr(JvmDslParserParser.ContinueExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code TryExpr}
+
+    /**
+     * Visit a parse tree produced by the {@code BreakExpr}
      * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitBreakExpr(JvmDslParserParser.BreakExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code ContinueExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitContinueExpr(JvmDslParserParser.ContinueExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code TryExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
      * @param ctx the parse tree
      * @return the visitor result
      */
@@ -249,10 +268,11 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 
     /**
      * Visit a parse tree produced by {@link JvmDslParserParser#catcheClause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCatcheClause(JvmDslParserParser.CatcheClauseContext ctx);
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitCatcheClause(JvmDslParserParser.CatcheClauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JvmDslParserParser#whileStatement}.
 	 * @param ctx the parse tree
@@ -747,39 +767,44 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * Visit a parse tree produced by the {@code ParenExpr}
 	 * labeled alternative in {@link JvmDslParserParser#unaryExpression}.
 	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParenExpr(JvmDslParserParser.ParenExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ParamsLambdaExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParamsLambdaExpr(JvmDslParserParser.ParamsLambdaExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code NoParamLambdaExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code OneParamLambdaExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx);
+     * @return the visitor result
+     */
+    T visitParenExpr(JvmDslParserParser.ParenExprContext ctx);
 
     /**
-     * Visit a parse tree produced by the {@code MatchCaseExpr}
+     * Visit a parse tree produced by the {@code ParamsLambdaExpr}
      * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
      *
      * @param ctx the parse tree
      * @return the visitor result
      */
-    T visitMatchCaseExpr(JvmDslParserParser.MatchCaseExprContext ctx);
+    T visitParamsLambdaExpr(JvmDslParserParser.ParamsLambdaExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code NoParamLambdaExpr}
+     * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code OneParamLambdaExpr}
+     * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#matchCaseExpression}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitMatchCaseExpression(JvmDslParserParser.MatchCaseExpressionContext ctx);
 
     /**
      * Visit a parse tree produced by {@link JvmDslParserParser#caseExpression}.
@@ -798,6 +823,14 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
     T visitUnapplyExpression(JvmDslParserParser.UnapplyExpressionContext ctx);
 
     /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#matchVariable}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitMatchVariable(JvmDslParserParser.MatchVariableContext ctx);
+
+    /**
      * Visit a parse tree produced by {@link JvmDslParserParser#typeMatchExpression}.
      *
      * @param ctx the parse tree
@@ -814,6 +847,14 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
     T visitUnapplyListExpression(JvmDslParserParser.UnapplyListExpressionContext ctx);
 
     /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#unapplyHeadExpression}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitUnapplyHeadExpression(JvmDslParserParser.UnapplyHeadExpressionContext ctx);
+
+    /**
      * Visit a parse tree produced by {@link JvmDslParserParser#unapplyClazzExpression}.
      *
      * @param ctx the parse tree
@@ -822,31 +863,13 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
     T visitUnapplyClazzExpression(JvmDslParserParser.UnapplyClazzExpressionContext ctx);
 
     /**
-     * Visit a parse tree produced by {@link JvmDslParserParser#unapplySetExpression}.
-     *
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitUnapplySetExpression(JvmDslParserParser.UnapplySetExpressionContext ctx);
-
-    /**
-     * Visit a parse tree produced by {@link JvmDslParserParser#unapplyMapExpression}.
-     *
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitUnapplyMapExpression(JvmDslParserParser.UnapplyMapExpressionContext ctx);
-
-    /**
      * Visit a parse tree produced by {@link JvmDslParserParser#unapplyTupleExpression}.
-     *
      * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitUnapplyTupleExpression(JvmDslParserParser.UnapplyTupleExpressionContext ctx);
-
-    /**
-     * Visit a parse tree produced by the {@code VoidType}
+	 * @return the visitor result
+	 */
+	T visitUnapplyTupleExpression(JvmDslParserParser.UnapplyTupleExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code VoidType}
 	 * labeled alternative in {@link JvmDslParserParser#type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1007,42 +1030,55 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOptionType(JvmDslParserParser.OptionTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code LambdaOneInMoreOutType}
-	 * labeled alternative in {@link JvmDslParserParser#type}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLambdaOneInMoreOutType(JvmDslParserParser.LambdaOneInMoreOutTypeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#types}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypes(JvmDslParserParser.TypesContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#clazzType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitClazzType(JvmDslParserParser.ClazzTypeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#varDef}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVarDef(JvmDslParserParser.VarDefContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#classDef}.
+     * Visit a parse tree produced by the {@code LambdaOneInMoreOutType}
+     * labeled alternative in {@link JvmDslParserParser#type}.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitLambdaOneInMoreOutType(JvmDslParserParser.LambdaOneInMoreOutTypeContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#types}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitTypes(JvmDslParserParser.TypesContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#clazzType}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitClazzType(JvmDslParserParser.ClazzTypeContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#varDef}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitVarDef(JvmDslParserParser.VarDefContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#classDef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitClassDef(JvmDslParserParser.ClassDefContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#callChain}.
+	 * Visit a parse tree produced by {@link JvmDslParserParser#funcCallChain}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCallChain(JvmDslParserParser.CallChainContext ctx);
+	T visitFuncCallChain(JvmDslParserParser.FuncCallChainContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JvmDslParserParser#literalCallChain}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiteralCallChain(JvmDslParserParser.LiteralCallChainContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JvmDslParserParser#part}.
 	 * @param ctx the parse tree
@@ -1072,45 +1108,76 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	T visitLiteralCallNoArgs(JvmDslParserParser.LiteralCallNoArgsContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code LiteralCallArgs}
-	 * labeled alternative in {@link JvmDslParserParser#funcCall}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLiteralCallArgs(JvmDslParserParser.LiteralCallArgsContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code TypeCallNoArgs}
-	 * labeled alternative in {@link JvmDslParserParser#funcCall}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeCallNoArgs(JvmDslParserParser.TypeCallNoArgsContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code TypeCallArgs}
-	 * labeled alternative in {@link JvmDslParserParser#funcCall}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#funcDef}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFuncDef(JvmDslParserParser.FuncDefContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#fieldDef}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFieldDef(JvmDslParserParser.FieldDefContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#literalAndCallChain}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLiteralAndCallChain(JvmDslParserParser.LiteralAndCallChainContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#literal}.
+     * labeled alternative in {@link JvmDslParserParser#funcCall}.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitLiteralCallArgs(JvmDslParserParser.LiteralCallArgsContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code TypeCallNoArgs}
+     * labeled alternative in {@link JvmDslParserParser#funcCall}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitTypeCallNoArgs(JvmDslParserParser.TypeCallNoArgsContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code TypeCallArgs}
+     * labeled alternative in {@link JvmDslParserParser#funcCall}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#funcDef}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitFuncDef(JvmDslParserParser.FuncDefContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#fieldDef}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitFieldDef(JvmDslParserParser.FieldDefContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code FuncCallChainExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitFuncCallChainExpr(JvmDslParserParser.FuncCallChainExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code LiteralCallChainExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitLiteralCallChainExpr(JvmDslParserParser.LiteralCallChainExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by the {@code LiteralExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitLiteralExpr(JvmDslParserParser.LiteralExprContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#literal}.
+     *
      * @param ctx the parse tree
      * @return the visitor result
      */
@@ -1134,16 +1201,19 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 
     /**
      * Visit a parse tree produced by {@link JvmDslParserParser#listLiteral}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitListLiteral(JvmDslParserParser.ListLiteralContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JvmDslParserParser#blockExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBlockExpression(JvmDslParserParser.BlockExpressionContext ctx);
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitListLiteral(JvmDslParserParser.ListLiteralContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link JvmDslParserParser#blockExpression}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitBlockExpression(JvmDslParserParser.BlockExpressionContext ctx);
 
     /**
      * Visit a parse tree produced by {@link JvmDslParserParser#setLiteral}.
@@ -1208,25 +1278,20 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
      * @return the visitor result
      */
     T visitImportClazz(JvmDslParserParser.ImportClazzContext ctx);
-
-    /**
-     * Visit a parse tree produced by {@link JvmDslParserParser#packagePath}.
-     *
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitPackagePath(JvmDslParserParser.PackagePathContext ctx);
-
-    /**
-     * Visit a parse tree produced by {@link JvmDslParserParser#packageName}.
-     *
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitPackageName(JvmDslParserParser.PackageNameContext ctx);
-
-    /**
-     * Visit a parse tree produced by {@link JvmDslParserParser#parameters}.
+	/**
+	 * Visit a parse tree produced by {@link JvmDslParserParser#packagePath}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackagePath(JvmDslParserParser.PackagePathContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JvmDslParserParser#packageName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackageName(JvmDslParserParser.PackageNameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JvmDslParserParser#parameters}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
