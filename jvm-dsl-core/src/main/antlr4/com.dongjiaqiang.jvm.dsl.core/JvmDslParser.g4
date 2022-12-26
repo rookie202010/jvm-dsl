@@ -218,7 +218,7 @@ lambdaExpression    :   LPAREN localVariable  (COMMA localVariable)* RPAREN    A
                     |   localVariable ARROW     lambdaBlock  # OneParamLambdaExpr
                     ;
 
-matchCaseExpression :  localVariable   ARROW   LBRACE
+matchCaseExpression :  localVariable   MATCH   LBRACE
                        (CASE caseExpression ARROW     matchCaseBlock)+
                        (DEFAULT ARROW  matchCaseBlock)?
                        RBRACE;
