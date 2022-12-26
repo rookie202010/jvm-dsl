@@ -22,7 +22,7 @@ class LambdaSuit extends AnyFunSuite {
       """program {
 
 
-            Int kk= kk=>{
+            Int kk= kk match {
 
                        case 12=>{ return 2;}
                        case (a1,a2,a3)=>{ return a1+a2+a3;}
