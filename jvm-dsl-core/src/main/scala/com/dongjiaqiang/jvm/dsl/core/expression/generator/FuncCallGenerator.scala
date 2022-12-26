@@ -7,7 +7,7 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object CallChainGenerator extends IExpressionGenerator[CallChainContext, Expression] {
+object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContext, Expression] {
 
   def partExpression(partContext: PartContext, expressionContext: ExprContext): Part = {
     if (partContext.variable( ) != null) {
@@ -65,19 +65,22 @@ object CallChainGenerator extends IExpressionGenerator[CallChainContext, Express
 
 
   override def generate(exprContext: ExprContext,
-                        ruleContext: CallChainContext): Expression = {
-    if (ruleContext.literal( ) != null) {
-      val clazzLiteral = ClassLiteralGenerator.generate( exprContext, ruleContext.literal( ).classLiteral( ) )
-      val parts = ruleContext.part( ).map( p ⇒ {
-        partExpression( p, exprContext )
-      } )
-      new LiteralCallChain( clazzLiteral, parts.toList )
-    } else {
-      val funcCall = FuncCall.generate( exprContext, ruleContext.funcCall( ) )
-      val parts = ruleContext.part( ).map( p ⇒ {
-        partExpression( p, exprContext )
-      } )
-      new FuncCallChain( funcCall, parts.toList )
+                        ruleContext: LiteralAndCallChainContext): Expression = {
+    ruleContext match {
+      case c: LiteralExprContext ⇒
+        LiteralGenerator.generate( exprContext, c.literal( ) )
+      case c: LiteralCallChainExprContext ⇒
+        val clazzLiteral = ClassLiteralGenerator.generate( exprContext, c.literalCallChain( ).literal( ).classLiteral( ) )
+        val parts = c.literalCallChain( ).part( ).map( p ⇒ {
+          partExpression( p, exprContext )
+        } )
+        new LiteralCallChain( clazzLiteral, parts.toList )
+      case c: FuncCallChainExprContext ⇒
+        val funcCall = FuncCall.generate( exprContext, c.funcCallChain( ).funcCall( ) )
+        val parts = c.funcCallChain( ).part( ).map( p ⇒ {
+          partExpression( p, exprContext )
+        } )
+        new FuncCallChain( funcCall, parts.toList )
     }
   }
 }

@@ -1,11 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
-import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.{BaseLiteralContext, ForStatementContext, UnapplyExpressionContext}
+import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.ForStatementContext
 import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.core.exception.SymbolParseException
 import com.dongjiaqiang.jvm.dsl.core.scope._
 import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserBaseListener, JvmDslParserParser}
-import org.antlr.v4.runtime.tree.TerminalNode
 
 import java.util.{LinkedList ⇒ Stack}
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -147,9 +145,12 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   var currentClazzScope: ClazzScope = _
 
 
+  var matchCaseParser: MatchCaseParser = _
+
   override def enterProgram(ctx: JvmDslParserParser.ProgramContext): Unit = {
     programScope = new ProgramScope( )
-    stack = new BlockStack(programScope)
+    stack = new BlockStack( programScope )
+    matchCaseParser = new MatchCaseParser( programScope )
   }
 
 
@@ -237,24 +238,30 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
 
-  //start handle lambdaBlock
-  private def enterLambdaExpr(variableList: List[JvmDslParserParser.LocalVariableContext]): Unit = {
-
-    val parent = if(stack.empty()){
+  private def enterContexts[T](contexts: List[T], producer: (T, Int, BlockScope) ⇒ FieldScope): Unit = {
+    val parent = if (stack.empty( )) {
       programScope
-    }else{
+    } else {
       stack.peek( )
     }
 
     val topScope = Option.apply( currentClazzScope ).getOrElse( programScope )
-    val blockScope = new BlockScope( parent.statements-1, parent, topScope )
-    variableList.zipWithIndex.foreach {
-      case (lvc, index) ⇒
-        blockScope.addScope( lvc.IDENTIFIER( ).getText,
-          new FieldScope( index, lvc.IDENTIFIER( ).getText, UnResolvedType, blockScope, programScope, false ) )
+    val blockScope = new BlockScope( parent.statements - 1, parent, topScope )
+    contexts.zipWithIndex.foreach {
+      case (product, index) ⇒
+        val fieldScope = producer.apply( product, index, blockScope )
+        blockScope.addScope( fieldScope.symbolName,
+          fieldScope )
     }
-    blockScope.incStatement(variableList.size)
+    blockScope.incStatement( contexts.size )
     stack.push( blockScope )
+  }
+
+  //start handle lambdaBlock
+  private def enterLambdaExpr(variableList: List[JvmDslParserParser.LocalVariableContext]): Unit = {
+    enterContexts[JvmDslParserParser.LocalVariableContext]( variableList, (variable, index, blockScope) ⇒ {
+      new FieldScope( index, variable.IDENTIFIER( ).getText, UnResolvedType, blockScope, programScope, false )
+    } )
   }
 
   override def enterParamsLambdaExpr(ctx: JvmDslParserParser.ParamsLambdaExprContext): Unit = {
@@ -289,155 +296,18 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
     stack.pollLambda( )
   }
 
-  def resolveVar(uec: UnapplyExpressionContext, mayType: Option[DslType]):Array[(String,DslType)]={
-      def resolveLiteral(blc: BaseLiteralContext, mayType: Option[DslType]):Array[(String,DslType)]={
-            def checkVar(terminalNode:TerminalNode,dslType: DslType,validDslType:DslType): Boolean = {
-              Option.apply(terminalNode) match {
-                case Some(_) ⇒ if (validDslType != dslType) {
-                  //todo
-                  throw SymbolParseException("")
-                } else {
-                  true
-                }
-                case None ⇒ false
-              }
-            }
-            mayType match {
-              case Some(dslType)⇒
-                if(checkVar(blc.BOOL_LITERAL(),BoolType,dslType)){
-                    Array()
-                }else if(checkVar(blc.CHAR_LITERAL(),CharType,dslType)){
-                    Array()
-                }else if(checkVar(blc.STRING_LITERAL(),StringType,dslType)){
-                    Array()
-                }else if(blc.numberLiteral()!=null){
-                  if(checkVar(blc.numberLiteral().INT_LITERAL(),IntType,dslType)){
-                    Array()
-                  }else if(checkVar(blc.numberLiteral().LONG_LITERAL(),LongType,dslType)) {
-                    Array()
-                  }else if(checkVar(blc.numberLiteral().FLOAT_LITERAL(),FloatType,dslType)){
-                    Array()
-                  }else if(checkVar(blc.numberLiteral().DOUBLE_LITERAL(),DoubleType,dslType)){
-                    Array()
-                  }
-                }
-              case None⇒ Array()
-            }
-      }
-      if(uec.baseLiteral()!=null){
-          resolveLiteral(uec.baseLiteral(),mayType)
-      }else if(uec.localVariable()!=null){
-          Array((uec.localVariable().IDENTIFIER().getText,mayType.getOrElse(AnyType)))
-      }else if(uec.unapplyListExpression()!=null){
-          mayType match {
-              case Some(dslType)⇒
-                dslType match {
-                  case listType: ListType ⇒
-                    uec.unapplyListExpression().unapplyExpression().
-                      flatMap(c ⇒ resolveVar(c, Some(listType.valueType))).toArray
-                    //todo
-                  case _ ⇒ throw SymbolParseException("")
-                }
-              case None⇒
-                  uec.unapplyListExpression().unapplyExpression().
-                flatMap(c⇒resolveVar(c,None)).toArray
-          }
-      }else if(uec.unapplySetExpression()!=null){
-
-          mayType match {
-            case Some(dslType)⇒
-                dslType match {
-                  case setType: SetType ⇒
-                      uec.unapplySetExpression().unapplyExpression().
-                        flatMap(c ⇒ resolveVar(c,Some(setType.valueType))).toArray
-                }
-            case None⇒
-                uec.unapplySetExpression().unapplyExpression().
-                flatMap(c⇒resolveVar(c,None)).toArray
-          }
-
-      }else if(uec.unapplyTupleExpression().unapplyExpression()!=null){
-
-          mayType match {
-            case Some(dslType)⇒
-                dslType match {
-                  case tupleType: TupleType⇒
-                      val expressions = uec.unapplyTupleExpression().unapplyExpression()
-                      val types = tupleType.valueTypes
-                      //todo
-                      if(expressions.size()!=types.length){
-                          throw SymbolParseException("")
-                      }else{
-                          expressions.zip(types).flatMap{
-                            case (expression,dslType)⇒
-                                resolveVar(expression,Some(dslType))
-                          }.toArray
-                      }
-                }
-            case None ⇒
-              uec.unapplyTupleExpression().unapplyExpression().
-                flatMap(c⇒resolveVar(c,None)).toArray
-          }
-
-      }else if(uec.unapplyMapExpression().unapplyExpression()!=null){
-
-          mayType match {
-            case Some(dslType)⇒
-                dslType match {
-                  case mapType: MapType⇒
-                      uec.unapplyMapExpression().unapplyExpression().grouped(2).flatMap(kv⇒{
-                          resolveVar(kv.head,Some(mapType.keyType))++resolveVar(kv.last,Some(mapType.valueType))
-                      }).toArray
-                }
-            case None ⇒
-              uec.unapplyMapExpression().unapplyExpression().
-                flatMap(c⇒resolveVar(c,None)).toArray
-          }
-
-      }else{
-        val clazzName = uec.unapplyClazzExpression().clazzType().IDENTIFIER().getText
-        programScope.classes.get(clazzName) match {
-          case None⇒
-            uec.unapplyClazzExpression().unapplyExpression()
-              .flatMap(c⇒resolveVar(c,None)).toArray
-          case Some(scope)⇒
-            val expressions = uec.unapplyClazzExpression().unapplyExpression()
-            val types = scope.fields.map(_._2.dslType).toArray
-            if(expressions.size!=types.length){
-              //todo
-                throw SymbolParseException("")
-            }else{
-                types.zip(expressions).flatMap{
-                  case (dslType,expression)⇒
-                  resolveVar(expression,Some(dslType))
-                }
-            }
-        }
-      }
+  override def enterMatchCaseExpression(ctx: JvmDslParserParser.MatchCaseExpressionContext): Unit = {
+    matchCaseParser.parseMatchCase( ctx )
   }
 
-  override def enterMatchCaseExpr(ctx: JvmDslParserParser.MatchCaseExprContext): Unit = {
-    val parent = stack.peek()
-    val topScope = Option.apply(currentClazzScope).getOrElse(programScope)
+  override def enterMatchCaseBlock(ctx: JvmDslParserParser.MatchCaseBlockContext): Unit = {
+    val vars = matchCaseParser.poll( )
+    enterContexts[(String, DslType)]( vars.toList, (v, _, blockScope) ⇒
+      new FieldScope( 0, v._1, v._2, blockScope, programScope, false ) )
+  }
 
-    if (ctx.DEFAULT() != null) {
-
-    } else {
-      ctx.caseExpression().foreach {
-        caseExpr ⇒
-          val blockScope = new BlockScope(parent.statements-1, parent, topScope)
-          if (caseExpr.typeMatchExpression() != null) {
-            val fieldName = caseExpr.typeMatchExpression().localVariable().IDENTIFIER().getText
-            val fieldScope = new FieldScope(0,
-              fieldName,
-              DslType.unapply(caseExpr.typeMatchExpression().`type`()), blockScope, programScope)
-            blockScope.addScope(fieldName, fieldScope)
-            blockScope.incStatement()
-          } else {
-            resolveVar(caseExpr.unapplyExpression(), None)
-          }
-      }
-    }
+  override def exitMatchCaseBlock(ctx: JvmDslParserParser.MatchCaseBlockContext): Unit = {
+    stack.pollLambda( )
   }
 
   //end handle lambda block

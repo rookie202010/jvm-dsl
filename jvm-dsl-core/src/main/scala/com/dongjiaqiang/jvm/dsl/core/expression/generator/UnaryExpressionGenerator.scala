@@ -21,18 +21,10 @@ object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionCont
         new Paren( generate( exprContext, c.unaryExpression( ) ) )
       case c: InstanceofExprContext ⇒
         val dslType = DslType.unapply( c.`type`( ) )
-        val expression = if (c.literalAndCallChain( ).callChain( ) != null) {
-          CallChainGenerator.generate( exprContext, c.literalAndCallChain( ).callChain( ) )
-        } else {
-          LiteralGenerator.generate( exprContext, c.literalAndCallChain( ).literal( ) )
-        }
-        new Instanceof( expression, dslType )
+        new Instanceof( CallChainGenerator.generate( exprContext, c.literalAndCallChain( ) ),
+          dslType )
       case c: LiteralAndFuncCallExprContext ⇒
-        if (c.literalAndCallChain( ).literal( ) != null) {
-          LiteralGenerator.generate( exprContext, c.literalAndCallChain( ).literal( ) )
-        } else {
-          CallChainGenerator.generate( exprContext, c.literalAndCallChain( ).callChain( ) )
-        }
+        CallChainGenerator.generate( exprContext, c.literalAndCallChain( ) )
     }
   }
 }

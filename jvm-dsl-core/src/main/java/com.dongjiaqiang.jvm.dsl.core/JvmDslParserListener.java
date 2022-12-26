@@ -28,17 +28,21 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	 */
 	void exitMember(JvmDslParserParser.MemberContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#importDeppendency}.
-	 * @param ctx the parse tree
-	 */
-	void enterImportDeppendency(JvmDslParserParser.ImportDeppendencyContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#importDeppendency}.
-	 * @param ctx the parse tree
-	 */
-	void exitImportDeppendency(JvmDslParserParser.ImportDeppendencyContext ctx);
-	/**
+     * Enter a parse tree produced by {@link JvmDslParserParser#importDeppendency}.
+     * @param ctx the parse tree
+     */
+    void enterImportDeppendency(JvmDslParserParser.ImportDeppendencyContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#importDeppendency}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitImportDeppendency(JvmDslParserParser.ImportDeppendencyContext ctx);
+
+    /**
      * Enter a parse tree produced by {@link JvmDslParserParser#block}.
+     *
      * @param ctx the parse tree
      */
     void enterBlock(JvmDslParserParser.BlockContext ctx);
@@ -63,6 +67,20 @@ public interface JvmDslParserListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitLambdaBlock(JvmDslParserParser.LambdaBlockContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#matchCaseBlock}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterMatchCaseBlock(JvmDslParserParser.MatchCaseBlockContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#matchCaseBlock}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitMatchCaseBlock(JvmDslParserParser.MatchCaseBlockContext ctx);
 
     /**
      * Enter a parse tree produced by {@link JvmDslParserParser#blockStatements}.
@@ -136,16 +154,19 @@ public interface JvmDslParserListener extends ParseTreeListener {
 
     /**
      * Exit a parse tree produced by the {@code WhileExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitWhileExpr(JvmDslParserParser.WhileExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ForExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterForExpr(JvmDslParserParser.ForExprContext ctx);
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitWhileExpr(JvmDslParserParser.WhileExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code ForExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterForExpr(JvmDslParserParser.ForExprContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code ForExpr}
 	 * labeled alternative in {@link JvmDslParserParser#statement}.
@@ -218,24 +239,30 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void enterContinueExpr(JvmDslParserParser.ContinueExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ContinueExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitContinueExpr(JvmDslParserParser.ContinueExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code TryExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterTryExpr(JvmDslParserParser.TryExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code TryExpr}
-	 * labeled alternative in {@link JvmDslParserParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitTryExpr(JvmDslParserParser.TryExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code ContinueExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitContinueExpr(JvmDslParserParser.ContinueExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code TryExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterTryExpr(JvmDslParserParser.TryExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code TryExpr}
+     * labeled alternative in {@link JvmDslParserParser#statement}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitTryExpr(JvmDslParserParser.TryExprContext ctx);
 
     /**
      * Enter a parse tree produced by the {@code AssertExpr}
@@ -298,11 +325,13 @@ public interface JvmDslParserListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitSynchronizedStatement(JvmDslParserParser.SynchronizedStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#throwReturnOrSideEffectStatement}.
-	 * @param ctx the parse tree
-	 */
-	void enterThrowReturnOrSideEffectStatement(JvmDslParserParser.ThrowReturnOrSideEffectStatementContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#throwReturnOrSideEffectStatement}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterThrowReturnOrSideEffectStatement(JvmDslParserParser.ThrowReturnOrSideEffectStatementContext ctx);
 
     /**
      * Exit a parse tree produced by {@link JvmDslParserParser#throwReturnOrSideEffectStatement}.
@@ -383,9 +412,10 @@ public interface JvmDslParserListener extends ParseTreeListener {
 
     /**
      * Enter a parse tree produced by {@link JvmDslParserParser#tryStatement}.
+     *
      * @param ctx the parse tree
-	 */
-	void enterTryStatement(JvmDslParserParser.TryStatementContext ctx);
+     */
+    void enterTryStatement(JvmDslParserParser.TryStatementContext ctx);
 	/**
 	 * Exit a parse tree produced by {@link JvmDslParserParser#tryStatement}.
 	 * @param ctx the parse tree
@@ -1273,40 +1303,48 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	void exitParamsLambdaExpr(JvmDslParserParser.ParamsLambdaExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code NoParamLambdaExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code NoParamLambdaExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code OneParamLambdaExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code OneParamLambdaExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code MatchCaseExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterMatchCaseExpr(JvmDslParserParser.MatchCaseExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code MatchCaseExpr}
-	 * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
+     * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
      * @param ctx the parse tree
      */
-    void exitMatchCaseExpr(JvmDslParserParser.MatchCaseExprContext ctx);
+    void enterNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code NoParamLambdaExpr}
+     * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitNoParamLambdaExpr(JvmDslParserParser.NoParamLambdaExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code OneParamLambdaExpr}
+     * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code OneParamLambdaExpr}
+     * labeled alternative in {@link JvmDslParserParser#lambdaExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitOneParamLambdaExpr(JvmDslParserParser.OneParamLambdaExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#matchCaseExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterMatchCaseExpression(JvmDslParserParser.MatchCaseExpressionContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#matchCaseExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitMatchCaseExpression(JvmDslParserParser.MatchCaseExpressionContext ctx);
 
     /**
      * Enter a parse tree produced by {@link JvmDslParserParser#caseExpression}.
@@ -1337,6 +1375,20 @@ public interface JvmDslParserListener extends ParseTreeListener {
     void exitUnapplyExpression(JvmDslParserParser.UnapplyExpressionContext ctx);
 
     /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#matchVariable}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterMatchVariable(JvmDslParserParser.MatchVariableContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#matchVariable}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitMatchVariable(JvmDslParserParser.MatchVariableContext ctx);
+
+    /**
      * Enter a parse tree produced by {@link JvmDslParserParser#typeMatchExpression}.
      *
      * @param ctx the parse tree
@@ -1365,6 +1417,20 @@ public interface JvmDslParserListener extends ParseTreeListener {
     void exitUnapplyListExpression(JvmDslParserParser.UnapplyListExpressionContext ctx);
 
     /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#unapplyHeadExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterUnapplyHeadExpression(JvmDslParserParser.UnapplyHeadExpressionContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#unapplyHeadExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitUnapplyHeadExpression(JvmDslParserParser.UnapplyHeadExpressionContext ctx);
+
+    /**
      * Enter a parse tree produced by {@link JvmDslParserParser#unapplyClazzExpression}.
      *
      * @param ctx the parse tree
@@ -1377,44 +1443,13 @@ public interface JvmDslParserListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitUnapplyClazzExpression(JvmDslParserParser.UnapplyClazzExpressionContext ctx);
-
-    /**
-     * Enter a parse tree produced by {@link JvmDslParserParser#unapplySetExpression}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterUnapplySetExpression(JvmDslParserParser.UnapplySetExpressionContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link JvmDslParserParser#unapplySetExpression}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitUnapplySetExpression(JvmDslParserParser.UnapplySetExpressionContext ctx);
-
-    /**
-     * Enter a parse tree produced by {@link JvmDslParserParser#unapplyMapExpression}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterUnapplyMapExpression(JvmDslParserParser.UnapplyMapExpressionContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link JvmDslParserParser#unapplyMapExpression}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitUnapplyMapExpression(JvmDslParserParser.UnapplyMapExpressionContext ctx);
-
-    /**
-     * Enter a parse tree produced by {@link JvmDslParserParser#unapplyTupleExpression}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterUnapplyTupleExpression(JvmDslParserParser.UnapplyTupleExpressionContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link JvmDslParserParser#unapplyTupleExpression}.
+	/**
+	 * Enter a parse tree produced by {@link JvmDslParserParser#unapplyTupleExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnapplyTupleExpression(JvmDslParserParser.UnapplyTupleExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JvmDslParserParser#unapplyTupleExpression}.
 	 * @param ctx the parse tree
 	 */
 	void exitUnapplyTupleExpression(JvmDslParserParser.UnapplyTupleExpressionContext ctx);
@@ -1711,51 +1746,76 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void enterTypes(JvmDslParserParser.TypesContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#types}.
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#types}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitTypes(JvmDslParserParser.TypesContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#clazzType}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterClazzType(JvmDslParserParser.ClazzTypeContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#clazzType}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitClazzType(JvmDslParserParser.ClazzTypeContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#varDef}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterVarDef(JvmDslParserParser.VarDefContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#varDef}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitVarDef(JvmDslParserParser.VarDefContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#classDef}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterClassDef(JvmDslParserParser.ClassDefContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#classDef}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitClassDef(JvmDslParserParser.ClassDefContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#funcCallChain}.
 	 * @param ctx the parse tree
 	 */
-	void exitTypes(JvmDslParserParser.TypesContext ctx);
+	void enterFuncCallChain(JvmDslParserParser.FuncCallChainContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#clazzType}.
+	 * Exit a parse tree produced by {@link JvmDslParserParser#funcCallChain}.
 	 * @param ctx the parse tree
 	 */
-	void enterClazzType(JvmDslParserParser.ClazzTypeContext ctx);
+	void exitFuncCallChain(JvmDslParserParser.FuncCallChainContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#clazzType}.
+	 * Enter a parse tree produced by {@link JvmDslParserParser#literalCallChain}.
 	 * @param ctx the parse tree
 	 */
-	void exitClazzType(JvmDslParserParser.ClazzTypeContext ctx);
+	void enterLiteralCallChain(JvmDslParserParser.LiteralCallChainContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#varDef}.
+	 * Exit a parse tree produced by {@link JvmDslParserParser#literalCallChain}.
 	 * @param ctx the parse tree
 	 */
-	void enterVarDef(JvmDslParserParser.VarDefContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#varDef}.
-	 * @param ctx the parse tree
-	 */
-	void exitVarDef(JvmDslParserParser.VarDefContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#classDef}.
-	 * @param ctx the parse tree
-	 */
-	void enterClassDef(JvmDslParserParser.ClassDefContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#classDef}.
-	 * @param ctx the parse tree
-	 */
-	void exitClassDef(JvmDslParserParser.ClassDefContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#callChain}.
-	 * @param ctx the parse tree
-	 */
-	void enterCallChain(JvmDslParserParser.CallChainContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#callChain}.
-	 * @param ctx the parse tree
-	 */
-	void exitCallChain(JvmDslParserParser.CallChainContext ctx);
+	void exitLiteralCallChain(JvmDslParserParser.LiteralCallChainContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link JvmDslParserParser#part}.
 	 * @param ctx the parse tree
@@ -1822,85 +1882,135 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	void enterTypeCallNoArgs(JvmDslParserParser.TypeCallNoArgsContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code TypeCallNoArgs}
-	 * labeled alternative in {@link JvmDslParserParser#funcCall}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypeCallNoArgs(JvmDslParserParser.TypeCallNoArgsContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code TypeCallArgs}
-	 * labeled alternative in {@link JvmDslParserParser#funcCall}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code TypeCallArgs}
-	 * labeled alternative in {@link JvmDslParserParser#funcCall}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#funcDef}.
-	 * @param ctx the parse tree
-	 */
-	void enterFuncDef(JvmDslParserParser.FuncDefContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#funcDef}.
-	 * @param ctx the parse tree
-	 */
-	void exitFuncDef(JvmDslParserParser.FuncDefContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#fieldDef}.
-	 * @param ctx the parse tree
-	 */
-	void enterFieldDef(JvmDslParserParser.FieldDefContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#fieldDef}.
-	 * @param ctx the parse tree
-	 */
-	void exitFieldDef(JvmDslParserParser.FieldDefContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#literalAndCallChain}.
-	 * @param ctx the parse tree
-	 */
-	void enterLiteralAndCallChain(JvmDslParserParser.LiteralAndCallChainContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#literalAndCallChain}.
-	 * @param ctx the parse tree
-	 */
-	void exitLiteralAndCallChain(JvmDslParserParser.LiteralAndCallChainContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#literal}.
-	 * @param ctx the parse tree
-	 */
-	void enterLiteral(JvmDslParserParser.LiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#literal}.
-	 * @param ctx the parse tree
-	 */
-	void exitLiteral(JvmDslParserParser.LiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#baseLiteral}.
-	 * @param ctx the parse tree
-	 */
-	void enterBaseLiteral(JvmDslParserParser.BaseLiteralContext ctx);
+     * labeled alternative in {@link JvmDslParserParser#funcCall}.
+     * @param ctx the parse tree
+     */
+    void exitTypeCallNoArgs(JvmDslParserParser.TypeCallNoArgsContext ctx);
 
     /**
-     * Exit a parse tree produced by {@link JvmDslParserParser#baseLiteral}.
+     * Enter a parse tree produced by the {@code TypeCallArgs}
+     * labeled alternative in {@link JvmDslParserParser#funcCall}.
      *
      * @param ctx the parse tree
      */
-    void exitBaseLiteral(JvmDslParserParser.BaseLiteralContext ctx);
+    void enterTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx);
 
     /**
-     * Enter a parse tree produced by {@link JvmDslParserParser#numberLiteral}.
+     * Exit a parse tree produced by the {@code TypeCallArgs}
+     * labeled alternative in {@link JvmDslParserParser#funcCall}.
      *
      * @param ctx the parse tree
      */
-    void enterNumberLiteral(JvmDslParserParser.NumberLiteralContext ctx);
+    void exitTypeCallArgs(JvmDslParserParser.TypeCallArgsContext ctx);
 
     /**
-     * Exit a parse tree produced by {@link JvmDslParserParser#numberLiteral}.
+     * Enter a parse tree produced by {@link JvmDslParserParser#funcDef}.
      *
+     * @param ctx the parse tree
+     */
+    void enterFuncDef(JvmDslParserParser.FuncDefContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#funcDef}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitFuncDef(JvmDslParserParser.FuncDefContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#fieldDef}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterFieldDef(JvmDslParserParser.FieldDefContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#fieldDef}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitFieldDef(JvmDslParserParser.FieldDefContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code FuncCallChainExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterFuncCallChainExpr(JvmDslParserParser.FuncCallChainExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code FuncCallChainExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitFuncCallChainExpr(JvmDslParserParser.FuncCallChainExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code LiteralCallChainExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterLiteralCallChainExpr(JvmDslParserParser.LiteralCallChainExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code LiteralCallChainExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitLiteralCallChainExpr(JvmDslParserParser.LiteralCallChainExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by the {@code LiteralExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterLiteralExpr(JvmDslParserParser.LiteralExprContext ctx);
+
+    /**
+     * Exit a parse tree produced by the {@code LiteralExpr}
+     * labeled alternative in {@link JvmDslParserParser#literalAndCallChain}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitLiteralExpr(JvmDslParserParser.LiteralExprContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#literal}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterLiteral(JvmDslParserParser.LiteralContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#literal}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitLiteral(JvmDslParserParser.LiteralContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#baseLiteral}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterBaseLiteral(JvmDslParserParser.BaseLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JvmDslParserParser#baseLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void exitBaseLiteral(JvmDslParserParser.BaseLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JvmDslParserParser#numberLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumberLiteral(JvmDslParserParser.NumberLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JvmDslParserParser#numberLiteral}.
      * @param ctx the parse tree
      */
     void exitNumberLiteral(JvmDslParserParser.NumberLiteralContext ctx);
@@ -1911,46 +2021,62 @@ public interface JvmDslParserListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void enterListLiteral(JvmDslParserParser.ListLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#listLiteral}.
-	 * @param ctx the parse tree
-	 */
-	void exitListLiteral(JvmDslParserParser.ListLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#blockExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlockExpression(JvmDslParserParser.BlockExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#blockExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlockExpression(JvmDslParserParser.BlockExpressionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#setLiteral}.
-	 * @param ctx the parse tree
-	 */
-	void enterSetLiteral(JvmDslParserParser.SetLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#setLiteral}.
-	 * @param ctx the parse tree
-	 */
-	void exitSetLiteral(JvmDslParserParser.SetLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#optionalLiteral}.
-	 * @param ctx the parse tree
-	 */
-	void enterOptionalLiteral(JvmDslParserParser.OptionalLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JvmDslParserParser#optionalLiteral}.
-	 * @param ctx the parse tree
-	 */
-	void exitOptionalLiteral(JvmDslParserParser.OptionalLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link JvmDslParserParser#mapLiteral}.
-	 * @param ctx the parse tree
-	 */
-	void enterMapLiteral(JvmDslParserParser.MapLiteralContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#listLiteral}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitListLiteral(JvmDslParserParser.ListLiteralContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#blockExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterBlockExpression(JvmDslParserParser.BlockExpressionContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#blockExpression}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitBlockExpression(JvmDslParserParser.BlockExpressionContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#setLiteral}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterSetLiteral(JvmDslParserParser.SetLiteralContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#setLiteral}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitSetLiteral(JvmDslParserParser.SetLiteralContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#optionalLiteral}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterOptionalLiteral(JvmDslParserParser.OptionalLiteralContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link JvmDslParserParser#optionalLiteral}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitOptionalLiteral(JvmDslParserParser.OptionalLiteralContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link JvmDslParserParser#mapLiteral}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterMapLiteral(JvmDslParserParser.MapLiteralContext ctx);
 
     /**
      * Exit a parse tree produced by {@link JvmDslParserParser#mapLiteral}.
@@ -2010,45 +2136,34 @@ public interface JvmDslParserListener extends ParseTreeListener {
 
     /**
      * Exit a parse tree produced by {@link JvmDslParserParser#variable}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitVariable(JvmDslParserParser.VariableContext ctx);
-
-    /**
-     * Enter a parse tree produced by {@link JvmDslParserParser#importClazz}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterImportClazz(JvmDslParserParser.ImportClazzContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link JvmDslParserParser#importClazz}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitImportClazz(JvmDslParserParser.ImportClazzContext ctx);
-
-    /**
-     * Enter a parse tree produced by {@link JvmDslParserParser#packagePath}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterPackagePath(JvmDslParserParser.PackagePathContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link JvmDslParserParser#packagePath}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitPackagePath(JvmDslParserParser.PackagePathContext ctx);
-
-    /**
-     * Enter a parse tree produced by {@link JvmDslParserParser#packageName}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterPackageName(JvmDslParserParser.PackageNameContext ctx);
+	 * @param ctx the parse tree
+	 */
+	void exitVariable(JvmDslParserParser.VariableContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JvmDslParserParser#importClazz}.
+	 * @param ctx the parse tree
+	 */
+	void enterImportClazz(JvmDslParserParser.ImportClazzContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JvmDslParserParser#importClazz}.
+	 * @param ctx the parse tree
+	 */
+	void exitImportClazz(JvmDslParserParser.ImportClazzContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JvmDslParserParser#packagePath}.
+	 * @param ctx the parse tree
+	 */
+	void enterPackagePath(JvmDslParserParser.PackagePathContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JvmDslParserParser#packagePath}.
+	 * @param ctx the parse tree
+	 */
+	void exitPackagePath(JvmDslParserParser.PackagePathContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JvmDslParserParser#packageName}.
+	 * @param ctx the parse tree
+	 */
+	void enterPackageName(JvmDslParserParser.PackageNameContext ctx);
 	/**
 	 * Exit a parse tree produced by {@link JvmDslParserParser#packageName}.
 	 * @param ctx the parse tree

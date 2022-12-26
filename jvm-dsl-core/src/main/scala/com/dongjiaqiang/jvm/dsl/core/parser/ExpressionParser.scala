@@ -141,8 +141,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   var currentBlock: Block = _
   var blockStack: Stack[Block] = new Stack[Block]( )
 
-  //lambda block
-  val lambdaBlockStack:Stack[Block] = new Stack[Block]()
+  var lambdaBlocks: java.util.List[(Scope, Block)] = new java.util.LinkedList[(Scope, Block)]( )
 
   override def enterProgram(ctx: JvmDslParserParser.ProgramContext): Unit = {
 
@@ -211,6 +210,24 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
     currentMethod = null
   }
 
+  override def enterFieldDef(ctx: FieldDefContext): Unit = {
+    val assigned = if (ctx.varDef( ).expression( ) == null) {
+      None
+    } else {
+      Some( if (ctx.varDef( ).expression( ).lambdaExpression( ) != null) {
+        LambdaGenerator.generate( this, ctx.varDef( ).expression( ).lambdaExpression( ) )
+      } else if (ctx.varDef( ).expression( ).conditionalOrExpression( ) != null) {
+        OrGenerator.generate( this, ctx.varDef( ).expression( ).conditionalOrExpression( ) )
+      } else if (ctx.varDef( ).expression( ).blockExpression( ) != null) {
+        BlockExpressionGenerator.generate( this, ctx.varDef( ).expression( ).blockExpression( ) )
+      } else {
+        MatchCaseExpressionGenerator.generate( this, ctx.varDef( ).expression( ).matchCaseExpression( ) )
+      } )
+    }
+    assigned.foreach( expression ⇒ program.assigned.put( ctx.varDef( ).parameter( ).localVariable( ).IDENTIFIER( ).getText
+      , expression ) )
+  }
+
   override def enterBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
     if (currentBlockScope == null) {
 
@@ -246,10 +263,11 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
       }
 
       def getLooped(context: LiteralAndCallChainContext): Expression = {
-        if (context.literal() != null) {
-          LiteralGenerator.generate( this, context.literal( ) )
-        } else {
-          CallChainGenerator.generate( this, context.callChain( ) )
+        context match {
+          case c: LiteralExprContext ⇒
+            LiteralGenerator.generate( this, c.literal( ) )
+          case _ ⇒
+            CallChainGenerator.generate( this, context )
         }
       }
 
@@ -300,26 +318,72 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
           new IfBlock()
         case ContextType.TRY ⇒
           if (parseContext.mayNextRule[String].map(r ⇒ r == "TRY").isDefined) {
-            new TryBlock()
-          } else if (parseContext.mayNextRule[String].map(r ⇒ r == "FINALLY").isDefined) {
-            new FinallyBlock()
+            new TryBlock( )
+          } else if (parseContext.mayNextRule[String].map( r ⇒ r == "FINALLY" ).isDefined) {
+            new FinallyBlock( )
           } else {
-            new CatchBlock()
+            new CatchBlock( )
           }
       }
     }
   }
 
+  override def enterLambdaBlock(ctx: LambdaBlockContext): Unit = {
+    if (currentBlock != null) {
+      blockStack.push( currentBlock )
+      statementIndexStack.push( currentStatementIndex )
+      blockIndexStack.push( currentBlockIndex )
+    }
+
+    currentStatementIndex = 0
+    currentBlockIndex = 0
+    currentBlock = lambdaBlocks.remove( 0 )._2
+
+    currentBlockScope = if (currentBlockScope != null) {
+      currentBlockScope.lambdaScopes.remove( 0 )
+    } else {
+      programScope.lambdaBlockScope.remove( 0 )
+    }
+  }
+
+  override def enterMatchCaseBlock(ctx: MatchCaseBlockContext): Unit = {
+    enterLambdaBlock( null )
+  }
+
+  override def exitLambdaBlock(ctx: LambdaBlockContext): Unit = {
+    currentBlockScope.parentScope match {
+
+      case blockScope: BlockScope ⇒
+
+        currentBlockScope = blockScope
+        currentBlockIndex = blockIndexStack.poll( )
+        currentStatementIndex = statementIndexStack.poll( )
+
+        currentBlock = blockStack.poll( )
+      case _: ProgramScope ⇒
+        blockIndexStack.poll( )
+        statementIndexStack.poll( )
+
+        currentBlockIndex = 0
+        currentStatementIndex = 0
+
+        currentBlockScope = null
+    }
+  }
+
+  override def exitMatchCaseBlock(ctx: MatchCaseBlockContext): Unit = {
+    exitLambdaBlock( null )
+  }
 
   override def exitBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
     currentBlockScope.parentScope match {
       case blockScope: BlockScope ⇒
         currentBlockScope = blockScope
-        currentBlockIndex = blockIndexStack.poll()
-        currentStatementIndex = statementIndexStack.poll()
+        currentBlockIndex = blockIndexStack.poll( )
+        currentStatementIndex = statementIndexStack.poll( )
 
-        val parentBlock = blockStack.poll()
-        parentBlock.expressions.append(currentBlock)
+        val parentBlock = blockStack.poll( )
+        parentBlock.expressions.append( currentBlock )
         currentBlock = parentBlock
 
         if (parseContext.get() == ContextType.IF && !parseContext.empty()) {
@@ -336,7 +400,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
                 new CatchParameter( p.localVariable( ).IDENTIFIER( ).getText,
                   DslType.unapply( p.`type`( ) ) )
               )
-            })
+            } )
         }
 
       case _: MethodScope ⇒
@@ -345,6 +409,10 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
         currentBlockIndex = 0
         currentStatementIndex = 0
+
+        currentBlockScope = null
+
+
     }
   }
 
@@ -551,31 +619,23 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
   override def getTopScope: Scope = Option.apply( currentClazzScope ).getOrElse( programScope )
 
-  override def pushBlock(lambdaBlock: Block): Unit = lambdaBlockStack.push( lambdaBlock )
+  override def pushBlock(lambdaBlock: Block): Unit = {
+    val currentScope = if (currentBlockScope != null) {
+      currentBlockScope
+    } else {
+      programScope
+    }
 
+    if (lambdaBlocks.isEmpty) {
+      lambdaBlocks.add( (currentScope, lambdaBlock) )
+    } else {
+      if (currentScope == lambdaBlocks.get( 0 )._1) {
+        lambdaBlocks.add( (currentScope, lambdaBlock) )
+      } else {
+        lambdaBlocks.add( 0, (currentScope, lambdaBlock) )
+      }
 
-  /**
-   * program{
-   *
-   * def method()=Int{
-   *
-   * func(a=>{
-   * return a+10;
-   * },10)*func(a=>{
-   * return a+20;
-   * ),20);
-   *
-   *
-   *
-   * }
-   *
-   * }
-   *
-   * */
-  override def enterLambdaBlock(ctx: LambdaBlockContext): Unit = {
-    blockStack.push( currentBlock )
-    currentBlock = lambdaBlockStack.poll( )
+    }
   }
-
 
 }

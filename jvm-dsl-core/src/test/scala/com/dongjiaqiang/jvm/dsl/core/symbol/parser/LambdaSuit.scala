@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.symbol.parser
 
-import com.dongjiaqiang.jvm.dsl.core.{JvmDslLexer, JvmDslParserParser}
 import com.dongjiaqiang.jvm.dsl.core.parser.SymbolDefParser
-import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
+import com.dongjiaqiang.jvm.dsl.core.{JvmDslLexer, JvmDslParserParser}
 import org.antlr.v4.runtime.tree.ParseTreeWalker
+import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.StringReader
@@ -20,35 +20,28 @@ class LambdaSuit extends AnyFunSuite {
 
     val input =
       """program {
-            Int i = 10;
-            Int=>Int lambda = i=>{
 
-                while(this.i<100){
-                    Long j = 200;
-                    foo(j);
-                    this.i = this.i-1;
-                }
 
-                return i*2;
-            };
+            Int kk= kk=>{
 
-            (Int,Int)=>Long lambda1 = (i,j)=>{
+                       case 12=>{ return 2;}
+                       case (a1,a2,a3)=>{ return a1+a2+a3;}
+                        case k1::kTail=>{ return 1;}
+                       default=>{
+                         return 2200;
+                       }
+                     };
 
-                (Int,Int)=>Int lambda2 = k=>{
-                  return k+j+i;
-                }
 
-                return lambda2(10);
-            };
         }
         """
-    val jvmDslLexer = new JvmDslLexer(CharStreams.fromReader(new StringReader(input)))
-    val jvmDslParser = new JvmDslParserParser(new CommonTokenStream(jvmDslLexer))
-    val symbolDefParser = new SymbolDefParser()
-    ParseTreeWalker.DEFAULT.walk(symbolDefParser, jvmDslParser.program())
-    assert(symbolDefParser.programScope.fields.isEmpty)
-    assert(symbolDefParser.programScope.classes.isEmpty)
-    assert(symbolDefParser.programScope.methods.isEmpty)
+    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
+    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
+    val symbolDefParser = new SymbolDefParser( )
+    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
+    assert( symbolDefParser.programScope.fields.isEmpty )
+    // assert(symbolDefParser.programScope.classes.isEmpty)
+    //  assert(symbolDefParser.programScope.methods.isEmpty)
 
   }
 

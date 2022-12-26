@@ -1,4 +1,5 @@
 T__0=1
+T__1=2
 PROGRAM=1
 ASSERT=2
 BREAK=3
@@ -100,6 +101,7 @@ LINE_COMMENT=98
 ESC=99
 ID_LETTER=100
 ':'=1
+'::'=2
 'program'=1
 'assert'=2
 'break'=3
