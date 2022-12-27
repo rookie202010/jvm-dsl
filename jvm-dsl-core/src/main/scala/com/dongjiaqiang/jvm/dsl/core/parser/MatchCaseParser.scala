@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser
-import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.UnapplyExpressionContext
+import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.`type`.{DslType, UnResolvedType}
 import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
 
@@ -12,21 +12,17 @@ class MatchCaseParser(val programScope: ProgramScope) {
   private val caseQueue: util.Queue[Array[(String, DslType)]] = new util.LinkedList[Array[(String, DslType)]]( )
 
   private def resolveUnapplyExpression(uec: UnapplyExpressionContext): Array[String] = {
-    if (uec.matchVariable( ) != null) {
-      Array( uec.matchVariable( ).IDENTIFIER( ).getText )
-    } else if (uec.unapplyListExpression( ) != null) {
-      uec.unapplyListExpression( ).unapplyExpression( ).
+    uec match {
+      case c: UnapplyVarExprContext ⇒ Array( c.localVariable( ).IDENTIFIER( ).getText )
+      case c: UnapplyListExprContext ⇒ c.unapplyExpression( ).
         flatMap( resolveUnapplyExpression ).toArray
-    } else if (uec.unapplyTupleExpression( ) != null) {
-      uec.unapplyTupleExpression( ).unapplyExpression( ).
+      case c: UnapplyTupleExprContext ⇒ c.unapplyExpression( ).
         flatMap( resolveUnapplyExpression ).toArray
-    } else if (uec.unapplyClazzExpression( ) != null) {
-      uec.unapplyClazzExpression( ).unapplyExpression( )
+      case c: UnapplyClazzExprContext ⇒ c.unapplyExpression( )
         .flatMap( resolveUnapplyExpression ).toArray
-    } else if (uec.unapplyHeadExpression( ) != null) {
-      uec.unapplyHeadExpression( ).matchVariable( ).map( _.IDENTIFIER( ).getText ).toArray
-    } else {
-      Array( )
+      case c: UnapplyHeadExprContext ⇒ c.unapplyExpression( )
+        .flatMap( resolveUnapplyExpression ).toArray
+      case _ ⇒ Array( )
     }
   }
 
@@ -34,7 +30,7 @@ class MatchCaseParser(val programScope: ProgramScope) {
     ctx.caseExpression( ).foreach {
       caseExpr ⇒
         if (caseExpr.typeMatchExpression( ) != null) {
-          val fieldName = caseExpr.typeMatchExpression( ).matchVariable( ).IDENTIFIER( ).getText
+          val fieldName = caseExpr.typeMatchExpression( ).localVariable( ).IDENTIFIER( ).getText
           val dslType = DslType.unapply( caseExpr.typeMatchExpression( ).`type`( ) )
           caseQueue.add( Array( (fieldName, dslType) ) )
         } else {

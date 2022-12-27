@@ -26,7 +26,7 @@ class LambdaSuit extends AnyFunSuite {
 
                        case 12=>{ return 2;}
                        case (a1,a2,a3)=>{ return a1+a2+a3;}
-                        case k1::kTail=>{ return 1;}
+                 case k1::kTail=>{ return 1;}
                        default=>{
                          return 2200;
                        }

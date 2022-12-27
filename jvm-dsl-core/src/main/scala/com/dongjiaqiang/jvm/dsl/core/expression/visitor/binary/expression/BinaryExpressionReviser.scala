@@ -1,48 +1,95 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression
 
-import com.dongjiaqiang.jvm.dsl.core.expression.{Add, And, BitAnd, BitOr, Caret, Div, Eq, Expression, Ge, Gt, Le, LeftShift, Lt, Mod, Mul, NotEq, Or, RightShift, Sub, UnsignedRightShift}
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.core.expression._
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
-trait BinaryExpressionReviser extends BinaryExpressionVisitor[Expression]{
-  override def visitDiv(div: Div): Expression = div
+trait BinaryExpressionReviser extends BinaryExpressionVisitor[Expression] {
 
-  override def visitMod(mod: Mod): Expression = mod
+  private def revise(binaryExpression: BinaryExpression,
+                     visitor: ExpressionVisitor[Expression],
+                     reviser: (Expression, Expression) ⇒ BinaryExpression): BinaryExpression = {
+    val left = visitor.visit( binaryExpression.left )
+    val right = visitor.visit( binaryExpression.right )
+    if (binaryExpression.left == left && binaryExpression.right == right) {
+      binaryExpression
+    } else {
+      reviser.apply( left, right )
+    }
+  }
 
-  override def visitMul(mul: Mul): Expression = mul
+  override def visit(div: Div, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( div, visitor, (l, r) ⇒ new Div( l, r ) )
+  }
 
-  override def visitAdd(add: Add): Expression = add
+  override def visit(mod: Mod, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( mod, visitor, (l, r) ⇒ new Mod( l, r ) )
+  }
 
-  override def visitSub(sub: Sub): Expression = sub
+  override def visit(mul: Mul, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( mul, visitor, (l, r) ⇒ new Mul( l, r ) )
+  }
 
-  override def visitLeftShift(leftShift: LeftShift): Expression = leftShift
+  override def visit(add: Add, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( add, visitor, (l, r) ⇒ new Add( l, r ) )
+  }
 
-  override def visitRightShift(rightShift: RightShift): Expression = rightShift
+  override def visit(sub: Sub, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( sub, visitor, (l, r) ⇒ new Sub( l, r ) )
+  }
 
-  override def visitUnsignedRightShift(unsignedRightShift: UnsignedRightShift): Expression = unsignedRightShift
+  override def visit(leftShift: LeftShift, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( leftShift, visitor, (l, r) ⇒ new LeftShift( l, r ) )
+  }
 
-  override def visitLt(lt: Lt): Expression = lt
+  override def visit(rightShift: RightShift, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( rightShift, visitor, (l, r) ⇒ new RightShift( l, r ) )
+  }
 
-  override def visitGt(gt: Gt): Expression = gt
+  override def visit(unsignedRightShift: UnsignedRightShift, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( unsignedRightShift, visitor, (l, r) ⇒ new UnsignedRightShift( l, r ) )
+  }
 
-  override def visitLe(le: Le): Expression = le
+  override def visit(lt: Lt, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( lt, visitor, (l, r) ⇒ new Lt( l, r ) )
+  }
 
-  override def visitGe(ge: Ge): Expression = ge
+  override def visit(gt: Gt, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( gt, visitor, (l, r) ⇒ new Gt( l, r ) )
+  }
 
-  override def visitEq(eq: Eq): Expression = eq
+  override def visit(le: Le, visitor: ExpressionVisitor[Expression]): Expression = {
+    new Le( visitor.visit( le.left ), visitor.visit( le.right ) )
+  }
 
-  override def visitNotEq(ne: NotEq): Expression = ne
+  override def visit(ge: Ge, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( ge, visitor, (l, r) ⇒ new Ge( l, r ) )
+  }
 
-  override def visitBitAnd(bitAnd: BitAnd): Expression = bitAnd
+  override def visit(eq: Eq, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( eq, visitor, (l, r) ⇒ new Eq( l, r ) )
+  }
 
-  override def visitCaret(caret: Caret): Expression = caret
+  override def visit(ne: NotEq, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( ne, visitor, (l, r) ⇒ new NotEq( l, r ) )
+  }
 
-  override def visitBitOr(bitOr: BitOr): Expression = bitOr
+  override def visit(bitAnd: BitAnd, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( bitAnd, visitor, (l, r) ⇒ new BitAnd( l, r ) )
+  }
 
-  override def visitAnd(and: And): Expression = and
+  override def visit(caret: Caret, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( caret, visitor, (l, r) ⇒ new Caret( l, r ) )
+  }
 
-  override def visitOr(or: Or): Expression = or
+  override def visit(bitOr: BitOr, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( bitOr, visitor, (l, r) ⇒ new BitOr( l, r ) )
+  }
+
+  override def visit(and: And, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( and, visitor, (l, r) ⇒ new And( l, r ) )
+  }
+
+  override def visit(or: Or, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( or, visitor, (l, r) ⇒ new Or( l, r ) )
+  }
 }

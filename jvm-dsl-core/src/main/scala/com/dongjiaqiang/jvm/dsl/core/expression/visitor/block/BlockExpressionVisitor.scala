@@ -1,36 +1,32 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.block
 
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
 trait BlockExpressionVisitor[T] {
 
-  def visitBlock(block: Block): T
+  def visit(block: Block, visitor: ExpressionVisitor[T]): T
 
-  def visitFor(forExpr: For): T
+  def visit(forExpr: For, visitor: ExpressionVisitor[T]): T
 
-  def visitForCollection(forCollection: ForCollection): T
+  def visit(forCollection: ForCollection, visitor: ExpressionVisitor[T]): T
 
-  def visitForMap(forMap: ForMap): T
+  def visit(forMap: ForMap, visitor: ExpressionVisitor[T]): T
 
-  def visitWhile(whileExpr: While): T
+  def visit(whileExpr: While, visitor: ExpressionVisitor[T]): T
 
-  def visitDoWhile(doWhile: DoWhile): T
+  def visit(doWhile: DoWhile, visitor: ExpressionVisitor[T]): T
 
-  def visitSync(sync: Sync): T
+  def visit(sync: Sync, visitor: ExpressionVisitor[T]): T
 
-  def visitIf(ifExpr: If): T
+  def visit(ifExpr: If, visitor: ExpressionVisitor[T]): T
 
-  def visitTryCatch(tryCatch: TryCatch): T
+  def visit(tryCatch: TryCatch, visitor: ExpressionVisitor[T]): T
 
-  def visitAsync(asyncBlock: Async): T
+  def visit(asyncBlock: Async, visitor: ExpressionVisitor[T]): T
 
-  def visitTry(tryBlock: Try): T
+  def visit(tryBlock: Try, visitor: ExpressionVisitor[T]): T
 
-  def visitMatchCase(matchCase: MatchCase): T
+  def visit(matchCase: MatchCase, visitor: ExpressionVisitor[T]): T
 
 }
