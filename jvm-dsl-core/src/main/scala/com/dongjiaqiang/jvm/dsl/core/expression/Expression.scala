@@ -587,7 +587,7 @@ case class Or(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-class FuncCallChain(val head:FuncCall, val tails:List[Part]) extends Expression
+case class FuncCallChain(head:FuncCall, tails:List[Part]) extends Expression
 
 class LiteralCallChain[T,D<:DslType](val head:Literal[T,D],val tails:List[Part]) extends Expression
 
@@ -639,29 +639,29 @@ class VarName(override val name:String) extends Part
 //func call expression
 trait FuncCall extends Expression {
     val name:String
-    val params:List[Expression]
+    val params:Array[Expression]
 }
 
 //method call expression
 class MethodCall(val methodScope:MethodScope,
                  override val name:String,
-                 override val params:List[Expression]) extends FuncCall with Part
+                 override val params:Array[Expression]) extends FuncCall with Part
 
 
 //static call expression
 class StaticCall(val `type`:DslType,
                  override val name:String,
-                 override val params:List[Expression]) extends FuncCall
+                 override val params:Array[Expression]) extends FuncCall
 
 //literal call expression
 class LiteralCall(val literal: Expression,
                   override val name:String,
-                  override val params:List[Expression]) extends FuncCall
+                  override val params:Array[Expression]) extends FuncCall
 
 //var call expression
 class VarCall(val varRef:VarRef,
               override val name:String,
-              override val params:List[Expression]) extends FuncCall
+              override val params:Array[Expression]) extends FuncCall
 
 
 //block expression
@@ -677,7 +677,6 @@ class VarCall(val varRef:VarRef,
  * }
  * <pre><code>
  */
-
 class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Expression
 
 //for statement expression

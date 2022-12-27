@@ -9,11 +9,7 @@ import com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal.LiteralExpressio
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement.StatementExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression.UnaryExpressionReviser
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
+
 trait ExpressionReviser extends ExpressionVisitor[Expression]
                         with BinaryExpressionReviser
                         with BlockExpressionReviser
@@ -60,7 +56,7 @@ object ExpressionReviser{
   }
 
   def revise[T<:Expression, K<:Expression,RT<:Expression,RK<:Expression](origin: Array[(T,K)],
-                                           visitorT: ExpressionVisitor[Expression],
+                                           visitorT:ExpressionVisitor[Expression],
                                            visitorK:ExpressionVisitor[Expression]): Option[Array[(RT,RK)]] = {
     val revise = origin.map{
       case (t,k)⇒(visitorT.visit(t),visitorK.visit(k))

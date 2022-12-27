@@ -5,7 +5,7 @@ import com.dongjiaqiang.jvm.dsl.core.expression._
 
 trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
   override def visit(block: Block,
-                     visitor: ExpressionVisitor[Expression]): Expression = {
+                     visitor: ExpressionVisitor[Expression]): Block = {
     val expressions = ExpressionReviser.revise[Expression,Expression](block.expressions.toArray,visitor)
     if (expressions.isDefined) {
       val newBlock = new Block()
@@ -25,7 +25,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     if (newLoopVarDef != forExpr.loopVarDef ||
       newLoopVarCondition != forExpr.loopVarCondition ||
       newLoopVarUpdate != forExpr.loopVarUpdate) {
-      For( newLoopVarDef, newLoopVarCondition, newLoopVarUpdate, newBody.asInstanceOf[Block] )
+      For( newLoopVarDef, newLoopVarCondition, newLoopVarUpdate, newBody )
     } else {
       forExpr
     }
@@ -35,7 +35,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
                      visitor: ExpressionVisitor[Expression]): Expression = {
     val newLocalVarDef = visitor.visit( forCollection.localVarDef ).asInstanceOf[LocalVarDef]
     val newLooped = visitor.visit( forCollection.looped )
-    val newBody = visitor.visit(forCollection.body).asInstanceOf[Block]
+    val newBody = visit(forCollection.body,visitor)
     if(newLocalVarDef!=forCollection.localVarDef ||
        newLooped!=forCollection.looped ||
        newBody!=forCollection.body){
@@ -50,7 +50,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
       val newLoopKeyDef = visitor.visit(forMap.loopKeyDef).asInstanceOf[LocalVarDef]
       val newLoopValueDef = visitor.visit(forMap.loopValueDef).asInstanceOf[LocalVarDef]
       val newLooped = visitor.visit(forMap.looped)
-      val newBody = visitor.visit(forMap.body).asInstanceOf[Block]
+      val newBody = visit(forMap.body,visitor)
     if(newLoopKeyDef!=forMap.loopKeyDef ||
        newLoopValueDef!=forMap.loopValueDef ||
        newLooped!=forMap.looped ||
@@ -64,7 +64,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
   override def visit(whileExpr: While,
                      visitor: ExpressionVisitor[Expression]): Expression = {
     val newCondition = visitor.visit(whileExpr.condition)
-    val newBody = visitor.visit(whileExpr.body).asInstanceOf[Block]
+    val newBody = visit(whileExpr.body,visitor)
     if(newCondition!=whileExpr.condition || newBody!=whileExpr.body){
         While(newCondition,newBody)
     }else{
@@ -75,7 +75,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
   override def visit(doWhile: DoWhile,
                      visitor: ExpressionVisitor[Expression]): Expression = {
     val newCondition = visitor.visit(doWhile.condition)
-    val newBody = visitor.visit(doWhile.body).asInstanceOf[Block]
+    val newBody = visit(doWhile.body,visitor)
     if(newCondition!=doWhile.condition || newBody!=doWhile.body){
       DoWhile(newCondition,newBody)
     }else{
@@ -86,7 +86,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
   override def visit(sync: Sync,
                      visitor: ExpressionVisitor[Expression]): Expression = {
     val newCondition = visitor.visit(sync.condition)
-    val newBody = visitor.visit(sync.body).asInstanceOf[Block]
+    val newBody = visit(sync.body,visitor)
     if(newCondition!=sync.condition || newBody!=sync.body){
       Sync(newCondition,newBody)
     }else{
@@ -108,7 +108,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
 
   override def visit(tryCatch: TryCatch,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-      val newTryBlock = visit(tryCatch.tryBlock,visitor).asInstanceOf[Block]
+      val newTryBlock = visit(tryCatch.tryBlock,visitor)
       val reviseFinallyBlock = ExpressionReviser.revise[Expression,Block](tryCatch.finallyBlock,visitor)
 
       val blocks = tryCatch.catches.map(_._2)
@@ -124,7 +124,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
 
   override def visit(asyncBlock: Async,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    val newBody = visit(asyncBlock.body,visitor).asInstanceOf[Block]
+    val newBody = visit(asyncBlock.body,visitor)
     if(newBody!=asyncBlock.body){
       Async(newBody,asyncBlock.executor,asyncBlock.dslType)
     }else{
@@ -134,7 +134,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
 
   override def visit(tryBlock: Try,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    val newBody = visit(tryBlock.body,visitor).asInstanceOf[Block]
+    val newBody = visit(tryBlock.body,visitor)
     if(newBody!=tryBlock.body){
         Try(newBody,tryBlock.dslType)
     }else{

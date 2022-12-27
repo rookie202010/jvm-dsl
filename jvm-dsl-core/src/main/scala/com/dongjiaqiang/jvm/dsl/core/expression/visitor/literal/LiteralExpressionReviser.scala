@@ -4,11 +4,7 @@ import com.dongjiaqiang.jvm.dsl.core.`type`.{DslType, ListType}
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 import com.dongjiaqiang.jvm.dsl.core.expression.{BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, Expression, FloatLiteral, IntLiteral, ListLiteral, LongLiteral, MapLiteral, OptionLiteral, SetLiteral, StringLiteral, TupleLiteral}
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
+
 trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression]{
 
 
@@ -77,21 +73,17 @@ trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression]{
     revise(literal,visitor, expressions⇒new ClazzLiteral(expressions,literal.dslType))
   }
 
-
   override def visit(literal: MapLiteral,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    val expressions = literal.literal
-    if(expressions.map{
-      case (k,v)⇒(visitor.visit(k),visitor.visit(v))
-    }.zip(literal.literal).exists{
-      case (e1,e2) ⇒ e1._1!=e2._1 || e2._2!=e2._2
-    }){
-      new MapLiteral(expressions,literal.dslType)
+
+    val expressions = ExpressionReviser.revise[Expression,Expression,Expression,Expression](literal.literal,visitor,visitor)
+    if(expressions.isDefined){
+      new MapLiteral(expressions.get,literal.dslType)
     }else{
       literal
     }
-  }
 
+  }
 
   override def visit(literal: OptionLiteral,
                      visitor: ExpressionVisitor[Expression]): Expression = {
