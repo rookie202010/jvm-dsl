@@ -30,6 +30,13 @@ trait Scope {
   def resolveVarRefs(index:Int, refs:List[String]):Option[FieldScope]
 
   /**
+   * resolve method in current scope
+   */
+  def resolveMethod(name:String):Option[MethodScope] = {
+    throw new UnsupportedOperationException(s"can not resolve $name in current scope")
+  }
+
+  /**
    * 外部作用域索引值
    *
    * index of outer scope
@@ -103,5 +110,4 @@ trait Scope {
     }
     this
   }
-
 }

@@ -1,32 +1,33 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
 trait LiteralExpressionVisitor[T] {
 
-  def visitInt(literal: IntLiteral): T
+  def visit(literal: IntLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitLong(literal: LongLiteral): T
+  def visit(literal: LongLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitDouble(literal: DoubleLiteral): T
+  def visit(literal: DoubleLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitFloat(literal: FloatLiteral): T
+  def visit(literal: FloatLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitBool(literal: BoolLiteral): T
+  def visit(literal: BoolLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitString(literal: StringLiteral): T
+  def visit(literal: StringLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitChar(literal: CharLiteral): T
+  def visit(literal: CharLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitList(literal: ListLiteral): T
+  def visit(literal: ListLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitMap(literal: MapLiteral): T
+  def visit(literal: MapLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitSet(literal: SetLiteral): T
+  def visit(literal: SetLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitTuple(literal: TupleLiteral): T
+  def visit(literal: TupleLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitClazz(literal: ClazzLiteral): T
+  def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[T]): T
 
-  def visitOption(literal: OptionLiteral): T
+  def visit(literal: OptionLiteral, visitor: ExpressionVisitor[T]): T
 }

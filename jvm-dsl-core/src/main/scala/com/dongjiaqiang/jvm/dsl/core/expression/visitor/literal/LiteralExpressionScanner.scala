@@ -1,30 +1,57 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
 trait LiteralExpressionScanner extends LiteralExpressionVisitor[Unit] {
-  override def visitInt(literal: IntLiteral): Unit = {}
+  override def visit(literal: IntLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitLong(literal: LongLiteral): Unit = {}
+  }
 
-  override def visitDouble(literal: DoubleLiteral): Unit = {}
+  override def visit(literal: LongLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitFloat(literal: FloatLiteral): Unit = {}
+  }
 
-  override def visitBool(literal: BoolLiteral): Unit = {}
+  override def visit(literal: DoubleLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitString(literal: StringLiteral): Unit = {}
+  }
 
-  override def visitChar(literal: CharLiteral): Unit = {}
+  override def visit(literal: FloatLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitList(literal: ListLiteral): Unit = {}
+  }
 
-  override def visitMap(literal: MapLiteral): Unit = {}
+  override def visit(literal: BoolLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitSet(literal: SetLiteral): Unit = {}
+  }
 
-  override def visitTuple(literal: TupleLiteral): Unit = {}
+  override def visit(literal: StringLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitClazz(literal: ClazzLiteral): Unit = {}
+  }
 
-  override def visitOption(literal: OptionLiteral): Unit = {}
+  override def visit(literal: CharLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(literal: ListLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(literal: MapLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(literal: SetLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(literal: TupleLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(literal: OptionLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
 }

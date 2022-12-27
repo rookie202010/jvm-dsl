@@ -27,7 +27,7 @@ object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionCont
         if (fieldScope.isEmpty) {
           throw ExpressionParserException( "Async block must be define variable" )
         } else {
-          new Async( block, fieldScope.get, new FutureType( UnResolvedType ) )
+          Async( block, fieldScope.get, new FutureType( UnResolvedType ) )
         }
       case _ ⇒
         throw ExpressionParserException( "xxx" )

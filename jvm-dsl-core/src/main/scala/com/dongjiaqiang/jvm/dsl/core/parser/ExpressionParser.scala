@@ -2,6 +2,7 @@ package com.dongjiaqiang.jvm.dsl.core.parser
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
+import com.dongjiaqiang.jvm.dsl.core.exception.ExpressionParserException
 import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.generator._
 import com.dongjiaqiang.jvm.dsl.core.program.{Clazz, Method, Program}
@@ -110,6 +111,14 @@ trait ExprContext {
   def getContextScope: BlockScope
 
   def getTopScope: Scope
+
+  def resolveMethod(name:String):MethodScope={
+      getTopScope.resolveMethod(name) match {
+        case Some(scope)⇒scope
+        case None⇒
+          throw ExpressionParserException(s"can not resolve $name in $getTopScope")
+      }
+  }
 
   def pushBlock(lambdaBlock: Block): Unit
 }

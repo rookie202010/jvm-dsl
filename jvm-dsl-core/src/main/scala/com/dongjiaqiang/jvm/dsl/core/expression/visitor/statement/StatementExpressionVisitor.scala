@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
 
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
 /**
  * @author: rookie
@@ -9,16 +10,16 @@ import com.dongjiaqiang.jvm.dsl.core.expression._
  * */
 trait StatementExpressionVisitor[T] {
 
-  def visitAssign(assign: Assign): T
+  def visit(assign: Assign, visitor: ExpressionVisitor[T]): T
 
-  def visitBreak(break: Break.type): T
+  def visit(break: Break.type, visitor: ExpressionVisitor[T]): T
 
-  def visitContinue(continue: Continue.type): T
+  def visit(continue: Continue.type, visitor: ExpressionVisitor[T]): T
 
-  def visitThrow(throwExpr: Throw): T
+  def visit(throwExpr: Throw, visitor: ExpressionVisitor[T]): T
 
-  def visitReturn(returnExpr: Return): T
+  def visit(returnExpr: Return, visitor: ExpressionVisitor[T]): T
 
-  def visitAssert(assert: Assert): T
+  def visit(assert: Assert, visitor: ExpressionVisitor[T]): T
 
 }
