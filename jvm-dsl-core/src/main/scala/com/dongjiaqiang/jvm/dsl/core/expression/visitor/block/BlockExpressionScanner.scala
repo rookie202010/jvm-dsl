@@ -7,7 +7,7 @@ import com.dongjiaqiang.jvm.dsl.core.expression._
 trait BlockExpressionScanner extends BlockExpressionVisitor[Unit] {
 
   override def visit(block: Block, visitor: ExpressionVisitor[Unit]): Unit = {
-    block
+
   }
 
   override def visit(forExpr: For, visitor: ExpressionVisitor[Unit]): Unit = {

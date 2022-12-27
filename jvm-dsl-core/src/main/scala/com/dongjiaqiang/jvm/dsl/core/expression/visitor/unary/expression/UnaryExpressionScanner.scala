@@ -1,4 +1,5 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.{Cast, Instanceof, Negate, Opposite, Paren}
 
 /**
@@ -7,13 +8,23 @@ import com.dongjiaqiang.jvm.dsl.core.expression.{Cast, Instanceof, Negate, Oppos
  * @date: 2022/12/26 
  * */
 trait UnaryExpressionScanner extends UnaryExpressionVisitor[Unit]{
-  override def visitNegate(negate: Negate): Unit = {}
+  override def visit(negate: Negate, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitOpposite(opposite: Opposite): Unit = {}
+  }
 
-  override def visitCast(cast: Cast): Unit = {}
+  override def visit(opposite: Opposite, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitInstanceof(instanceof: Instanceof): Unit = {}
+  }
 
-  override def visitParen(paren: Paren): Unit = {}
+  override def visit(cast: Cast, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(instanceof: Instanceof, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(paren: Paren, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
 }

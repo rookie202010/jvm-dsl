@@ -100,5 +100,4 @@ class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldS
           case _ ⇒  scope.resolveVarRefs(index,refs,this,fields,skipCurrentScope = false,backRef = false,Some(parentScope))
         }
   }
-
 }

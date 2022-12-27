@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression
 
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
 /**
  * @author: rookie
@@ -9,13 +10,13 @@ import com.dongjiaqiang.jvm.dsl.core.expression._
  * */
 trait UnaryExpressionVisitor[T] {
 
-  def visitNegate(negate: Negate): T
+  def visit(negate: Negate, visitor: ExpressionVisitor[T]): T
 
-  def visitOpposite(opposite: Opposite): T
+  def visit(opposite: Opposite, visitor: ExpressionVisitor[T]): T
 
-  def visitCast(cast: Cast): T
+  def visit(cast: Cast, visitor: ExpressionVisitor[T]): T
 
-  def visitInstanceof(instanceof: Instanceof): T
+  def visit(instanceof: Instanceof, visitor: ExpressionVisitor[T]): T
 
-  def visitParen(paren: Paren): T
+  def visit(paren: Paren, visitor: ExpressionVisitor[T]): T
 }

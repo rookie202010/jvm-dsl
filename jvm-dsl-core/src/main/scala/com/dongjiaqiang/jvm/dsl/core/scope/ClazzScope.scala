@@ -69,4 +69,7 @@ class ClazzScope(val outerScopeIndex:Int, val name:String,
       scope.resolveVarRefs(index, refs,this, fields, skipCurrentScope = false, backRef = true, None)
   }
 
+  override def resolveMethod(name: String): Option[MethodScope] = { methods.get(name)}
+
+  override def toString:String = s"ClazzScope($name)"
 }

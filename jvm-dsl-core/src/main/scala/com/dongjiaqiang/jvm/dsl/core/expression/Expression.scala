@@ -2,7 +2,7 @@ package com.dongjiaqiang.jvm.dsl.core.expression
 
 import com.dongjiaqiang.jvm.dsl.core.`type`._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.scope.FieldScope
+import com.dongjiaqiang.jvm.dsl.core.scope.{FieldScope, MethodScope}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -54,7 +54,7 @@ case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
  *
  * }<pre><code>
  */
-class ArrayVarRef(indexExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+class ArrayVarRef(val indexExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
 
 /**
  *<pre><code>
@@ -67,7 +67,7 @@ class ArrayVarRef(indexExpression: Expression, override val name: List[String], 
  *      }
  *}<pre><code>
  */
-class MapVarRef(KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+class MapVarRef(val KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
 
 
 //literal expression
@@ -227,7 +227,7 @@ class MapLiteral(literal: Array[(Expression, Expression)],
  *      }
  *}<pre><code>
  */
-class Async(body: Block, executor: FieldScope, val dslType: FutureType) extends Expression
+case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends Expression
 
 
 //try expression
@@ -242,7 +242,7 @@ class Async(body: Block, executor: FieldScope, val dslType: FutureType) extends 
  *      }
  *}<pre><code>
  */
-class Try(body: Block, val dslType: TryType) extends Expression
+case class Try(body: Block, dslType: TryType) extends Expression
 
 
 //lambda expression
@@ -345,7 +345,7 @@ case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default
  * }
  * <pre><code>
  */
-class Assign(val varRef: VarRef, val right: Expression) extends Expression
+case class Assign(varRef: VarRef, assigned: Expression) extends Expression
 
 
 //unary expression
@@ -366,7 +366,7 @@ sealed trait UnaryExpression extends Expression {
  * }
  * <pre><code>
  */
-class Negate(val child:Expression) extends UnaryExpression
+case class Negate(child:Expression) extends UnaryExpression
 
 /**
  * <pre><code>
@@ -377,7 +377,7 @@ class Negate(val child:Expression) extends UnaryExpression
  * }
  * <pre><code>
  */
-class Opposite(val child: Expression) extends UnaryExpression
+case class Opposite(child: Expression) extends UnaryExpression
 
 /**
  * <pre><code>
@@ -388,7 +388,7 @@ class Opposite(val child: Expression) extends UnaryExpression
  * }
  * <pre><code>
  */
-class Cast(val child: Expression, castType: DslType) extends UnaryExpression
+case class Cast(child: Expression, castType: DslType) extends UnaryExpression
 
 /**
  * <pre><code>
@@ -399,7 +399,7 @@ class Cast(val child: Expression, castType: DslType) extends UnaryExpression
  * }
  * <pre><code>
  */
-class Instanceof(val child: Expression,judgeType: DslType) extends UnaryExpression //a instance Int
+case class Instanceof(child: Expression,judgeType: DslType) extends UnaryExpression //a instance Int
 
 /**
  * <pre><code>
@@ -413,7 +413,7 @@ class Instanceof(val child: Expression,judgeType: DslType) extends UnaryExpressi
  * }
  * <pre><code>
  */
-class Paren(val child:Expression) extends UnaryExpression
+case class Paren(child:Expression) extends UnaryExpression
 
 //binary expression
 sealed trait BinaryExpression extends Expression{
@@ -434,9 +434,9 @@ sealed trait BinaryExpression extends Expression{
  * }
  * <pre><code>
  */
-class Div(val left:Expression, val right:Expression) extends BinaryExpression
-class Mul(val left:Expression, val right:Expression) extends BinaryExpression
-class Mod(val left:Expression, val right:Expression) extends BinaryExpression
+case class Div(left:Expression, right:Expression) extends BinaryExpression
+case class Mul(left:Expression, right:Expression) extends BinaryExpression
+case class Mod(left:Expression, right:Expression) extends BinaryExpression
 
 //additive expression
 
@@ -450,8 +450,8 @@ class Mod(val left:Expression, val right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-class Add(val left:Expression, val right:Expression) extends BinaryExpression
-class Sub(val left:Expression, val right:Expression) extends BinaryExpression
+case class Add(left:Expression, right:Expression) extends BinaryExpression
+case class Sub(left:Expression, right:Expression) extends BinaryExpression
 
 //shit expression
 
@@ -459,16 +459,16 @@ class Sub(val left:Expression, val right:Expression) extends BinaryExpression
  * <pre><code>
  *program{
  *      def method()=Unit{
- *          Int j = 1<<2; // 1<<2 => LeftShit
+ *          Int j = 1&lt;&lt;2; // 1&lt;&lt;2 => LeftShit
  *          Int k = 1>>2; // 1>>2 => RightShift
  *          Int i = 1>>>2; // 1>>>2 => UnsignedRightShift
  *      }
  * }
  * <pre><code>
  */
-class LeftShift(val left:Expression, val right:Expression) extends BinaryExpression
-class RightShift(val left:Expression, val right:Expression) extends BinaryExpression
-class UnsignedRightShift(val left:Expression,val right:Expression) extends BinaryExpression
+case class LeftShift(left:Expression, right:Expression) extends BinaryExpression
+case class RightShift(left:Expression, right:Expression) extends BinaryExpression
+case class UnsignedRightShift(left:Expression,right:Expression) extends BinaryExpression
 
 //relation expression
 
@@ -476,45 +476,117 @@ class UnsignedRightShift(val left:Expression,val right:Expression) extends Binar
  * <pre><code>
  *program{
  *      def method()=Unit{
- *          Bool j = 1<2; // 1<2 => Lt
+ *          Bool j = 1&lt;2; // 1&lt;2 => Lt
  *          Bool k = 1>2; // 1>2 => Gt
- *          Bool i = 1<=2; // 1<=2 => Le
+ *          Bool i = 1&lt;=2; // 1&lt;=2 => Le
  *          Bool z = 1>=2; // 1>=2 => Ge
  *      }
  * }
  * <pre><code>
  */
 
-class Lt(val left:Expression, val right:Expression) extends BinaryExpression
-class Gt(val left:Expression, val right:Expression) extends BinaryExpression
-class Le(val left:Expression, val right:Expression) extends BinaryExpression
-class Ge(val left:Expression, val right:Expression) extends BinaryExpression
+case class Lt(left:Expression, right:Expression) extends BinaryExpression
+case class Gt(left:Expression, right:Expression) extends BinaryExpression
+case class Le(left:Expression, right:Expression) extends BinaryExpression
+case class Ge(left:Expression, right:Expression) extends BinaryExpression
 
 //equality expression
 
+/**
+ * <pre><code>
+ *program{
+ *      def method()=Unit{
+ *          Bool j = 1==2; // 1==2 => Eq
+ *          Bool k = 1!=2; // 1!=2 => NotEq
+ *      }
+ * }
+ * <pre><code>
+ */
 
-class Eq(val left:Expression, val right:Expression) extends BinaryExpression // a==b
-class NotEq(val left:Expression, val right:Expression) extends BinaryExpression // a!=b
+case class Eq(left:Expression, right:Expression) extends BinaryExpression
+case class NotEq(left:Expression, right:Expression) extends BinaryExpression
 
 //bit and expression
-class BitAnd(val left:Expression, val right:Expression) extends BinaryExpression // a & b
+
+/**
+ * <pre><code>
+ *program{
+ *      def method()=Unit{
+ *          Int value = 1 & 2; // 1 & 2 => BitAnd
+ *      }
+ * }
+ * <pre><code>
+ */
+
+case class BitAnd(left:Expression, right:Expression) extends BinaryExpression
 
 //exclusive or expression
-class Caret(val left:Expression, val right:Expression) extends BinaryExpression // a ^ b
+
+/**
+ * <pre><code>
+ *program{
+ *      def method()=Unit{
+ *          Int value = 1 &#94 2; // 1 &#94 2 => BitOr
+ *      }
+ * }
+ * <pre><code>
+ */
+case class Caret(left:Expression, right:Expression) extends BinaryExpression
 
 //inclusive or expression
-class BitOr(val left:Expression, val right:Expression) extends BinaryExpression // a | b
+
+/**
+ * <pre><code>
+ *program{
+ *      def method()=Unit{
+ *          Int value = 1|2; // 1|2 => BitOr
+ *      }
+ * }
+ * <pre><code>
+ */
+case class BitOr(left:Expression, right:Expression) extends BinaryExpression
 
 //and expression
-class And(val left:Expression, val right:Expression) extends BinaryExpression // a && b
+
+/**
+ * <pre><code>
+ *program{
+ *      def method()=Unit{
+ *          bool condition = 1>2 && 2>1; // 1>2 && 2>1 => And
+ *      }
+ * }
+ * <pre><code>
+ */
+case class And(left:Expression, right:Expression) extends BinaryExpression
 
 //or expression
-class Or(val left:Expression, val right:Expression) extends BinaryExpression // a || b
 
+/**
+ * <pre><code>
+ *program{
+ *      def method()=Unit{
+ *          bool condition = 1>2 || 2>1; // 1>2 || 2>1 => Or
+ *      }
+ * }
+ * <pre><code>
+ */
+case class Or(left:Expression, right:Expression) extends BinaryExpression
 
 
 //call chains expression
 
+/**
+ * <pre><code>
+ *program{
+ *      def method()=Unit{
+ *          foo().a.bar(); // foo().a.bar() => MethodCall chain
+ *          a.foo().b.a.bar(); // a.foo().b.a.bar() => VarCall chain
+ *          A.foo().b.bar().a; // A.foo().b.bar().a => StaticCall chain
+ *          "xxx".size(); // "xxx".size() => LiteralCall chain
+ *      }
+ * }
+ * <pre><code>
+ */
 class FuncCallChain(val head:FuncCall, val tails:List[Part]) extends Expression
 
 class LiteralCallChain[T,D<:DslType](val head:Literal[T,D],val tails:List[Part]) extends Expression
@@ -524,6 +596,39 @@ class IntLiteralCallChain(override val head:IntLiteral,override val tails:List[P
 
 class LongLiteralCallChain(override val head:LongLiteral,override val tails:List[Part])
   extends LiteralCallChain[Long,LongType.type ](head, tails)
+
+class FloatLiteralCallChain(override val head:FloatLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Float,FloatType.type ](head, tails)
+
+class DoubleLiteralCallChain(override val head:DoubleLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Double,DoubleType.type ](head, tails)
+
+class StringLiteralCallChain(override val head:StringLiteral,override val tails:List[Part])
+  extends LiteralCallChain[String,StringType.type ](head, tails)
+
+class CharLiteralCallChain(override val head:CharLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Char,CharType.type ](head, tails)
+
+class BoolLiteralCallChain(override val head:BoolLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Boolean,BoolType.type ](head, tails)
+
+class ClazzLiteralCallChain(override val head:ClazzLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Array[Expression],ClazzType](head, tails)
+
+class OptionLiteralCallChain(override val head:OptionLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Expression,OptionType](head, tails)
+
+class ListLiteralCallChain(override val head:ListLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Array[Expression],ListType](head, tails)
+
+class SetLiteralCallChain(override val head:SetLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Array[Expression],SetType](head, tails)
+
+class TupleLiteralCallChain(override val head:TupleLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Array[Expression],TupleType](head, tails)
+
+class MapLiteralCallChain(override val head:MapLiteral,override val tails:List[Part])
+  extends LiteralCallChain[Array[(Expression,Expression)],MapType](head, tails)
 
 trait Part{
     val name:String
@@ -538,7 +643,8 @@ trait FuncCall extends Expression {
 }
 
 //method call expression
-class MethodCall(override val name:String,
+class MethodCall(val methodScope:MethodScope,
+                 override val name:String,
                  override val params:List[Expression]) extends FuncCall with Part
 
 
@@ -593,9 +699,10 @@ class ForLoop(val loopVarDef:LocalVarDef,
               val loopVarUpdate:Expression,
               override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
-class For(val loopVarDef:LocalVarDef,
-          val loopVarCondition:Expression,
-          val loopVarUpdate:Expression,val body:Block) extends Expression
+case class For(loopVarDef:LocalVarDef,
+               loopVarCondition:Expression,
+               loopVarUpdate:Expression,
+               body:Block) extends Expression
 
 /**
  * <pre><code>
@@ -613,8 +720,8 @@ class ForLoopCollection(val localVarDef: LocalVarDef,
                         val looped:Expression,
                         override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
-class ForCollection(val localVarDef: LocalVarDef,
-                    val looped:Expression,val body:Block) extends Expression
+case class ForCollection(localVarDef: LocalVarDef,
+                    looped:Expression,body:Block) extends Expression
 /**
  * <pre><code>
  *program{
@@ -626,14 +733,14 @@ class ForCollection(val localVarDef: LocalVarDef,
  * }
  * <pre><code>
  */
-class ForLoopMap(loopKeyDef:LocalVarDef,
-                 loopValueDef:LocalVarDef,
-                 looped:Expression,
+class ForLoopMap(val loopKeyDef:LocalVarDef,
+                 val loopValueDef:LocalVarDef,
+                 val looped:Expression,
                  override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
-class ForMap(loopKeyDef:LocalVarDef,
+case class ForMap(loopKeyDef:LocalVarDef,
              loopValueDef:LocalVarDef,
-             looped:Expression,val body:Block) extends Expression
+             looped:Expression,body:Block) extends Expression
 
 //while statement expression
 
@@ -656,7 +763,7 @@ class ForMap(loopKeyDef:LocalVarDef,
 class WhileCondition(val expression: Expression) extends Expression
 class WhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions)
 
-class While(condition: Expression, body:Block) extends Expression
+case class While(condition: Expression, body:Block) extends Expression
 
 //do while statement expression
 
@@ -679,7 +786,7 @@ class While(condition: Expression, body:Block) extends Expression
 class DoWhileCondition(val expression: Expression) extends Expression
 class DoWhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions)
 
-class DoWhile(condition:Expression,body:Block) extends Expression
+case class DoWhile(condition:Expression,body:Block) extends Expression
 
 //break statement
 
@@ -733,7 +840,7 @@ object Continue extends Expression
  * <pre><code>
  */
 
-class Throw(val expression: Expression) extends Expression
+case class Throw(expression: Expression) extends Expression
 
 //return statement
 
@@ -747,7 +854,7 @@ class Throw(val expression: Expression) extends Expression
  * <pre><code>
  */
 
-class Return(val expression: Expression) extends Expression
+case class Return(expression: Expression) extends Expression
 
 //assert statement
 
@@ -760,7 +867,7 @@ class Return(val expression: Expression) extends Expression
  * }
  * <pre><code>
  */
-class Assert(val expression: Expression) extends Expression
+case class Assert(expression: Expression) extends Expression
 
 //synchronized statement
 
@@ -779,7 +886,7 @@ class Assert(val expression: Expression) extends Expression
 class SyncCondition(val expression: Expression) extends Expression
 class SyncBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
-class Sync(condition: Expression,body:Block) extends Expression
+case class Sync(condition: Expression,body:Block) extends Expression
 
 //if statement
 
@@ -802,7 +909,7 @@ class Sync(condition: Expression,body:Block) extends Expression
 class IfCondition(val expression: Expression,val first:Boolean) extends Expression
 class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
-class If(expressions:Array[(Expression,Block)],default:Option[Block]) extends Expression
+case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Expression
 
 //try statement
 
@@ -831,4 +938,4 @@ class CatchParameter(val name: String, val dslType: DslType) extends Expression
 class CatchBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions )
 class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
 
-class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],block:Option[Block]) extends Expression
+case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],finallyBlock:Option[Block]) extends Expression

@@ -1,4 +1,5 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.{Assert, Assign, Break, Continue, Return, Throw}
 
 /**
@@ -7,15 +8,27 @@ import com.dongjiaqiang.jvm.dsl.core.expression.{Assert, Assign, Break, Continue
  * @date: 2022/12/26 
  * */
 trait StatementExpressionScanner extends StatementExpressionVisitor[Unit]{
-  override def visitAssign(assign: Assign): Unit = {}
+  override def visit(assign: Assign, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitBreak(break: Break.type): Unit = {}
+  }
 
-  override def visitContinue(continue: Continue.type): Unit = {}
+  override def visit(break: Break.type, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitThrow(throwExpr: Throw): Unit = {}
+  }
 
-  override def visitReturn(returnExpr: Return): Unit = {}
+  override def visit(continue: Continue.type, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitAssert(assert: Assert): Unit = {}
+  }
+
+  override def visit(throwExpr: Throw, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(returnExpr: Return, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(assert: Assert, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
 }

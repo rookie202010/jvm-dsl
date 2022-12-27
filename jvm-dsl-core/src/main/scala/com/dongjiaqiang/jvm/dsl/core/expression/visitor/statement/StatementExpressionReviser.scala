@@ -1,18 +1,52 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
 
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.{Expression, _}
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
 
 trait StatementExpressionReviser extends StatementExpressionVisitor[Expression]{
-  override def visitAssign(assign: Assign): Expression = assign
+  override def visit(assign: Assign, visitor: ExpressionVisitor[Expression]): Expression={
+      val newVarRef = visitor.visit(assign.varRef).asInstanceOf[VarRef]
+      val newAssigned = visitor.visit(assign.assigned)
+      if(newVarRef!=assign.varRef||newAssigned!=assign.assigned){
+        Assign(newVarRef,newAssigned)
+      }else{
+        assign
+      }
+  }
 
-  override def visitBreak(break: Break.type): Expression = break
+  override def visit(break: Break.type, visitor: ExpressionVisitor[Expression]): Expression={
+      break
+  }
 
-  override def visitContinue(continue: Continue.type): Expression = continue
+  override def visit(continue: Continue.type, visitor: ExpressionVisitor[Expression]): Expression={
+      continue
+  }
 
-  override def visitThrow(throwExpr: Throw): Expression = throwExpr
+  override def visit(throwExpr: Throw, visitor: ExpressionVisitor[Expression]): Expression={
+    val newExpr = visitor.visit(throwExpr.expression)
+    if(newExpr!=throwExpr.expression){
+        Throw(newExpr)
+    }else{
+        throwExpr
+    }
+  }
 
-  override def visitReturn(returnExpr: Return): Expression = returnExpr
+  override def visit(returnExpr: Return, visitor: ExpressionVisitor[Expression]): Expression={
+    val newExpr = visitor.visit(returnExpr.expression)
+    if(newExpr!=returnExpr.expression){
+        Return(newExpr)
+    }else{
+        returnExpr
+    }
+  }
 
-  override def visitAssert(assert: Assert): Expression = assert
+  override def visit(assert: Assert, visitor: ExpressionVisitor[Expression]): Expression={
+    val newExpr = visitor.visit(assert.expression)
+    if(newExpr!=assert.expression){
+        Assert(newExpr)
+    }else{
+        assert
+    }
+  }
 }

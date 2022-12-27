@@ -11,6 +11,7 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
                    val lambdaBlockScope:ArrayBuffer[BlockScope] = ArrayBuffer()
                   ) extends Scope {
 
+  override def toString:String = "Program Scope"
 
   override val outerScopeIndex: Int = 0
 
@@ -66,4 +67,10 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
     scope.resolveVarRefs(index,refs,this, fields,skipCurrentScope = false,backRef = true,None)
   }
 
+  /**
+   * resolve method in current scope
+   */
+  override def resolveMethod(name: String): Option[MethodScope] = { methods.get(name)}
+
+  override def toString = s"ProgramScope()"
 }

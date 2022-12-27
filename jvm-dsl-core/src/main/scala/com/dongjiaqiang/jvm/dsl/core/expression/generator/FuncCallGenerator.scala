@@ -24,6 +24,12 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
     }
   }
 
+  def generateMethodCall(exprContext: ExprContext,funcName:String,expressions: List[ExpressionContext]):MethodCall={
+    new MethodCall( exprContext.resolveMethod(funcName),
+      funcName,
+      expressions.map( e ⇒ ExpressionGenerator.generate( exprContext, e ) ) )
+  }
+
   def generator(expressionContext: ExprContext,
                 funcName: String, variable: VariableContext, expressions: List[ExpressionContext]): FuncCall = {
     Option.apply( variable )
@@ -33,8 +39,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
         new VarCall( varRef, funcName,
           expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ) )
       case _ ⇒
-        new MethodCall( funcName,
-          expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ) )
+          generateMethodCall(expressionContext,funcName,expressions)
     }
   }
 
@@ -47,7 +52,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
       case Some( t ) ⇒
         new StaticCall( t, funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ) )
       case _ ⇒
-        new MethodCall( funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ) )
+        generateMethodCall(expressionContext,funcName,expressions)
     }
   }
 
@@ -59,7 +64,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
       case Some( l ) ⇒
         new LiteralCall( l, funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ) )
       case _ ⇒
-        new MethodCall( funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ) )
+        generateMethodCall(expressionContext,funcName,expressions)
     }
   }
 
