@@ -1,12 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
-import com.dongjiaqiang.jvm.dsl.core.expression.{BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, FloatLiteral, IntLiteral, ListLiteral, LongLiteral, MapLiteral, OptionLiteral, SetLiteral, StringLiteral, TupleLiteral}
+import com.dongjiaqiang.jvm.dsl.core.expression._
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
-trait LiteralExpressionScanner extends LiteralExpressionVisitor[Unit]{
+trait LiteralExpressionScanner extends LiteralExpressionVisitor[Unit] {
   override def visitInt(literal: IntLiteral): Unit = {}
 
   override def visitLong(literal: LongLiteral): Unit = {}

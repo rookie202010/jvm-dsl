@@ -2,11 +2,6 @@ package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 
 import com.dongjiaqiang.jvm.dsl.core.expression._
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/23
- * */
 trait LiteralExpressionVisitor[T] {
 
   def visitInt(literal: IntLiteral): T

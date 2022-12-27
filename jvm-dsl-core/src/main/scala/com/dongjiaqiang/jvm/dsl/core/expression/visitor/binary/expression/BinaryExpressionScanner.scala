@@ -1,47 +1,88 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression
-import com.dongjiaqiang.jvm.dsl.core.expression.{Add, And, BitAnd, BitOr, Caret, Div, Eq, Ge, Gt, Le, LeftShift, Lt, Mod, Mul, NotEq, Or, RightShift, Sub, UnsignedRightShift}
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
-trait BinaryExpressionScanner extends BinaryExpressionVisitor[Unit]{
-  override def visitDiv(div: Div): Unit = {}
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.core.expression._
 
-  override def visitMod(mod: Mod): Unit = {}
+trait BinaryExpressionScanner extends BinaryExpressionVisitor[Unit] {
 
-  override def visitMul(mul: Mul): Unit = {}
+  def visitBinaryExpression(binaryExpression: BinaryExpression, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitor.visit( binaryExpression.left )
+    visitor.visit( binaryExpression.right )
+  }
 
-  override def visitAdd(add: Add): Unit = {}
+  override def visit(div: Div, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( div, visitor )
+  }
 
-  override def visitSub(sub: Sub): Unit = {}
+  override def visit(mod: Mod, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( mod, visitor )
+  }
 
-  override def visitLeftShift(leftShift: LeftShift): Unit = {}
+  override def visit(mul: Mul, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( mul, visitor )
+  }
 
-  override def visitRightShift(rightShift: RightShift): Unit = {}
+  override def visit(add: Add, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( add, visitor )
+  }
 
-  override def visitUnsignedRightShift(unsignedRightShift: UnsignedRightShift): Unit = {}
+  override def visit(sub: Sub, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( sub, visitor )
+  }
 
-  override def visitLt(lt: Lt): Unit = {}
+  override def visit(leftShift: LeftShift, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( leftShift, visitor )
+  }
 
-  override def visitGt(gt: Gt): Unit = {}
+  override def visit(rightShift: RightShift, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( rightShift, visitor )
+  }
 
-  override def visitLe(le: Le): Unit = {}
+  override def visit(unsignedRightShift: UnsignedRightShift, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( unsignedRightShift, visitor )
+  }
 
-  override def visitGe(ge: Ge): Unit = {}
+  override def visit(lt: Lt, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( lt, visitor )
+  }
 
-  override def visitEq(eq: Eq): Unit = {}
+  override def visit(gt: Gt, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( gt, visitor )
+  }
 
-  override def visitNotEq(ne: NotEq): Unit = {}
+  override def visit(le: Le, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( le, visitor )
+  }
 
-  override def visitBitAnd(bitAnd: BitAnd): Unit = {}
+  override def visit(ge: Ge, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( ge, visitor )
+  }
 
-  override def visitCaret(caret: Caret): Unit = {}
+  override def visit(eq: Eq, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( eq, visitor )
+  }
 
-  override def visitBitOr(bitOr: BitOr): Unit = {}
+  override def visit(ne: NotEq, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( ne, visitor )
+  }
 
-  override def visitAnd(and: And): Unit = {}
+  override def visit(bitAnd: BitAnd, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( bitAnd, visitor )
+  }
 
-  override def visitOr(or: Or): Unit = {}
+  override def visit(caret: Caret, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( caret, visitor )
+  }
+
+  override def visit(bitOr: BitOr, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( bitOr, visitor )
+  }
+
+  override def visit(and: And, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( and, visitor )
+  }
+
+  override def visit(or: Or, visitor: ExpressionVisitor[Unit]): Unit = {
+    visitBinaryExpression( or, visitor )
+  }
 }

@@ -18,28 +18,28 @@ sealed trait Expression {
  *
  *
  * <pre><code>
- *program{
- *      def method()=Unit{
- *          Int i = foo()*10; //LocalVarDef
- *          Long j; //LocalVarDef
- *      }
+ * program{
+ * def method()=Unit{
+ * Int i = foo()*10; //LocalVarDef
+ * Long j; //LocalVarDef
+ * }
  * }<pre><code>
  */
-case class LocalVarDef(fieldScope: FieldScope, assigned: Option[Expression])
+case class LocalVarDef(fieldScope: FieldScope, assigned: Option[Expression]) extends Expression
 
 /**
  * <pre><code>
- *program{
- *      Foo foo = new Foo(a,b);
+ * program{
+ * Foo foo = new Foo(a,b);
  *
- *      def method()=Unit{
- *          Int i = foo()*10; //LocalVarDef
- *          foo.a * 10; // foo.a => VarRef
- *          i*10; // i => VarRef
- *      }
+ * def method()=Unit{
+ * Int i = foo()*10; //LocalVarDef
+ * foo.a * 10; // foo.a => VarRef
+ * i*10; // i => VarRef
+ * }
  * }<pre><code>
  */
-case class VarRef(name: List[String], fieldScope: FieldScope)
+case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
 
 
 /**
@@ -276,53 +276,46 @@ case class MatchType(name: String, dslType: DslType) extends Expression
 /**
  * <pre><code>
  * a=>{
- *      case one:two:tail=>{}
+ * case one:two:tail=>{}
  * }
  * <pre><code>
- *@see MatchCase
+ *
+ * @see MatchCase
  */
-case class MatchHead(head: Array[String], tail: String) extends Expression
+case class MatchHead(head: Array[Either[Expression, String]], tail: Either[Expression, String]) extends Expression
 
 /**
  * <pre><code>
  * a=>{
- *      case [1,2,b]=>{}
+ * case [1,2,b]=>{}
  * }
  * <pre><code>
+ *
  * @see MatchCase
  */
-case class MatchList(expressions: Array[Expression]) extends Expression
+case class MatchList(expressions: Array[Either[Expression, String]]) extends Expression
 
 /**
  * <pre><code>
  * a=>{
- *      case (a1,a2,a3)=>{}
+ * case (a1,a2,a3)=>{}
  * }
  * <pre><code>
+ *
  * @see MatchCase
  */
-case class MatchTuple(expression: Array[Expression]) extends Expression
+case class MatchTuple(expression: Array[Either[Expression, String]]) extends Expression
 
-//todo
 /**
  * <pre><code>
  * a=>{
- *      case b=>{}
+ * case Foo(d,c,b)=>{}
  * }
  * <pre><code>
+ *
  * @see MatchCase
  */
-case class MatchIdentify(identify: String) extends Expression
-
-/**
- *<pre><code>
- * a=>{
- *      case Foo(d,c,b)=>{}
- * }
- * <pre><code>
- * @see MatchCase
- */
-case class MatchClass(expression: Array[Expression]) extends Expression
+case class MatchClass(dslType: DslType, expression: Array[Either[Expression, String]]) extends Expression
 
 
 /**

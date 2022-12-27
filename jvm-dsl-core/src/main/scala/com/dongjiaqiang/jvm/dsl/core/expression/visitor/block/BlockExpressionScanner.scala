@@ -1,34 +1,56 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.block
-import com.dongjiaqiang.jvm.dsl.core.expression.{Async, Block, DoWhile, For, ForCollection, ForMap, If, Lambda, MatchCase, Sync, Try, TryCatch, While}
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
-trait BlockExpressionScanner extends BlockExpressionVisitor[Unit]{
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.core.expression._
 
-  override def visitBlock(block: Block): Unit = {}
 
-  override def visitFor(forExpr: For): Unit = {}
+trait BlockExpressionScanner extends BlockExpressionVisitor[Unit] {
 
-  override def visitForCollection(forCollection: ForCollection): Unit =  {}
+  override def visit(block: Block, visitor: ExpressionVisitor[Unit]): Unit = {
+    block
+  }
 
-  override def visitForMap(forMap: ForMap): Unit =  {}
+  override def visit(forExpr: For, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitWhile(whileExpr: While): Unit =  {}
+  }
 
-  override def visitDoWhile(doWhile: DoWhile): Unit =  {}
+  override def visit(forCollection: ForCollection, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitSync(sync: Sync): Unit =  {}
+  }
 
-  override def visitIf(ifExpr: If): Unit =  {}
+  override def visit(forMap: ForMap, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitTryCatch(tryCatch: TryCatch): Unit =  {}
+  }
 
-  override def visitAsync(asyncBlock: Async): Unit =  {}
+  override def visit(whileExpr: While, visitor: ExpressionVisitor[Unit]): Unit = {
 
-  override def visitTry(tryBlock: Try): Unit =  {}
+  }
 
-  override def visitMatchCase(matchCase: MatchCase): Unit =  {}
+  override def visit(doWhile: DoWhile, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(sync: Sync, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(ifExpr: If, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(tryCatch: TryCatch, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(asyncBlock: Async, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(tryBlock: Try, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(matchCase: MatchCase, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
 }

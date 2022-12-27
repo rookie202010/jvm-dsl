@@ -1,5 +1,3 @@
-T__0=1
-T__1=2
 PROGRAM=1
 ASSERT=2
 BREAK=3
@@ -100,8 +98,6 @@ COMMENT=97
 LINE_COMMENT=98
 ESC=99
 ID_LETTER=100
-':'=1
-'::'=2
 'program'=1
 'assert'=2
 'break'=3
@@ -162,6 +158,7 @@ ID_LETTER=100
 '!'=66
 '~'=67
 '?'=68
+':'=69
 '=='=70
 '<='=71
 '>='=72

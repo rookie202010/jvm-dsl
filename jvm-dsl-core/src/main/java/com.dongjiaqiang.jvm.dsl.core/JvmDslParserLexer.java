@@ -18,7 +18,7 @@ public class JvmDslParserLexer extends Lexer {
 	protected static final PredictionContextCache _sharedContextCache =
 			new PredictionContextCache();
 	public static final int
-			T__0 = 1, T__1 = 2;
+			T__0 = 1;
 	public static String[] channelNames = {
 			"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 	};
@@ -29,14 +29,14 @@ public class JvmDslParserLexer extends Lexer {
 
 	private static String[] makeRuleNames() {
 		return new String[]{
-				"T__0", "T__1"
+				"T__0"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
 
 	private static String[] makeLiteralNames() {
 		return new String[]{
-				null, "':'", "'::'"
+				null, "':'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -103,13 +103,10 @@ public class JvmDslParserLexer extends Lexer {
 	public ATN getATN() { return _ATN; }
 
 	public static final String _serializedATN =
-			"\u0004\u0000\u0002\n\u0006\uffff\uffff\u0002\u0000\u0007\u0000\u0002\u0001" +
-					"\u0007\u0001\u0001\u0000\u0001\u0000\u0001\u0001\u0001\u0001\u0001\u0001" +
-					"\u0000\u0000\u0002\u0001\u0001\u0003\u0002\u0001\u0000\u0000\t\u0000\u0001" +
-					"\u0001\u0000\u0000\u0000\u0000\u0003\u0001\u0000\u0000\u0000\u0001\u0005" +
-					"\u0001\u0000\u0000\u0000\u0003\u0007\u0001\u0000\u0000\u0000\u0005\u0006" +
-					"\u0005:\u0000\u0000\u0006\u0002\u0001\u0000\u0000\u0000\u0007\b\u0005" +
-					":\u0000\u0000\b\t\u0005:\u0000\u0000\t\u0004\u0001\u0000\u0000\u0000\u0001" +
+			"\u0004\u0000\u0001\u0005\u0006\uffff\uffff\u0002\u0000\u0007\u0000\u0001" +
+					"\u0000\u0001\u0000\u0000\u0000\u0001\u0001\u0001\u0001\u0000\u0000\u0004" +
+					"\u0000\u0001\u0001\u0000\u0000\u0000\u0001\u0003\u0001\u0000\u0000\u0000" +
+					"\u0003\u0004\u0005:\u0000\u0000\u0004\u0002\u0001\u0000\u0000\u0000\u0001" +
 					"\u0000\u0000";
 	public static final ATN _ATN =
 			new ATNDeserializer().deserialize(_serializedATN.toCharArray());

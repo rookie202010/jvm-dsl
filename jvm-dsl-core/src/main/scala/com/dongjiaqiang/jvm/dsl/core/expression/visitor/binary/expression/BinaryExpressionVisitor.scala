@@ -1,49 +1,45 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression
 
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
 trait BinaryExpressionVisitor[T] {
 
-  def visitDiv(div: Div): T
+  def visit(div: Div, visitor: ExpressionVisitor[T]): T
 
-  def visitMod(mod: Mod): T
+  def visit(mod: Mod, visitor: ExpressionVisitor[T]): T
 
-  def visitMul(mul: Mul): T
+  def visit(mul: Mul, visitor: ExpressionVisitor[T]): T
 
-  def visitAdd(add: Add): T
+  def visit(add: Add, visitor: ExpressionVisitor[T]): T
 
-  def visitSub(sub: Sub): T
+  def visit(sub: Sub, visitor: ExpressionVisitor[T]): T
 
-  def visitLeftShift(leftShift: LeftShift): T
+  def visit(leftShift: LeftShift, visitor: ExpressionVisitor[T]): T
 
-  def visitRightShift(rightShift: RightShift): T
+  def visit(rightShift: RightShift, visitor: ExpressionVisitor[T]): T
 
-  def visitUnsignedRightShift(unsignedRightShift: UnsignedRightShift): T
+  def visit(unsignedRightShift: UnsignedRightShift, visitor: ExpressionVisitor[T]): T
 
-  def visitLt(lt: Lt): T
+  def visit(lt: Lt, visitor: ExpressionVisitor[T]): T
 
-  def visitGt(gt: Gt): T
+  def visit(gt: Gt, visitor: ExpressionVisitor[T]): T
 
-  def visitLe(le: Le): T
+  def visit(le: Le, visitor: ExpressionVisitor[T]): T
 
-  def visitGe(ge: Ge): T
+  def visit(ge: Ge, visitor: ExpressionVisitor[T]): T
 
-  def visitEq(eq: Eq): T
+  def visit(eq: Eq, visitor: ExpressionVisitor[T]): T
 
-  def visitNotEq(ne: NotEq): T
+  def visit(ne: NotEq, visitor: ExpressionVisitor[T]): T
 
-  def visitBitAnd(bitAnd: BitAnd): T
+  def visit(bitAnd: BitAnd, visitor: ExpressionVisitor[T]): T
 
-  def visitCaret(caret: Caret): T
+  def visit(caret: Caret, visitor: ExpressionVisitor[T]): T
 
-  def visitBitOr(bitOr: BitOr): T
+  def visit(bitOr: BitOr, visitor: ExpressionVisitor[T]): T
 
-  def visitAnd(and: And): T
+  def visit(and: And, visitor: ExpressionVisitor[T]): T
 
-  def visitOr(or: Or): T
+  def visit(or: Or, visitor: ExpressionVisitor[T]): T
 }

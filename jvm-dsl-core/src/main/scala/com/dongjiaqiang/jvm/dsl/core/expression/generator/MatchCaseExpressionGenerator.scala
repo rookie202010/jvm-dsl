@@ -18,7 +18,7 @@ object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpres
 
     val cases = ruleContext.caseExpression( ).map( ctx ⇒ {
       if (ctx.typeMatchExpression( ) != null) {
-        val matchVar = MatchType( ctx.typeMatchExpression( ).matchVariable( ).IDENTIFIER( ).getText,
+        val matchVar = MatchType( ctx.typeMatchExpression( ).localVariable( ).IDENTIFIER( ).getText,
           DslType.unapply( ctx.typeMatchExpression( ).`type`( ) ) )
 
         val block = new Block( )

@@ -7,7 +7,7 @@ grammar JvmDslParser;
 options { tokenVocab=JvmDslLexer; }
 
 program   :    PROGRAM LBRACE
-                importDeppendency*
+                importDependency*
                 member*
             RBRACE
             ;
@@ -17,7 +17,7 @@ member :    funcDef
         |   fieldDef    SEMI
         ;
 
-importDeppendency   :   importClazzStatement
+importDependency   :   importClazzStatement
                         usingPackageStatement   ;
 
 block   :   LBRACE  blockStatements?    RBRACE
@@ -227,27 +227,15 @@ matchCaseExpression :  localVariable   MATCH   LBRACE
 caseExpression  :   unapplyExpression
                 | typeMatchExpression;
 
-unapplyExpression :   baseLiteral
-        |   unapplyClazzExpression
-        |   matchVariable
-        |   unapplyHeadExpression
-        |   unapplyListExpression
-        |   unapplyTupleExpression
+unapplyExpression :   baseLiteral   # unapplyLiteralExpr
+        |   clazzType   LPAREN  unapplyExpression (COMMA unapplyExpression)* RPAREN # unapplyClazzExpr
+        |   localVariable # unapplyVarExpr
+        |   unapplyExpression COLON COLON unapplyExpression   (COLON COLON unapplyExpression)*  # unapplyHeadExpr
+        |   LBRACK unapplyExpression   (COMMA    unapplyExpression    )* RBRACK # unapplyListExpr
+        |   LPAREN unapplyExpression  (COMMA    unapplyExpression)+    RPAREN # unapplyTupleExpr
         ;
 
-matchVariable   :  IDENTIFIER;
-typeMatchExpression :   matchVariable ':' type;
-
-unapplyListExpression:    |   LBRACK unapplyExpression   (COMMA    unapplyExpression    )* RBRACK
-                     ;
-
-unapplyHeadExpression:  |   matchVariable '::' matchVariable   ('::' matchVariable)*;
-
-unapplyClazzExpression   :   clazzType   LPAREN  unapplyExpression (COMMA unapplyExpression)* RPAREN
-                    ;
-
-unapplyTupleExpression   :   LPAREN unapplyExpression  (COMMA    unapplyExpression)+    RPAREN ;
-
+typeMatchExpression :   localVariable COLON type;
 
 //Type  ex. Int,    Float,  Char,   Set[Int]
 type    :   INT #   IntType
