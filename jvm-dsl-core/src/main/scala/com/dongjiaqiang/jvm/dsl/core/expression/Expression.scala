@@ -19,27 +19,34 @@ sealed trait Expression {
  *
  * <pre><code>
  * program{
- * def method()=Unit{
- * Int i = foo()*10; //LocalVarDef
- * Long j; //LocalVarDef
- * }
+ *      def method()=Unit{
+ *          Int i = foo()*10; //LocalVarDef
+ *          Long j; //LocalVarDef
+ *      }
  * }<pre><code>
  */
-case class LocalVarDef(fieldScope: FieldScope, assigned: Option[Expression]) extends Expression
+case class LocalVarDef(fieldScope: FieldScope, assigned: Option[Expression]) extends Expression{
+    override def toString: String = assigned match {
+        case Some(v)⇒s"${fieldScope.dslType} ${fieldScope.symbolName} = $v"
+        case None⇒s"${fieldScope.dslType} ${fieldScope.symbolName}"
+    }
+}
 
 /**
  * <pre><code>
  * program{
- * Foo foo = new Foo(a,b);
+ *      Foo foo = new Foo(a,b);
  *
- * def method()=Unit{
- * Int i = foo()*10; //LocalVarDef
- * foo.a * 10; // foo.a => VarRef
- * i*10; // i => VarRef
- * }
+ *      def method()=Unit{
+ *          Int i = foo()*10; //LocalVarDef
+ *          foo.a * 10; // foo.a => VarRef
+ *          i*10; // i => VarRef
+ *      }
  * }<pre><code>
  */
-case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
+case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression{
+    override def toString: String = s"${name.mkString(".")}"
+}
 
 
 /**
@@ -54,7 +61,11 @@ case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
  *
  * }<pre><code>
  */
-class ArrayVarRef(val indexExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+class ArrayVarRef(val indexExpression: Expression,
+                  override val name: List[String],
+                  override val fieldScope: FieldScope) extends VarRef( name, fieldScope ){
+    override def toString: String = s"${name.mkString(".")}[$indexExpression]"
+}
 
 /**
  *<pre><code>
@@ -67,7 +78,9 @@ class ArrayVarRef(val indexExpression: Expression, override val name: List[Strin
  *      }
  *}<pre><code>
  */
-class MapVarRef(val KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope )
+class MapVarRef(val KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope ){
+    override def toString: String = s"${name.mkString(".")}($KeyExpression)"
+}
 
 
 //literal expression
@@ -94,30 +107,44 @@ object Literal {
 
 class IntLiteral(literal: Int) extends Literal[Int,IntType.type](literal){
     override val dslType: IntType.type = IntType
+
+    override def toString: String = literal.toString
 }
 
 class LongLiteral(literal:Long) extends Literal[Long,LongType.type](literal){
     override val dslType: LongType.type = LongType
+
+    override def toString: String = literal.toString
 }
 
 class FloatLiteral(literal: Float) extends Literal[Float,FloatType.type](literal){
     override val dslType: FloatType.type = FloatType
+
+    override def toString: String = literal.toString
 }
 
 class DoubleLiteral(literal: Double) extends Literal[Double,DoubleType.type ](literal){
     override val dslType: DoubleType.type = DoubleType
+
+    override def toString: String = literal.toString
 }
 
 class StringLiteral(literal:String) extends Literal[String,StringType.type ](literal){
     override val dslType: StringType.type = StringType
+
+    override def toString: String = literal
 }
 
 class CharLiteral(literal: Char) extends Literal[Char,CharType.type ](literal){
     override val dslType: CharType.type = CharType
+
+    override def toString: String = literal.toString
 }
 
 class BoolLiteral(literal: Boolean) extends Literal[Boolean,BoolType.type](literal){
     override val dslType: BoolType.type = BoolType
+
+    override def toString: String = literal.toString
 }
 
 /**
@@ -137,7 +164,9 @@ class BoolLiteral(literal: Boolean) extends Literal[Boolean,BoolType.type](liter
  *}<pre><code>
  */
 class ClazzLiteral(literal: Array[Expression],
-                   override val dslType: ClazzType) extends Literal[Array[Expression],ClazzType](literal)
+                   override val dslType: ClazzType) extends Literal[Array[Expression],ClazzType](literal){
+    override def toString: String = s"new ${dslType.clazzName}(${literal.mkString(",")})"
+}
 
 /**
  *
@@ -155,7 +184,9 @@ class ClazzLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class OptionLiteral(literal:Expression,
-                    override val dslType:OptionType) extends Literal[Expression,OptionType](literal)
+                    override val dslType:OptionType) extends Literal[Expression,OptionType](literal){
+    override def toString: String = s"?$literal"
+}
 
 /**
  *
@@ -172,7 +203,9 @@ class OptionLiteral(literal:Expression,
  *}<pre><code>
  */
 class ListLiteral(literal:Array[Expression],
-                  override val dslType:ListType) extends Literal[Array[Expression],ListType](literal)
+                  override val dslType:ListType) extends Literal[Array[Expression],ListType](literal){
+    override def toString: String = s"[${literal.mkString(",")}]"
+}
 
 /**
  *
@@ -185,7 +218,9 @@ class ListLiteral(literal:Array[Expression],
  *}<pre><code>
  */
 class SetLiteral(literal: Array[Expression],
-                 override val dslType: SetType) extends Literal[Array[Expression], SetType]( literal )
+                 override val dslType: SetType) extends Literal[Array[Expression], SetType]( literal ){
+    override def toString: String = s"(${literal.mkString(",")})"
+}
 
 /**
  *
@@ -199,7 +234,9 @@ class SetLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class TupleLiteral(literal: Array[Expression],
-                   override val dslType: TupleType) extends Literal[Array[Expression], TupleType]( literal )
+                   override val dslType: TupleType) extends Literal[Array[Expression], TupleType]( literal ){
+    override def toString: String = s"(${literal.mkString(",")})"
+}
 
 /**
  *<pre><code>
@@ -213,7 +250,9 @@ class TupleLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class MapLiteral(literal: Array[(Expression, Expression)],
-                 override val dslType: MapType) extends Literal[Array[(Expression, Expression)], MapType]( literal )
+                 override val dslType: MapType) extends Literal[Array[(Expression, Expression)], MapType]( literal ){
+    override def toString: String = s"{${literal.map(kv⇒kv._1.toString+":"+kv._2.toString).mkString(",")}}"
+}
 
 //async expression
 
@@ -227,7 +266,10 @@ class MapLiteral(literal: Array[(Expression, Expression)],
  *      }
  *}<pre><code>
  */
-case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends Expression
+case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends Expression{
+    override def toString: String =s"Async $body"
+
+}
 
 
 //try expression
@@ -242,7 +284,10 @@ case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends
  *      }
  *}<pre><code>
  */
-case class Try(body: Block, dslType: TryType) extends Expression
+case class Try(body: Block, dslType: TryType) extends Expression{
+    override def toString: String = s"Try $body"
+
+}
 
 
 //lambda expression
@@ -259,7 +304,12 @@ case class Try(body: Block, dslType: TryType) extends Expression
  *      }
  *}<pre><code>
  */
-case class Lambda(inputs: Array[String], body: Block) extends Expression
+case class Lambda(inputs: Array[String], body: Block) extends Expression{
+    override def toString: String =
+        s"""
+           |(${inputs.mkString(",")}=>$body
+           |""".stripMargin
+}
 
 
 //match case expression
@@ -271,7 +321,9 @@ case class Lambda(inputs: Array[String], body: Block) extends Expression
  * <pre><code>
  *@see MatchCase
  */
-case class MatchType(name: String, dslType: DslType) extends Expression
+case class MatchType(name: String, dslType: DslType) extends Expression{
+    override def toString: String = s"$name:$dslType"
+}
 
 /**
  * <pre><code>
@@ -282,7 +334,12 @@ case class MatchType(name: String, dslType: DslType) extends Expression
  *
  * @see MatchCase
  */
-case class MatchHead(head: Array[Either[Expression, String]], tail: Either[Expression, String]) extends Expression
+case class MatchHead(head: Array[Either[Expression, String]], tail: Either[Expression, String]) extends Expression{
+    override def toString: String = s"${getString("","",":",head)}:${tail match {
+        case Left(i)⇒i.toString
+        case Right(j)⇒j
+    }}"
+}
 
 /**
  * <pre><code>
@@ -293,7 +350,9 @@ case class MatchHead(head: Array[Either[Expression, String]], tail: Either[Expre
  *
  * @see MatchCase
  */
-case class MatchList(expressions: Array[Either[Expression, String]]) extends Expression
+case class MatchList(expressions: Array[Either[Expression, String]]) extends Expression{
+    override def toString: String = getString("[","]",",",expressions)
+}
 
 /**
  * <pre><code>
@@ -304,7 +363,9 @@ case class MatchList(expressions: Array[Either[Expression, String]]) extends Exp
  *
  * @see MatchCase
  */
-case class MatchTuple(expression: Array[Either[Expression, String]]) extends Expression
+case class MatchTuple(expressions: Array[Either[Expression, String]]) extends Expression{
+    override def toString: String = getString("(",")",",",expressions)
+}
 
 /**
  * <pre><code>
@@ -315,7 +376,9 @@ case class MatchTuple(expression: Array[Either[Expression, String]]) extends Exp
  *
  * @see MatchCase
  */
-case class MatchClass(dslType: DslType, expression: Array[Either[Expression, String]]) extends Expression
+case class MatchClass(dslType: DslType, expressions: Array[Either[Expression, String]]) extends Expression{
+    override def toString: String = s"${dslType.asInstanceOf[ClazzType].clazzName}${getString("(",")",",",expressions)}"
+}
 
 
 /**
@@ -332,7 +395,17 @@ case class MatchClass(dslType: DslType, expression: Array[Either[Expression, Str
  *}
  *<pre><code>
  */
-case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default: Option[Block]) extends Expression
+case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default: Option[Block]) extends Expression{
+    override def toString: String =
+        s"""
+          |$matched match {
+          |     ${cases.map(`case`⇒{
+            "case "+`case`._1.toString+" => "+`case`._2.toString
+        }).mkString("\n")}
+          |  ${if(default.isDefined) "default =>"+ default.get}
+          |}
+          |""".stripMargin
+}
 
 //assign expression
 
@@ -345,7 +418,9 @@ case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default
  * }
  * <pre><code>
  */
-case class Assign(varRef: VarRef, assigned: Expression) extends Expression
+case class Assign(varRef: VarRef, assigned: Expression) extends Expression{
+    override def toString: String = s"$varRef = $assigned"
+}
 
 
 //unary expression
@@ -366,7 +441,9 @@ sealed trait UnaryExpression extends Expression {
  * }
  * <pre><code>
  */
-case class Negate(child:Expression) extends UnaryExpression
+case class Negate(child:Expression) extends UnaryExpression{
+    override def toString: String = s"!$child"
+}
 
 /**
  * <pre><code>
@@ -377,7 +454,9 @@ case class Negate(child:Expression) extends UnaryExpression
  * }
  * <pre><code>
  */
-case class Opposite(child: Expression) extends UnaryExpression
+case class Opposite(child: Expression) extends UnaryExpression{
+    override def toString: String = s"(-$child)"
+}
 
 /**
  * <pre><code>
@@ -388,7 +467,9 @@ case class Opposite(child: Expression) extends UnaryExpression
  * }
  * <pre><code>
  */
-case class Cast(child: Expression, castType: DslType) extends UnaryExpression
+case class Cast(child: Expression, castType: DslType) extends UnaryExpression{
+    override def toString: String = s"($castType)$child"
+}
 
 /**
  * <pre><code>
@@ -399,7 +480,9 @@ case class Cast(child: Expression, castType: DslType) extends UnaryExpression
  * }
  * <pre><code>
  */
-case class Instanceof(child: Expression,judgeType: DslType) extends UnaryExpression //a instance Int
+case class Instanceof(child: Expression,judgeType: DslType) extends UnaryExpression{
+    override def toString: String = s"$child instanceof $judgeType"
+}
 
 /**
  * <pre><code>
@@ -413,7 +496,9 @@ case class Instanceof(child: Expression,judgeType: DslType) extends UnaryExpress
  * }
  * <pre><code>
  */
-case class Paren(child:Expression) extends UnaryExpression
+case class Paren(child:Expression) extends UnaryExpression{
+    override def toString: String = s"($child)"
+}
 
 //binary expression
 sealed trait BinaryExpression extends Expression{
@@ -434,9 +519,15 @@ sealed trait BinaryExpression extends Expression{
  * }
  * <pre><code>
  */
-case class Div(left:Expression, right:Expression) extends BinaryExpression
-case class Mul(left:Expression, right:Expression) extends BinaryExpression
-case class Mod(left:Expression, right:Expression) extends BinaryExpression
+case class Div(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left/$right"
+}
+case class Mul(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left*$right"
+}
+case class Mod(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left%$right"
+}
 
 //additive expression
 
@@ -450,8 +541,12 @@ case class Mod(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-case class Add(left:Expression, right:Expression) extends BinaryExpression
-case class Sub(left:Expression, right:Expression) extends BinaryExpression
+case class Add(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left+$right"
+}
+case class Sub(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left-$right"
+}
 
 //shit expression
 
@@ -466,9 +561,15 @@ case class Sub(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-case class LeftShift(left:Expression, right:Expression) extends BinaryExpression
-case class RightShift(left:Expression, right:Expression) extends BinaryExpression
-case class UnsignedRightShift(left:Expression,right:Expression) extends BinaryExpression
+case class LeftShift(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left<<$right"
+}
+case class RightShift(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left>>$right"
+}
+case class UnsignedRightShift(left:Expression,right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left>>>$right"
+}
 
 //relation expression
 
@@ -485,10 +586,18 @@ case class UnsignedRightShift(left:Expression,right:Expression) extends BinaryEx
  * <pre><code>
  */
 
-case class Lt(left:Expression, right:Expression) extends BinaryExpression
-case class Gt(left:Expression, right:Expression) extends BinaryExpression
-case class Le(left:Expression, right:Expression) extends BinaryExpression
-case class Ge(left:Expression, right:Expression) extends BinaryExpression
+case class Lt(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left<$right"
+}
+case class Gt(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left>$right"
+}
+case class Le(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left<=$right"
+}
+case class Ge(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left>=$right"
+}
 
 //equality expression
 
@@ -503,8 +612,12 @@ case class Ge(left:Expression, right:Expression) extends BinaryExpression
  * <pre><code>
  */
 
-case class Eq(left:Expression, right:Expression) extends BinaryExpression
-case class NotEq(left:Expression, right:Expression) extends BinaryExpression
+case class Eq(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left ==  $right"
+}
+case class NotEq(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left !=  $right"
+}
 
 //bit and expression
 
@@ -518,7 +631,9 @@ case class NotEq(left:Expression, right:Expression) extends BinaryExpression
  * <pre><code>
  */
 
-case class BitAnd(left:Expression, right:Expression) extends BinaryExpression
+case class BitAnd(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left &   $right"
+}
 
 //exclusive or expression
 
@@ -531,7 +646,9 @@ case class BitAnd(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-case class Caret(left:Expression, right:Expression) extends BinaryExpression
+case class Caret(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left ^   $right"
+}
 
 //inclusive or expression
 
@@ -544,7 +661,9 @@ case class Caret(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-case class BitOr(left:Expression, right:Expression) extends BinaryExpression
+case class BitOr(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left |   $right"
+}
 
 //and expression
 
@@ -557,7 +676,9 @@ case class BitOr(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-case class And(left:Expression, right:Expression) extends BinaryExpression
+case class And(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left &&  $right"
+}
 
 //or expression
 
@@ -570,7 +691,9 @@ case class And(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-case class Or(left:Expression, right:Expression) extends BinaryExpression
+case class Or(left:Expression, right:Expression) extends BinaryExpression{
+    override def toString: String = s"$left ||  $right"
+}
 
 
 //call chains expression
@@ -587,9 +710,13 @@ case class Or(left:Expression, right:Expression) extends BinaryExpression
  * }
  * <pre><code>
  */
-case class FuncCallChain(head:FuncCall, tails:List[Part]) extends Expression
+case class FuncCallChain(head:FuncCall, tails:List[Part]) extends Expression{
+    override def toString: String = s"$head.${tails.mkString(".")}"
+}
 
-class LiteralCallChain[T,D<:DslType](val head:Literal[T,D],val tails:List[Part]) extends Expression
+class LiteralCallChain[T,D<:DslType](val head:Literal[T,D],val tails:List[Part]) extends Expression{
+    override def toString: String = s"$head.${tails.mkString(".")}"
+}
 
 class IntLiteralCallChain(override val head:IntLiteral,override val tails:List[Part])
   extends LiteralCallChain[Int,IntType.type ](head, tails)
@@ -634,7 +761,9 @@ trait Part{
     val name:String
 }
 
-class VarName(override val name:String) extends Part
+class VarName(override val name:String) extends Part{
+    override def toString: String = name
+}
 
 //func call expression
 trait FuncCall extends Expression {
@@ -645,23 +774,31 @@ trait FuncCall extends Expression {
 //method call expression
 class MethodCall(val methodScope:MethodScope,
                  override val name:String,
-                 override val params:Array[Expression]) extends FuncCall with Part
+                 override val params:Array[Expression]) extends FuncCall with Part{
+    override def toString: String = getString("",name, params)
+}
 
 
 //static call expression
 class StaticCall(val `type`:DslType,
                  override val name:String,
-                 override val params:Array[Expression]) extends FuncCall
+                 override val params:Array[Expression]) extends FuncCall{
+    override def toString: String = getString(`type`,name, params)
+}
 
 //literal call expression
 class LiteralCall(val literal: Expression,
                   override val name:String,
-                  override val params:Array[Expression]) extends FuncCall
+                  override val params:Array[Expression]) extends FuncCall{
+    override def toString: String = getString(literal,name, params)
+}
 
 //var call expression
 class VarCall(val varRef:VarRef,
               override val name:String,
-              override val params:Array[Expression]) extends FuncCall
+              override val params:Array[Expression]) extends FuncCall{
+    override def toString: String = getString(varRef,name, params)
+}
 
 
 //block expression
@@ -677,7 +814,14 @@ class VarCall(val varRef:VarRef,
  * }
  * <pre><code>
  */
-class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Expression
+class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Expression{
+    override def toString: String =
+        s"""
+          |{
+          |     ${expressions.map(e⇒e+";").mkString("\n")}
+          |}
+          |""".stripMargin
+}
 
 //for statement expression
 
@@ -696,12 +840,25 @@ class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends E
 class ForLoop(val loopVarDef:LocalVarDef,
               val loopVarCondition:Expression,
               val loopVarUpdate:Expression,
-              override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+              override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+    override def toString: String =
+        s"""
+          |for($loopVarDef;$loopVarCondition;$loopVarUpdate){
+          |     ${expressions.map(e⇒e+";").mkString("\n")}
+          |}
+          |""".stripMargin
+}
 
 case class For(loopVarDef:LocalVarDef,
                loopVarCondition:Expression,
                loopVarUpdate:Expression,
-               body:Block) extends Expression
+               body:Block) extends Expression{
+    override def toString: String =
+        s"""
+          |for($loopVarDef;$loopVarCondition;$loopVarUpdate)
+          | $body
+          |""".stripMargin
+}
 
 /**
  * <pre><code>
@@ -717,10 +874,23 @@ case class For(loopVarDef:LocalVarDef,
 
 class ForLoopCollection(val localVarDef: LocalVarDef,
                         val looped:Expression,
-                        override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+                        override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+    override def toString: String =
+        s"""
+          |for($localVarDef:$looped){
+          |    ${expressions.map(e⇒e+";").mkString("\n")}
+          |}
+          |""".stripMargin
+}
 
 case class ForCollection(localVarDef: LocalVarDef,
-                    looped:Expression,body:Block) extends Expression
+                    looped:Expression,body:Block) extends Expression{
+    override def toString: String =
+        s"""
+          |for($localVarDef:$looped)
+          | $body
+          |""".stripMargin
+}
 /**
  * <pre><code>
  *program{
@@ -735,11 +905,24 @@ case class ForCollection(localVarDef: LocalVarDef,
 class ForLoopMap(val loopKeyDef:LocalVarDef,
                  val loopValueDef:LocalVarDef,
                  val looped:Expression,
-                 override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+                 override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+    override def toString: String =
+        s"""
+          |for($loopKeyDef,$loopValueDef:$looped){
+          |     ${expressions.map(e⇒e+";").mkString("\n")}
+          |}
+          |""".stripMargin
+}
 
 case class ForMap(loopKeyDef:LocalVarDef,
              loopValueDef:LocalVarDef,
-             looped:Expression,body:Block) extends Expression
+             looped:Expression,body:Block) extends Expression{
+    override def toString: String =
+        s"""
+          |for($loopKeyDef,$loopValueDef:$looped)
+          |     $body
+          |""".stripMargin
+}
 
 //while statement expression
 
@@ -759,10 +942,20 @@ case class ForMap(loopKeyDef:LocalVarDef,
  * <pre><code>
  */
 
-class WhileCondition(val expression: Expression) extends Expression
-class WhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions)
+class WhileCondition(val expression: Expression) extends Expression{
+    override def toString: String = s"while($expression)"
+}
+class WhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions){
+    override def toString: String = s"${expressions.map(e⇒e+";").mkString("\n")}"
+}
 
-case class While(condition: Expression, body:Block) extends Expression
+case class While(condition: Expression, body:Block) extends Expression{
+    override def toString: String =
+        s"""
+          |while($condition)
+          |$body
+          |""".stripMargin
+}
 
 //do while statement expression
 
@@ -782,10 +975,26 @@ case class While(condition: Expression, body:Block) extends Expression
  * <pre><code>
  */
 
-class DoWhileCondition(val expression: Expression) extends Expression
-class DoWhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions)
+class DoWhileCondition(val expression: Expression) extends Expression{
+    override def toString: String = s"while($expression)"
+}
+class DoWhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions){
+    override def toString: String =
+        s"""
+          |do{
+          |    ${expressions.map(e⇒e+";").mkString("\n")}
+          |};
+          |""".stripMargin
+}
 
-case class DoWhile(condition:Expression,body:Block) extends Expression
+case class DoWhile(condition:Expression,body:Block) extends Expression{
+    override def toString: String =
+        s"""
+          |do
+          | $body
+          |while($condition)
+          |""".stripMargin
+}
 
 //break statement
 
@@ -805,7 +1014,9 @@ case class DoWhile(condition:Expression,body:Block) extends Expression
  * <pre><code>
  */
 
-object Break extends Expression
+object Break extends Expression{
+    override def toString: String = "break"
+}
 
 //continue statement
 
@@ -825,7 +1036,9 @@ object Break extends Expression
  * <pre><code>
  */
 
-object Continue extends Expression
+object Continue extends Expression{
+    override def toString: String = "continue"
+}
 
 //throw statement
 
@@ -839,7 +1052,9 @@ object Continue extends Expression
  * <pre><code>
  */
 
-case class Throw(expression: Expression) extends Expression
+case class Throw(expression: Expression) extends Expression{
+    override def toString: String = s"throw $expression"
+}
 
 //return statement
 
@@ -853,7 +1068,9 @@ case class Throw(expression: Expression) extends Expression
  * <pre><code>
  */
 
-case class Return(expression: Expression) extends Expression
+case class Return(expression: Expression) extends Expression{
+    override def toString: String = s"return $expression"
+}
 
 //assert statement
 
@@ -866,7 +1083,9 @@ case class Return(expression: Expression) extends Expression
  * }
  * <pre><code>
  */
-case class Assert(expression: Expression) extends Expression
+case class Assert(expression: Expression) extends Expression{
+    override def toString: String = s"assert $expression"
+}
 
 //synchronized statement
 
@@ -882,10 +1101,25 @@ case class Assert(expression: Expression) extends Expression
  * <pre><code>
  */
 
-class SyncCondition(val expression: Expression) extends Expression
-class SyncBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+class SyncCondition(val expression: Expression) extends Expression{
+    override def toString: String = s"sync($expression)"
+}
+class SyncBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+    override def toString: String =
+        s"""
+          |{
+          |   ${expressions.map(e⇒e+";").mkString("\n")}
+          |}
+          |""".stripMargin
+}
 
-case class Sync(condition: Expression,body:Block) extends Expression
+case class Sync(condition: Expression,body:Block) extends Expression{
+    override def toString: String =
+        s"""
+          |sync($condition)
+          | $body
+          |""".stripMargin
+}
 
 //if statement
 
@@ -905,10 +1139,21 @@ case class Sync(condition: Expression,body:Block) extends Expression
  * <pre><code>
  */
 
-class IfCondition(val expression: Expression,val first:Boolean) extends Expression
-class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+class IfCondition(val expression: Expression,val first:Boolean) extends Expression{
+    override def toString: String = if(first) s"if($expression)" else s"else if($expression)"
+}
+class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions) {
+    override def toString: String =
+        s"""
+           |{
+           |    ${expressions.map(e ⇒ e + ";").mkString("\n")}
+           |}
+           |""".stripMargin
+}
 
-case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Expression
+case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Expression{
+
+}
 
 //try statement
 
@@ -930,11 +1175,56 @@ case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Ex
  * <pre><code>
  */
 
-class TryBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions )
+class TryBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions ){
+    override def toString: String =
+        s"""
+           |try{
+           |    ${expressions.map(e⇒e+";").mkString("\n")}
+           |}
+           |""".stripMargin
+}
 
-class CatchParameter(val name: String, val dslType: DslType) extends Expression
+class CatchParameter(val name: String, val dslType: DslType) extends Expression{
+    override def toString: String =
+        s"""
+           |catch($dslType $name)
+           |""".stripMargin
+}
 
-class CatchBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions )
-class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions)
+class CatchBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions ){
+    override def toString: String =
+        s"""
+          |{
+          |     ${expressions.map(e⇒e+";").mkString("\n")}
+          |}
+          |""".stripMargin
+}
 
-case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],finallyBlock:Option[Block]) extends Expression
+class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+    override def toString: String =
+        s"""
+          |finally{
+          |      ${expressions.map(e⇒e+";").mkString("\n")}
+          |}
+          |""".stripMargin
+}
+
+case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],finallyBlock:Option[Block]) extends Expression {
+    override def toString: String =
+        s"""
+           |try
+           | $tryBlock
+
+           |${catches.map{
+            `catch`⇒ s"catch(${`catch`._1._2} ${`catch`._1._1}) ${`catch`._2}"
+        }.mkString("\n")}
+
+           |${
+            finallyBlock match {
+            case Some(
+            block)⇒
+                "finally"+block
+            case None⇒""
+        }}
+          |""".stripMargin
+}

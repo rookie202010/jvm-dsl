@@ -7,32 +7,28 @@ import com.dongjiaqiang.jvm.dsl.core.scope
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
 /**
+ * <pre><code>
  * program{
  *
- * Int i = 100;
- * Int j = 200;
+ *  Int i = 100;
+ *  Int j = 200;
  *
- * def foo(Int i)=Int{ //name = foo, outerScopeIndex = 2, parentScope is programScope
- * return i;
+ *  def foo(Int i)=Int{ //name = foo, outerScopeIndex = 2, parentScope is programScope
+ *    return i;
+ *  }
+ *
+ *  class Foo(Int k,Int z){
+ *    def foo1()=Int{ //name = foo1, outerScopeIndex = 2, parentScope is classScope foo
+ *      return k;
+ *    }
+ *
+ *    def foo2()=Int{ //name = foo2, outerScopeIndex = 3, parentScope is classScope foo
+ *      return z;
+ *    }
+ *  }
  * }
- *
- * class Foo(Int k,Int z){
- * def foo1()=Int{ //name = foo1, outerScopeIndex = 2, parentScope is classScope foo
- * return k;
- * }
- *
- * def foo2()=Int{ //name = foo2, outerScopeIndex = 3, parentScope is classScope foo
- * return z;
- * }
- * }
- *
- *
- *
- * }
- *
- *
  * method scope
- *
+ *<pre><code>
  */
 class MethodScope(val name: String,
                   val outerScopeIndex: Int,
@@ -42,10 +38,11 @@ class MethodScope(val name: String,
                   val parentScope: Scope,
                   var blockScope: BlockScope) extends Scope {
 
+  override def toString: String = s"$parentScope:MethodScope($name)"
+
   def this(name: String, outerScopeIndex: Int, parentScope: Scope, returnType: DslType) {
     this( name, outerScopeIndex, MutableMap( ), returnType, ArrayBuffer( ), parentScope, null )
   }
-
 
   override def addScope(symbolName: String, fieldScope: FieldScope): MethodScope = {
     duplicateSymbol( symbolName )

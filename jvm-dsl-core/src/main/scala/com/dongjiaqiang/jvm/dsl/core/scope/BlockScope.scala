@@ -49,7 +49,7 @@ class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldS
     }
 
   /**
-   *
+   *<pre><code>
    * blockScope in program method
    * program{
    *
@@ -88,7 +88,7 @@ class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldS
    *     Int b = 100;
    *
    * }
-   *
+   *<pre><code>
    * resolve ref in current or outer scope
    *
    * @param index ref index

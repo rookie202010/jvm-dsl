@@ -3,35 +3,35 @@ import com.dongjiaqiang.jvm.dsl.core.`type`.{AnyType, ClazzType, DslType, UnReso
 import com.dongjiaqiang.jvm.dsl.core.scope
 
 /**
+ *  field scope
+ * <pre><code>
  * program{
  *
- * Int a = 1;  // outerScopeIndex = 0, symbolName = a,dslType = IntType,belong to programScope
+ *    Int a = 1;// outerScopeIndex = 0, symbolName = a,dslType = IntType,belong to programScope
  *
- * def foo(Long a)=Unit{ // outerScopeIndex = 0,symbolName = a,dslType = LongType,belong to methodScope foo
- * a = 10;
+ *    def foo(Long a)=Unit{ // outerScopeIndex = 0,symbolName = a,dslType = LongType,belong to methodScope foo
+ *        a = 10;
  *
- * {
- * c = 100;
- * a = 200;
- * String s; //outerScopeIndex = 2,symbolName = s,dslType = StringType,belong to blockScope block1
- * } // block1
+ *        {
+ *          c = 100;
+ *          a = 200;
+ *          String s; //outerScopeIndex = 2,symbolName = s,dslType = StringType,belong to blockScope block1
+ *        } // block1
  *
- * Int c = 10; //outerScopeIndex = 2,symbolName = c,dslType = IntType,belong to blockScope block0
+ *        Int c = 10; //outerScopeIndex = 2,symbolName = c,dslType = IntType,belong to blockScope block0
  *
- * } //block0
+ *    } //block0
  *
- * Int b = 1; // outerScopeIndex = 2, symbolName = b,dslType = IntType,belong to programScope
+ *    Int b = 1; // outerScopeIndex = 2, symbolName = b,dslType = IntType,belong to programScope
  *
- * class Foo(Int a,Long b){
- * //outerScopeIndex = 0,symbolName = a,dslType = IntType,belong to clazzScope Foo
- * //outerScopeIndex = 0,symbolName = b,dslType = LongType,belong to clazzScope Foo
+ *    class Foo(Int a,Long b){
+ *      //outerScopeIndex = 0,symbolName = a,dslType = IntType,belong to clazzScope Foo
+ *      //outerScopeIndex = 0,symbolName = b,dslType = LongType,belong to clazzScope Foo
+ *    }
  * }
- *
- * }
- *
- *
- * field scope
+ *<pre><code>
  */
+
 class FieldScope(val outerScopeIndex:Int,
                  val symbolName:String,
                  val dslType: DslType,
@@ -59,8 +59,9 @@ class FieldScope(val outerScopeIndex:Int,
     }
 
   /**
-   * fieldScope in program,class,method params
    *
+   * fieldScope in program,class,method params
+   *<pre><code>
    * program{
    *    Class A(B a,Long i){}
    *    Class B(Int j,Int k){}
@@ -84,7 +85,7 @@ class FieldScope(val outerScopeIndex:Int,
    *
    *    }
    * }
-   *
+   *<pre><code>
    * resolve localRefs in fieldScope
    *
    * @param index localRefs index in blockScope

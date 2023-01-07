@@ -16,42 +16,41 @@ import scala.collection.mutable.{ListMap ⇒ MutableMap}
 /**
  *
  * statement parser response for parse statement to expression
+ * <pre><code>
+ * program{
+ *     Int i = 100;
+ *     Int j = 200;
  *
- * //program{
- * //    Int i = 100;
- * //    Int j = 200;
- * //
- * //    def f()=Unit // method scope
- * //    {  // block scope
- * //        Int k = 100;  // sIndex = 0
- * //        k = 100+i;  // sIndex = 1
- * //
- * //        {  // sIndex = 2
- * //            Int k = k;  // sIndex = 0,bIndex = 0
- * //            j = 300+k; // sIndex = 1, bIndex = 0
- * //            i = i*2; // sIndex = 2, bIndex = 0
- * //
- * //        }
- * //
- * //        k = 100+i; // sIndex = 3
- * //
- * //        {  // sIndex = 4
- * //            j+100;  // sIndex = 0,bIndex = 1
- * //            k+300; // sIndex = 1,bIndex = 1
- * //
- * //            { // sIndex = 2
- * //                Int k = k; // sIndex = 0, bIndex = 0
- * //                k+=1; // sIndex = 1,bIndex = 0
- * //            }
- * //        }
- * //
- * //        {  // sIndex = 5
- * //
- * //        }
- * //    }
- * //}
+ *     def f()=Unit // method scope
+ *     {  // block scope
+ *         Int k = 100;  // sIndex = 0
+ *         k = 100+i;  // sIndex = 1
  *
+ *         {  // sIndex = 2
+ *             Int k = k;  // sIndex = 0,bIndex = 0
+ *             j = 300+k; // sIndex = 1, bIndex = 0
+ *             i = i*2; // sIndex = 2, bIndex = 0
  *
+ *         }
+ *
+ *         k = 100+i; // sIndex = 3
+ *
+ *         {  // sIndex = 4
+ *             j+100;  // sIndex = 0,bIndex = 1
+ *             k+300; // sIndex = 1,bIndex = 1
+ *
+ *             { // sIndex = 2
+ *                 Int k = k; // sIndex = 0, bIndex = 0
+ *                 k+=1; // sIndex = 1,bIndex = 0
+ *             }
+ *         }
+ *
+ *         {  // sIndex = 5
+ *
+ *         }
+ *     }
+ * }
+ *<pre><code>
  * program scope
  */
 
