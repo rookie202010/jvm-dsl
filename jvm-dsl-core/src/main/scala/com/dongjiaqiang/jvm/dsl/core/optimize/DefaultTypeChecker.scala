@@ -1,21 +1,23 @@
-package com.dongjiaqiang.jvm.dsl.core.expression.visitor
+package com.dongjiaqiang.jvm.dsl.core.optimize
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.{BoolType, DoubleType, DslType, FloatType, IntType, LongType, NumberDslType, UnResolvedType}
-import com.dongjiaqiang.jvm.dsl.core.expression.{Add, And, BinaryExpression, BoolLiteral, CharLiteral, ClazzLiteral, Div, DoubleLiteral, Eq, Expression, FloatLiteral, Ge, Gt, IntLiteral, Le, LeftShift, ListLiteral, LongLiteral, Lt, MapLiteral, Mod, Mul, Negate, NotEq, Opposite, OptionLiteral, Or, RightShift, SetLiteral, StringLiteral, Sub, TupleLiteral, UnaryExpression, UnsignedRightShift}
-import com.dongjiaqiang.jvm.dsl.core.program.Program
+import com.dongjiaqiang.jvm.dsl.core.`type`._
+import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
 
 case class ExpressionResultType(dslType: Option[DslType])
-class TypeChecker(override val program: Program) extends ExpressionVisitor[ExpressionResultType]{
+
+class DefaultTypeChecker(override val programScope: ProgramScope) extends ExpressionVisitor[ExpressionResultType] {
   override def visit(literal: IntLiteral,
                      visitor: ExpressionVisitor[ExpressionResultType]): ExpressionResultType = {
-      ExpressionResultType(Some(IntType))
+    ExpressionResultType( Some( IntType ) )
   }
 
-  private def getPriority(expressionResultType: ExpressionResultType): Option[Int] ={
-        expressionResultType.dslType match {
-          case Some(dslType)⇒
-            if(dslType.isInstanceOf[NumberDslType] || dslType == UnResolvedType){
-              dslType match {
+  private def getPriority(expressionResultType: ExpressionResultType): Option[Int] = {
+    expressionResultType.dslType match {
+      case Some( dslType ) ⇒
+        if (dslType.isInstanceOf[NumberDslType] || dslType == UnResolvedType) {
+          dslType match {
                 case IntType⇒Some(0)
                 case LongType⇒Some(1)
                 case FloatType⇒Some(2)

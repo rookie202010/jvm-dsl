@@ -8,7 +8,7 @@ import com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain.CallChainExpre
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal.LiteralExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement.StatementExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression.UnaryExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.program.Program
+import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
 
 
 trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
@@ -19,7 +19,7 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
   with StatementExpressionVisitor[T]
   with VarExpressionVisitor[T]{
 
-  val program:Program
+  val programScope: ProgramScope
 
 
     def visit(expression:Expression):T={

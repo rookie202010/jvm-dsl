@@ -1,19 +1,26 @@
 package com.dongjiaqiang.jvm.dsl.core.`type`
+
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 
 trait DslType {
-    val name:String
+  val name: String
 }
 
+abstract class NumberDslType extends DslType
+
+
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.TypeContext
-object DslType{
-    import scala.collection.convert.ImplicitConversionsToScala._
-    def unapply(typeContext:TypeContext):DslType={
-        typeContext match {
-          case _:IntTypeContext⇒IntType
-          case _:LongTypeContext⇒LongType
-          case _:FloatTypeContext⇒FloatType
-          case _:DoubleTypeContext⇒DoubleType
+
+object DslType {
+
+  import scala.collection.convert.ImplicitConversionsToScala._
+
+  def unapply(typeContext: TypeContext): DslType = {
+    typeContext match {
+      case _: IntTypeContext ⇒ IntType
+      case _: LongTypeContext ⇒ LongType
+      case _: FloatTypeContext ⇒ FloatType
+      case _: DoubleTypeContext ⇒ DoubleType
           case _:StringTypeContext⇒StringType
           case _:CharTypeContext⇒CharType
           case context: ListTypeContext⇒
@@ -43,31 +50,37 @@ object DslType{
           case context:LambdaMoreInMoreOutTypeContext⇒
             new LambdaType(context.types(0).`type`().map(unapply).toArray,
               context.types(1).`type`().map(unapply).toArray)
-          case context:ParameterizedClassTypeContext⇒
-              new ClazzType(context.clazzType().IDENTIFIER().getText,context.`type`().map(unapply).toArray)
-          case context:ClassTypeContext⇒
-            new ClazzType(context.clazzType().IDENTIFIER().getText,Array())
+      case context: ParameterizedClassTypeContext ⇒
+        new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, context.`type`( ).map( unapply ).toArray )
+      case context: ClassTypeContext ⇒
+        if (context.clazzType( ).IDENTIFIER( ).getText == "Unit") {
+          UnitType
+        } else if (context.clazzType( ).IDENTIFIER( ).getText == "Any") {
+          AnyType
+        } else {
+          new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, Array( ) )
+        }
         }
     }
 }
 
 //base type
-object IntType extends DslType{
+object IntType extends NumberDslType {
   override val name: String = "Int"
 
 }
 
-object LongType extends DslType{
+object LongType extends NumberDslType {
   override val name: String = "Long"
 
 }
 
-object FloatType extends DslType{
+object FloatType extends NumberDslType {
   override val name: String = "Float"
 
 }
 
-object DoubleType extends DslType{
+object DoubleType extends NumberDslType {
   override val name: String = "Double"
 
 }
@@ -97,6 +110,10 @@ object UnResolvedType extends DslType {
 
 object AnyType extends DslType {
   override val name: String = "Any"
+}
+
+object UnitType extends DslType {
+  override val name: String = "Unit"
 }
 
 //collection type

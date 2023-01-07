@@ -33,8 +33,8 @@ class ExpressionParserSuit extends AnyFunSuite {
 
                   Int i = 10;
 
-                  def foo1(String=>String format,String str)=String{
-                      return format.apply(str);
+                  def foo1(String=>String format,String str)=Any{
+                      return ;
                   }
 
                   def foo2(String format,String str)=String{

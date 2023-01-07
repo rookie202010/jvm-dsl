@@ -8,12 +8,12 @@ import com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement.StatementExpre
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression.UnaryExpressionScanner
 
 
-trait ExpressionScan extends ExpressionVisitor[Unit]
-                      with BinaryExpressionScanner
-                      with BlockExpressionScanner
-                      with CallChainExpressionScanner
-                      with LiteralExpressionScanner
-                      with StatementExpressionScanner
-                      with UnaryExpressionScanner
-                      with VarExpressionScanner
+trait ExpressionScanner extends ExpressionVisitor[Unit]
+  with BinaryExpressionScanner
+  with BlockExpressionScanner
+  with CallChainExpressionScanner
+  with LiteralExpressionScanner
+  with StatementExpressionScanner
+  with UnaryExpressionScanner
+  with VarExpressionScanner
 

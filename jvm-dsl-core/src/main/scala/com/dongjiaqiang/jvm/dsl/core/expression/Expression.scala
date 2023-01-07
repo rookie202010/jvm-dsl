@@ -105,13 +105,17 @@ object Literal {
     def literal(literal: Char): CharLiteral = new CharLiteral( literal )
 }
 
-class IntLiteral(literal: Int) extends Literal[Int,IntType.type](literal){
+object UnitLiteral extends Literal[Unit, UnitType.type] {
+    override val dslType: UnitType.type = UnitType
+}
+
+class IntLiteral(literal: Int) extends Literal[Int, IntType.type]( literal ) {
     override val dslType: IntType.type = IntType
 
     override def toString: String = literal.toString
 }
 
-class LongLiteral(literal:Long) extends Literal[Long,LongType.type](literal){
+class LongLiteral(literal: Long) extends Literal[Long, LongType.type]( literal ) {
     override val dslType: LongType.type = LongType
 
     override def toString: String = literal.toString

@@ -3,7 +3,7 @@ package com.dongjiaqiang.jvm.dsl.core.expression.generator
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.BlockExpressionContext
 import com.dongjiaqiang.jvm.dsl.core.`type`.{FutureType, TryType, UnResolvedType}
 import com.dongjiaqiang.jvm.dsl.core.exception.ExpressionParserException
-import com.dongjiaqiang.jvm.dsl.core.expression.{Async, Expression, Try}
+import com.dongjiaqiang.jvm.dsl.core.expression.{Async, Expression, Try, UnitLiteral}
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -11,6 +11,9 @@ import scala.collection.convert.ImplicitConversionsToScala._
 object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionContext, Expression] {
 
   override def generate(exprContext: ExprContext, ruleContext: BlockExpressionContext): Expression = {
+    if (ruleContext.IDENTIFIER( ) == null) {
+      return UnitLiteral
+    }
     val blockType = ruleContext.IDENTIFIER( ).getText
     val fieldScope = Option.apply( ruleContext.variable( ).IDENTIFIER( ).map( _.getText ).toList )
       .flatMap( v ⇒ exprContext.getContextScope.resolveVarRefs( exprContext.getCurrentExpressionIndex, v ) )
@@ -21,7 +24,7 @@ object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionCont
         if (ruleContext.variable( ).IDENTIFIER( ) != null) {
           throw ExpressionParserException( "Try block must not define variable" )
         } else {
-          new Try( block, new TryType( UnResolvedType ) )
+          Try( block, new TryType( UnResolvedType ) )
         }
       case "Async" ⇒
         if (fieldScope.isEmpty) {
