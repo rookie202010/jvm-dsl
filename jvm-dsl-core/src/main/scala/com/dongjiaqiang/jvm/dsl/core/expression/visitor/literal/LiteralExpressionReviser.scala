@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 
 
 trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression]{
@@ -54,17 +54,30 @@ trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression]{
 
   override def visit(literal: ListLiteral,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    revise(literal,visitor, expressions⇒new ListLiteral(expressions,literal.dslType))
+    revise( literal, visitor, expressions ⇒ new ListLiteral( expressions, literal.dslType ) )
+  }
+
+
+  override def visit(literal: ArrayLiteral, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise( literal, visitor, expressions ⇒ new ArrayLiteral( expressions, literal.dslType ) )
+  }
+
+  override def visit(literal: EitherLiteral, visitor: ExpressionVisitor[Expression]): Expression = {
+    val either = literal.literal
+    either match {
+      case Left( left ) ⇒ new EitherLiteral( Left( visitor.visit( left ) ), literal.dslType )
+      case Right( right ) ⇒ new EitherLiteral( Right( visitor.visit( right ) ), literal.dslType )
+    }
   }
 
   override def visit(literal: SetLiteral,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    revise(literal,visitor, expressions⇒new SetLiteral(expressions,literal.dslType))
+    revise( literal, visitor, expressions ⇒ new SetLiteral( expressions, literal.dslType ) )
   }
 
   override def visit(literal: TupleLiteral,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    revise(literal,visitor, expressions⇒new TupleLiteral(expressions,literal.dslType))
+    revise( literal, visitor, expressions ⇒ new TupleLiteral( expressions, literal.dslType ) )
   }
 
   override def visit(literal: ClazzLiteral,
@@ -86,11 +99,15 @@ trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression]{
 
   override def visit(literal: OptionLiteral,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    val expression = visitor.visit(literal.literal)
-    if(expression!=literal.literal){
-      new OptionLiteral(expression,literal.dslType)
-    }else{
+    val expression = visitor.visit( literal.literal )
+    if (expression != literal.literal) {
+      new OptionLiteral( expression, literal.dslType )
+    } else {
       literal
     }
+  }
+
+  override def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[Expression]): Expression = {
+    literal
   }
 }

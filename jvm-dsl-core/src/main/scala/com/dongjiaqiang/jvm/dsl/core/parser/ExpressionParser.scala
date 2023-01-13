@@ -264,9 +264,9 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
       def varDef(fieldScope: FieldScope, context: VarDefContext): LocalVarDef = {
         if (context.expression( ).lambdaExpression( ) != null) {
-          LocalVarDef( fieldScope, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
+          LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
         } else {
-          LocalVarDef( fieldScope, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
+          LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
         }
       }
 

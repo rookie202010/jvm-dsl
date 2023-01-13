@@ -248,23 +248,16 @@ type    :   INT #   IntType
         |   CHAR    #   CharType
         |   VOID    #   VoidType
         |   LIST  LBRACK type    RBRACK #   ListType
-        |   ARRAY   LBRACK type RBRACK  #   ArrayType
         |   SET   LBRACK type    RBRACE #   SetType
         |   MAP   LBRACK type    COMMA  type  RBRACK    #   MapType
         |   LPAREN  type    (COMMA   type)+ RPAREN  #   TupleType
         |   OPTION    LBRACK type    RBRACK #   OptionType
         |   FUTURE    LBRACK type    RBRACK #   FutureType
-        |   type    ARROW   type    #   LambdaOneInOneOutType
-        |   type    ARROW   types  #   LambdaOneInMoreOutType
-        |   LPAREN  RPAREN  ARROW   type    #   LambdaZeroInOneOutType
-        |   LPAREN  RPAREN  ARROW   types  #   LambdaZeroInMoreOutType
-        |   types   ARROW   type    #   LambdaMoreInOneOutType
-        |   types  ARROW   types   #   LambdaMoreInMoreOutType
+        |   type    ARROW   type    #   LambdaType
+        |   LPAREN  RPAREN  ARROW   type    #   SupplierType
         |   clazzType LBRACK type    (COMMA  type)*  RBRACK # ParameterizedClassType
         |   clazzType   #   ClassType
         ;
-
-types:  LPAREN  type    (COMMA  type)+ RPAREN;
 
 clazzType   :   IDENTIFIER;
 
@@ -302,6 +295,7 @@ literalAndCallChain :   funcCallChain   # FuncCallChainExpr
 literal :   baseLiteral
         |   classLiteral
         |   variable
+        |   arrayVariable
         |   optionalLiteral
         |   listLiteral
         |   setLiteral
@@ -328,7 +322,7 @@ listLiteral:    |   LBRACK literalAndCallChain    (COMMA    literalAndCallChain 
 blockExpression:    |   IDENTIFIER (LPAREN  variable  RPAREN)? lambdaBlock;
 
 
-//set literal   ex. (), (1,3,2)
+//set literal   ex. {}, {1,3,2}
 setLiteral :   LBRACE  literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACE
            |   LBRACE   RBRACE;
 

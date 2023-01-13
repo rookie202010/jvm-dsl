@@ -19,33 +19,33 @@ sealed trait Expression {
  *
  * <pre><code>
  * program{
- *      def method()=Unit{
- *          Int i = foo()*10; //LocalVarDef
- *          Long j; //LocalVarDef
- *      }
+ * def method()=Unit{
+ * Int i = foo()*10; //LocalVarDef
+ * Long j; //LocalVarDef
+ * }
  * }<pre><code>
  */
-case class LocalVarDef(fieldScope: FieldScope, assigned: Option[Expression]) extends Expression{
+case class LocalVarDef(fieldScope: FieldScope, dslType: DslType, assigned: Option[Expression]) extends Expression {
     override def toString: String = assigned match {
-        case Some(v)⇒s"${fieldScope.dslType} ${fieldScope.symbolName} = $v"
-        case None⇒s"${fieldScope.dslType} ${fieldScope.symbolName}"
+        case Some( v ) ⇒ s"${fieldScope.dslType} ${fieldScope.symbolName} = $v"
+        case None ⇒ s"${fieldScope.dslType} ${fieldScope.symbolName}"
     }
 }
 
 /**
  * <pre><code>
  * program{
- *      Foo foo = new Foo(a,b);
+ * Foo foo = new Foo(a,b);
  *
- *      def method()=Unit{
- *          Int i = foo()*10; //LocalVarDef
- *          foo.a * 10; // foo.a => VarRef
- *          i*10; // i => VarRef
- *      }
+ * def method()=Unit{
+ * Int i = foo()*10; //LocalVarDef
+ * foo.a * 10; // foo.a => VarRef
+ * i*10; // i => VarRef
+ * }
  * }<pre><code>
  */
-case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression{
-    override def toString: String = s"${name.mkString(".")}"
+case class VarRef(name: List[String], dslType: DslType, fieldScope: FieldScope) extends Expression {
+    override def toString: String = s"${name.mkString( "." )}"
 }
 
 
@@ -54,32 +54,36 @@ case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
  *program{
  *      Array[Foo] fooArray = [new Foo(2,3),new Foo(1,2)];
  *
- *      def method()=Unit{
- *              Int i =0;
- *              Foo b = fooArray[i];  // fooArray[i] => ArrayVarRef
- *      }
+ * def method()=Unit{
+ * Int i =0;
+ * Foo b = fooArray[i];  // fooArray[i] => ArrayVarRef
+ * }
  *
  * }<pre><code>
  */
 class ArrayVarRef(val indexExpression: Expression,
                   override val name: List[String],
-                  override val fieldScope: FieldScope) extends VarRef( name, fieldScope ){
-    override def toString: String = s"${name.mkString(".")}[$indexExpression]"
+                  override val dslType: DslType,
+                  override val fieldScope: FieldScope) extends VarRef( name, dslType, fieldScope ) {
+    override def toString: String = s"${name.mkString( "." )}[$indexExpression]"
 }
 
 /**
- *<pre><code>
- *program{
- *      Map[Int,Foo] fooMap = {0:new Foo(2,3),1:new Foo(1,2)};
+ * <pre><code>
+ * program{
+ * Map[Int,Foo] fooMap = {0:new Foo(2,3),1:new Foo(1,2)};
  *
- *      def method()=Unit{
- *          Int i =0;
- *          Foo b = fooMap(i);  // fooMap(i) => MapVarRef
- *      }
- *}<pre><code>
+ * def method()=Unit{
+ * Int i =0;
+ * Foo b = fooMap(i);  // fooMap(i) => MapVarRef
+ * }
+ * }<pre><code>
  */
-class MapVarRef(val KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope ){
-    override def toString: String = s"${name.mkString(".")}($KeyExpression)"
+class MapVarRef(val KeyExpression: Expression,
+                override val name: List[String],
+                override val dslType: DslType,
+                override val fieldScope: FieldScope) extends VarRef( name, dslType, fieldScope ) {
+    override def toString: String = s"${name.mkString( "." )}($KeyExpression)"
 }
 
 
@@ -87,6 +91,10 @@ class MapVarRef(val KeyExpression: Expression, override val name: List[String], 
 
 abstract class Literal[T, D <: DslType](val literal: T) extends Expression {
     val dslType: D
+
+    def resolvedType(dslType: DslType): Literal[T, D] = {
+        this
+    }
 }
 
 object Literal {
@@ -161,24 +169,79 @@ class BoolLiteral(literal: Boolean) extends Literal[Boolean,BoolType.type](liter
  *          }
  *      }
  *
- *      def method(Int a,Int b)=Unit{
- *          Foo foo = new Foo(a,b); // new Foo(a,b) => ClazzLiteral
- *          Foo foo = new Foo(1,2); // new Foo(1,2) => ClazzLiteral
- *      }
- *}<pre><code>
+ * def method(Int a,Int b)=Unit{
+ * Foo foo = new Foo(a,b); // new Foo(a,b) => ClazzLiteral
+ * Foo foo = new Foo(1,2); // new Foo(1,2) => ClazzLiteral
+ * }
+ * }<pre><code>
  */
 class ClazzLiteral(literal: Array[Expression],
-                   override val dslType: ClazzType) extends Literal[Array[Expression],ClazzType](literal){
-    override def toString: String = s"new ${dslType.clazzName}(${literal.mkString(",")})"
+                   override val dslType: ClazzType) extends Literal[Array[Expression], ClazzType]( literal ) {
+    override def toString: String = s"new ${dslType.clazzName}(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], ClazzType] = {
+        if (this.dslType.valueTypes.contains( UnResolvedType ) || this.dslType.valueTypes.isEmpty) {
+            new ClazzLiteral( literal, dslType.asInstanceOf[ClazzType] )
+        } else {
+            this
+        }
+    }
+}
+
+/**
+ * <pre><code>
+ * program{
+ * class Foo(Int a,Int b){
+ * def foo()=Int{
+ * return a+b;
+ * }
+ *
+ * def method(Int a,Int b)=Unit{
+ * Array[Foo] array = new Array(new Foo(1,2),new Foo(2,3)); // new Array(new Foo(1,2),new Foo(2,3)) => ArrayLiteral
+ * }
+ * <pre><code>
+ */
+class ArrayLiteral(literal: Array[Expression], override val dslType: ArrayType) extends Literal[Array[Expression], ArrayType]( literal ) {
+    override def toString: String = s"new Array(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], ArrayType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new ArrayLiteral( literal, dslType.asInstanceOf[ArrayType] )
+        } else {
+            this
+        }
+    }
+}
+
+class EitherLiteral(literal: Either[Expression, Expression],
+                    override val dslType: EitherType)
+  extends Literal[Either[Expression, Expression], EitherType]( literal ) {
+
+    override def toString: String = {
+        literal match {
+            case Left( left ) ⇒ s"Left($left)"
+            case Right( right ) ⇒ s"Right($right)"
+        }
+    }
+
+    override def resolvedType(dslType: DslType):
+    Literal[Either[Expression, Expression], EitherType] = {
+        if (this.dslType.leftType == UnResolvedType || this.dslType.rightType == UnResolvedType) {
+            new EitherLiteral( literal, dslType.asInstanceOf[EitherType] )
+        } else {
+            this
+        }
+    }
+
 }
 
 /**
  *
- *<pre><code>
- *program{
- *      class Foo(Int a,Int b){
- *          def foo()=Int{
- *              return a+b;
+ * <pre><code>
+ * program{
+ * class Foo(Int a,Int b){
+ * def foo()=Int{
+ * return a+b;
  *          }
  *      }
  *
@@ -188,8 +251,16 @@ class ClazzLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class OptionLiteral(literal:Expression,
-                    override val dslType:OptionType) extends Literal[Expression,OptionType](literal){
+                    override val dslType:OptionType) extends Literal[Expression,OptionType](literal) {
     override def toString: String = s"?$literal"
+
+    override def resolvedType(dslType: DslType): Literal[Expression, OptionType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new OptionLiteral( literal, dslType.asInstanceOf[OptionType] )
+        } else {
+            this
+        }
+    }
 }
 
 /**
@@ -207,23 +278,40 @@ class OptionLiteral(literal:Expression,
  *}<pre><code>
  */
 class ListLiteral(literal:Array[Expression],
-                  override val dslType:ListType) extends Literal[Array[Expression],ListType](literal){
-    override def toString: String = s"[${literal.mkString(",")}]"
+                  override val dslType:ListType) extends Literal[Array[Expression],ListType](literal) {
+    override def toString: String = s"[${literal.mkString( "," )}]"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], ListType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new ListLiteral( literal, dslType.asInstanceOf[ListType] )
+        } else {
+            this
+        }
+    }
 }
 
 /**
  *
- *<pre><code>
- *program{
+ * <pre><code>
+ * program{
  *
- *      def method()=Unit{
- *          Set[Int] set = (1,2,3); //(1,2,3) => SetLiteral
- *      }
- *}<pre><code>
+ * def method()=Unit{
+ * Set[Int] set = {1,2,3}; //{1,2,3} => SetLiteral
+ * }
+ * }<pre><code>
  */
 class SetLiteral(literal: Array[Expression],
-                 override val dslType: SetType) extends Literal[Array[Expression], SetType]( literal ){
-    override def toString: String = s"(${literal.mkString(",")})"
+                 override val dslType: SetType) extends Literal[Array[Expression], SetType]( literal ) {
+    override def toString: String = s"(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], SetType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new SetLiteral( literal, dslType.asInstanceOf[SetType] )
+        } else {
+            this
+        }
+    }
+
 }
 
 /**
@@ -238,8 +326,16 @@ class SetLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class TupleLiteral(literal: Array[Expression],
-                   override val dslType: TupleType) extends Literal[Array[Expression], TupleType]( literal ){
-    override def toString: String = s"(${literal.mkString(",")})"
+                   override val dslType: TupleType) extends Literal[Array[Expression], TupleType]( literal ) {
+    override def toString: String = s"(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], TupleType] = {
+        if (this.dslType.valueTypes.contains( UnResolvedType )) {
+            new TupleLiteral( literal, dslType.asInstanceOf[TupleType] )
+        } else {
+            this
+        }
+    }
 }
 
 /**
@@ -254,24 +350,32 @@ class TupleLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class MapLiteral(literal: Array[(Expression, Expression)],
-                 override val dslType: MapType) extends Literal[Array[(Expression, Expression)], MapType]( literal ){
-    override def toString: String = s"{${literal.map(kv⇒kv._1.toString+":"+kv._2.toString).mkString(",")}}"
+                 override val dslType: MapType) extends Literal[Array[(Expression, Expression)], MapType]( literal ) {
+    override def toString: String = s"{${literal.map( kv ⇒ kv._1.toString + ":" + kv._2.toString ).mkString( "," )}}"
+
+    override def resolvedType(dslType: DslType): Literal[Array[(Expression, Expression)], MapType] = {
+        if (this.dslType.keyType == UnResolvedType || this.dslType.valueType == UnResolvedType) {
+            new MapLiteral( literal, dslType.asInstanceOf[MapType] )
+        } else {
+            this
+        }
+    }
 }
 
 //async expression
 
 /**
- *<pre><code>
- *program{
- *      def method()=Unit{
- *          Future[Int] future = Async{ // Async{ ... } => Async
- *              return foo();
- *          }
- *      }
- *}<pre><code>
+ * <pre><code>
+ * program{
+ * def method()=Unit{
+ * Future[Int] future = Async{ // Async{ ... } => Async
+ * return foo();
+ * }
+ * }
+ * }<pre><code>
  */
-case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends Expression{
-    override def toString: String =s"Async $body"
+case class Async(body: Block, executor: Option[FieldScope], dslType: FutureType) extends Expression {
+    override def toString: String = s"Async $body"
 
 }
 
@@ -283,14 +387,32 @@ case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends
  *program{
  *      def method()=Unit{
  *          Try[Int] maySuccess = Try{ // Try{ ... } => Try
- *              return foo();
- *          }
- *      }
- *}<pre><code>
+ * return foo();
+ * }
+ * }
+ * }<pre><code>
  */
-case class Try(body: Block, dslType: TryType) extends Expression{
+case class Try(body: Block, dslType: TryType) extends Expression {
     override def toString: String = s"Try $body"
 
+}
+
+//custom block expression
+
+/**
+ * <pre><code>
+ * program{
+ * def method()=Unit{
+ * String body = "body";
+ * Int len = body.length;
+ * Json maySuccess = Json{ // Json{ ... } => Json
+ * {"body":body,"len":len}
+ * }
+ * }
+ * }<pre><code>
+ */
+case class CustomBlockExpression(name: String, body: Block, param: Option[FieldScope]) extends Expression {
+    override def toString: String = s"$name $body"
 }
 
 
@@ -298,10 +420,10 @@ case class Try(body: Block, dslType: TryType) extends Expression{
 
 
 /**
- *<pre><code>
- *program{
- *      def method()=Unit{
- *          Int=>Int lambda = p=>{  // p=> { ... } => Lambda
+ * <pre><code>
+ * program{
+ * def method()=Unit{
+ * Int=>Int lambda = p=>{  // p=> { ... } => Lambda
  *              return p*2;
  *          }
  *          lambda.apply(2);

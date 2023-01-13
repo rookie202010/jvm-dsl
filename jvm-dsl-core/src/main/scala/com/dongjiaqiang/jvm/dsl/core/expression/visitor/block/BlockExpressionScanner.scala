@@ -70,6 +70,11 @@ trait BlockExpressionScanner extends BlockExpressionVisitor[Unit] {
     visit( tryBlock.body, visitor )
   }
 
+
+  override def visit(customBlockExpression: CustomBlockExpression, visitor: ExpressionVisitor[Unit]): Unit = {
+    visit( customBlockExpression.body, visitor )
+  }
+
   override def visit(matchCase: MatchCase, visitor: ExpressionVisitor[Unit]): Unit = {
     visitor.visit( matchCase.matched )
     matchCase.cases.foreach {
@@ -78,5 +83,40 @@ trait BlockExpressionScanner extends BlockExpressionVisitor[Unit] {
         visitor.visit( b )
     }
     matchCase.default.foreach( visitor.visit )
+  }
+
+  override def visit(matchType: MatchType, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
+
+  override def visit(matchHead: MatchHead, visitor: ExpressionVisitor[Unit]): Unit = {
+    matchHead.head.foreach {
+      case Left( expression ) ⇒ visitor.visit( expression )
+      case _ ⇒
+    }
+    matchHead.tail match {
+      case Left( expression ) ⇒ visitor.visit( expression )
+    }
+  }
+
+  override def visit(matchList: MatchList, visitor: ExpressionVisitor[Unit]): Unit = {
+    matchList.expressions.foreach {
+      case Left( expression ) ⇒ visitor.visit( expression )
+      case _ ⇒
+    }
+  }
+
+  override def visit(matchTuple: MatchTuple, visitor: ExpressionVisitor[Unit]): Unit = {
+    matchTuple.expressions.foreach {
+      case Left( expression ) ⇒ visitor.visit( expression )
+      case _ ⇒
+    }
+  }
+
+  override def visit(matchClass: MatchClass, visitor: ExpressionVisitor[Unit]): Unit = {
+    matchClass.expressions.foreach {
+      case Left( expression ) ⇒ visitor.visit( expression )
+      case _ ⇒
+    }
   }
 }

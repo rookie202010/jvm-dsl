@@ -45,15 +45,28 @@ trait LiteralExpressionVisitor[T] {
     throw new UnsupportedOperationException("not supported")
   }
 
-  def visit(literal: TupleLiteral, visitor: ExpressionVisitor[T]): T={
-    throw new UnsupportedOperationException("not supported")
+  def visit(literal: TupleLiteral, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
   }
 
-  def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[T]): T={
-    throw new UnsupportedOperationException("not supported")
+  def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
   }
 
-  def visit(literal: OptionLiteral, visitor: ExpressionVisitor[T]): T={
-    throw new UnsupportedOperationException("not supported")
+  def visit(literal: ArrayLiteral, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(literal: EitherLiteral, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+
+  def visit(literal: OptionLiteral, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
   }
 }

@@ -28,17 +28,23 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext,Expression] 
       ClassLiteralGenerator.generate( exprContext, ruleContext.classLiteral( ) )
     } else if (ruleContext.variable( ) != null) {
       VarGenerator.generate( exprContext, ruleContext.variable( ) )
+    } else if (ruleContext.arrayVariable( ) != null) {
+
+      val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
+      val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
+      new ArrayVarRef( indexExpr, variable.name, variable.fieldScope.dslType, variable.fieldScope )
+
     } else if (ruleContext.optionalLiteral( ) != null) {
       OptionLiteralGenerator.generate( exprContext, ruleContext.optionalLiteral( ) )
     } else if (ruleContext.listLiteral( ) != null) {
       ListLiteralGenerator.generate( exprContext, ruleContext.listLiteral( ) )
-    }else if(ruleContext.setLiteral()!=null){
+    } else if (ruleContext.setLiteral( ) != null) {
       SetLiteralGenerator.generate( exprContext, ruleContext.setLiteral( ) )
-    }else if(ruleContext.mapLiteral()!=null){
+    } else if (ruleContext.mapLiteral( ) != null) {
       MapLiteralGenerator.generate( exprContext, ruleContext.mapLiteral( ) )
-    }else if(ruleContext.tupleLiteral()!=null){
+    } else if (ruleContext.tupleLiteral( ) != null) {
       TupleLiteralGenerator.generate( exprContext, ruleContext.tupleLiteral( ) )
-    }else{
+    } else {
       null
     }
   }

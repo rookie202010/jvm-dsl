@@ -9,6 +9,6 @@ object VarDefGenerator extends IExpressionGenerator[VarDefContext, LocalVarDef] 
   override def generate(exprContext: ExprContext, ruleContext: VarDefContext): LocalVarDef = {
     val fieldScope = exprContext.getContextScope.fields( ruleContext.parameter( ).localVariable( ).getText )
     val assigned = Option.apply( ruleContext.expression( ) ).map( c ⇒ ExpressionGenerator.generate( exprContext, c ) )
-    LocalVarDef( fieldScope, assigned )
+    LocalVarDef( fieldScope, fieldScope.dslType, assigned )
   }
 }

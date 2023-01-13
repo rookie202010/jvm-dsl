@@ -1,8 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
+import com.dongjiaqiang.jvm.dsl.core.`type`.{ArrayType, DslType, EitherType, UnResolvedType}
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
 
 import scala.collection.mutable.ArrayBuffer
@@ -82,7 +82,26 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
 
   override def visit(block: Block, visitor: ExpressionVisitor[Expression]): Block = {
     val newExpression = ArrayBuffer[Expression]( )
-    revise( super.visit( block, visitor ).expressions, newExpression )
-    new Block( newExpression )
+    revise( block.expressions, newExpression )
+    super.visit( new Block( newExpression ), visitor )
+  }
+
+  override def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[Expression]): Expression = {
+    literal.dslType.clazzName match {
+      case "Array" ⇒ new ArrayLiteral( literal.literal, new ArrayType( literal.dslType.valueTypes.headOption.getOrElse( UnResolvedType ) ) )
+      case "Left" ⇒
+        val list = literal.literal
+        new EitherLiteral( Left( list.head ), new EitherType(
+          literal.dslType.valueTypes.headOption.getOrElse( UnResolvedType ),
+          literal.dslType.valueTypes.lastOption.getOrElse( UnResolvedType )
+        ) )
+      case "Right" ⇒
+        val list = literal.literal
+        new EitherLiteral( Right( list.head ), new EitherType(
+          literal.dslType.valueTypes.headOption.getOrElse( UnResolvedType ),
+          literal.dslType.valueTypes.lastOption.getOrElse( UnResolvedType )
+        ) )
+      case _ ⇒ literal
+    }
   }
 }
