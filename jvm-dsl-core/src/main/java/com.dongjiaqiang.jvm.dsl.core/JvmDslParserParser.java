@@ -8500,19 +8500,15 @@ public class JvmDslParserParser extends Parser {
 		public ListLiteralContext listLiteral() {
 			return getRuleContext(ListLiteralContext.class, 0);
 		}
-
 		public SetLiteralContext setLiteral() {
 			return getRuleContext(SetLiteralContext.class, 0);
 		}
-
 		public MapLiteralContext mapLiteral() {
 			return getRuleContext(MapLiteralContext.class, 0);
 		}
-
 		public TupleLiteralContext tupleLiteral() {
 			return getRuleContext(TupleLiteralContext.class, 0);
 		}
-
 		public NulLiteralContext nulLiteral() {
 			return getRuleContext(NulLiteralContext.class, 0);
 		}
@@ -8530,7 +8526,6 @@ public class JvmDslParserParser extends Parser {
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof JvmDslParserListener) ((JvmDslParserListener) listener).enterLiteral(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof JvmDslParserListener ) ((JvmDslParserListener)listener).exitLiteral(this);
@@ -8783,12 +8778,10 @@ public class JvmDslParserParser extends Parser {
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof JvmDslParserListener) ((JvmDslParserListener) listener).enterNulLiteral(this);
 		}
-
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof JvmDslParserListener) ((JvmDslParserListener) listener).exitNulLiteral(this);
 		}
-
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if (visitor instanceof JvmDslParserVisitor)
@@ -8825,7 +8818,6 @@ public class JvmDslParserParser extends Parser {
 		public List<LiteralAndCallChainContext> literalAndCallChain() {
 			return getRuleContexts(LiteralAndCallChainContext.class);
 		}
-
 		public LiteralAndCallChainContext literalAndCallChain(int i) {
 			return getRuleContext(LiteralAndCallChainContext.class, i);
 		}

@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.java.core
 
-import com.dongjiaqiang.jvm.dsl.core.`type`._
+import com.dongjiaqiang.jvm.dsl.api.`type`._
 import org.scalatest.funsuite.AnyFunSuite
 
 class JavaTypeSuit extends AnyFunSuite {

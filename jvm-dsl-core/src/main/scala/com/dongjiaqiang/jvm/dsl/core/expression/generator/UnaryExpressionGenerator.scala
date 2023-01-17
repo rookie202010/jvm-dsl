@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
-import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
-import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
+import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionContext,Expression]{
 
@@ -11,7 +11,7 @@ object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionCont
                         ruleContext: UnaryExpressionContext): Expression = {
     ruleContext match {
       case c: CastExprContext ⇒
-        val dslType = DslType.unapply( c.`type`( ) )
+        val dslType = toDslType( c.`type`( ) )
         Cast( generate( exprContext, c.unaryExpression( ) ), dslType )
       case c: NegateExprContext ⇒
         Negate( generate( exprContext, c.unaryExpression( ) ) )
@@ -20,7 +20,7 @@ object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionCont
       case c: ParenExprContext ⇒
         Paren( generate( exprContext, c.unaryExpression( ) ) )
       case c: InstanceofExprContext ⇒
-        val dslType = DslType.unapply( c.`type`( ) )
+        val dslType = toDslType( c.`type`( ) )
         Instanceof( CallChainGenerator.generate( exprContext, c.literalAndCallChain( ) ),
           dslType )
       case c: LiteralAndFuncCallExprContext ⇒

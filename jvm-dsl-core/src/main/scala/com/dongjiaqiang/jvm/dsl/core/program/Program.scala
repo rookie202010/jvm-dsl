@@ -1,8 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.program
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionScanner, ExpressionVisitor}
-import com.dongjiaqiang.jvm.dsl.core.expression.{Block, Expression}
-import com.dongjiaqiang.jvm.dsl.core.scope.{ClazzScope, MethodScope, ProgramScope}
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.{Block, Expression}
+import com.dongjiaqiang.jvm.dsl.api.scope.{ClazzScope, MethodScope, ProgramScope}
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionScanner}
 
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 

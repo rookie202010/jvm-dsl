@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
+import com.dongjiaqiang.jvm.dsl.api.expression.Expression
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.ExpressionContext
-import com.dongjiaqiang.jvm.dsl.core.expression.Expression
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 object ExpressionGenerator extends IExpressionGenerator[ExpressionContext, Expression] {

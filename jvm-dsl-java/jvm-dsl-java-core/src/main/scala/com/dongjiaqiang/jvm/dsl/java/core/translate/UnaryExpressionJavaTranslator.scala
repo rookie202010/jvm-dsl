@@ -1,8 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression.UnaryExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.unary.expression.UnaryExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaTranslatorContext
 import com.dongjiaqiang.jvm.dsl.java.core
 
 trait UnaryExpressionJavaTranslator extends UnaryExpressionVisitor[String] {

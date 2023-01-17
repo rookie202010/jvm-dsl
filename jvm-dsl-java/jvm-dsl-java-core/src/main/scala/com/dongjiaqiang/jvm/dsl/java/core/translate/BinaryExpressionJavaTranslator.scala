@@ -1,8 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression.BinaryExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.binary.expression.BinaryExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaTranslatorContext
 
 trait BinaryExpressionJavaTranslator extends BinaryExpressionVisitor[String] {
 

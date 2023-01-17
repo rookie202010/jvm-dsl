@@ -1,8 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
 
-trait StatementExpressionScanner extends StatementExpressionVisitor[Unit]{
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.statement.StatementExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+
+trait StatementExpressionScanner extends StatementExpressionVisitor[Unit] {
   override def visit(assign: Assign, visitor: ExpressionVisitor[Unit]): Unit = {
 
   }

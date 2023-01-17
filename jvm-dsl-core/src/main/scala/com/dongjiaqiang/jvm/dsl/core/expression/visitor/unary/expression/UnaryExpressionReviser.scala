@@ -1,9 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.unary.expression.UnaryExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 
-trait UnaryExpressionReviser extends UnaryExpressionVisitor[Expression]{
+trait UnaryExpressionReviser extends UnaryExpressionVisitor[Expression] {
 
   private def revise(unaryExpression: UnaryExpression,
                      visitor: ExpressionVisitor[Expression],

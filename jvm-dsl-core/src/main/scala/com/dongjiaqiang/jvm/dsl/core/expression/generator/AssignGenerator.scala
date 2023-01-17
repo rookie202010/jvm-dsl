@@ -1,11 +1,12 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
+import com.dongjiaqiang.jvm.dsl.api
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
-import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 
-object AssignGenerator extends IExpressionGenerator[AssignmentContext,Assign] {
+object AssignGenerator extends IExpressionGenerator[AssignmentContext, Assign] {
 
   def generate(varRef: VarRef,
                assignOperatorContext: AssignOperatorContext,
@@ -14,7 +15,7 @@ object AssignGenerator extends IExpressionGenerator[AssignmentContext,Assign] {
     val expression = ExpressionGenerator.generate( exprContext, assignmentContext.expression( ) )
 
     if (assignOperatorContext.ASSIGN( ) != null) {
-      Assign( varRef, expression )
+      api.expression.Assign( varRef, expression )
     } else if (assignOperatorContext.OR_ASSIGN( ) != null) {
       Assign( varRef, Or( varRef, expression ) )
     } else if (assignOperatorContext.AND_ASSIGN( ) != null) {

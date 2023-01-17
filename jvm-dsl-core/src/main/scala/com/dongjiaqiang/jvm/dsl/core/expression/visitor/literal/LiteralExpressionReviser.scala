@@ -1,10 +1,12 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 
-import com.dongjiaqiang.jvm.dsl.core.expression._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 
-trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression]{
+trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression] {
 
 
   override def visit(literal: IntLiteral,

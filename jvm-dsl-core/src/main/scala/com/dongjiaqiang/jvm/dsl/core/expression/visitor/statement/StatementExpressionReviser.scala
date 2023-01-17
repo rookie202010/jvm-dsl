@@ -1,17 +1,18 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
 
-import com.dongjiaqiang.jvm.dsl.core.expression.{Expression, _}
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.statement.StatementExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 
 
-trait StatementExpressionReviser extends StatementExpressionVisitor[Expression]{
-  override def visit(assign: Assign, visitor: ExpressionVisitor[Expression]): Expression={
-      val newVarRef = visitor.visit(assign.varRef).asInstanceOf[VarRef]
-      val newAssigned = visitor.visit(assign.assigned)
-      if(newVarRef!=assign.varRef||newAssigned!=assign.assigned){
-        Assign(newVarRef,newAssigned)
-      }else{
-        assign
+trait StatementExpressionReviser extends StatementExpressionVisitor[Expression] {
+  override def visit(assign: Assign, visitor: ExpressionVisitor[Expression]): Expression = {
+    val newVarRef = visitor.visit( assign.varRef ).asInstanceOf[VarRef]
+    val newAssigned = visitor.visit( assign.assigned )
+    if (newVarRef != assign.varRef || newAssigned != assign.assigned) {
+      Assign( newVarRef, newAssigned )
+    } else {
+      assign
       }
   }
 

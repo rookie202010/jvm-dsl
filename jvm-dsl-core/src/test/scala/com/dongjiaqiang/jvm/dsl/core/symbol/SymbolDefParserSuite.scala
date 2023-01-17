@@ -1,8 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.symbol
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.{IntType, MapType, StringType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{IntType, MapType, StringType}
+import com.dongjiaqiang.jvm.dsl.api.scope._
 import com.dongjiaqiang.jvm.dsl.core.parser.SymbolDefParser
-import com.dongjiaqiang.jvm.dsl.core.scope._
 import com.dongjiaqiang.jvm.dsl.core.{JvmDslLexer, JvmDslParserParser}
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}

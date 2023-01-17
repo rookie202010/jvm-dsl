@@ -1,9 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
+import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, UnResolvedType}
+import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
-import com.dongjiaqiang.jvm.dsl.core.`type`.{DslType, UnResolvedType}
-import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
+import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import java.util
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -31,7 +32,7 @@ class MatchCaseParser(val programScope: ProgramScope) {
       caseExpr ⇒
         if (caseExpr.typeMatchExpression( ) != null) {
           val fieldName = caseExpr.typeMatchExpression( ).localVariable( ).IDENTIFIER( ).getText
-          val dslType = DslType.unapply( caseExpr.typeMatchExpression( ).`type`( ) )
+          val dslType = toDslType( caseExpr.typeMatchExpression( ).`type`( ) )
           caseQueue.add( Array( (fieldName, dslType) ) )
         } else {
           caseQueue.add( resolveUnapplyExpression( caseExpr.unapplyExpression( ) ).map( v ⇒ (v, UnResolvedType) ) )

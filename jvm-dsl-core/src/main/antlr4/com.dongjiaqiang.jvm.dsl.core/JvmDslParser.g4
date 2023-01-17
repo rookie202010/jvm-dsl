@@ -1,6 +1,6 @@
 grammar JvmDslParser;
 
-import JvmDslLexer;
+//import JvmDslLexer;
 
 //@header {package com.dongjiaqiang.jvm.dsl.core;}
 

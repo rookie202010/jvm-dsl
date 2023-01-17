@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
-import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.core.expression._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
 case class ExpressionResultType(dslType: Option[DslType])
 

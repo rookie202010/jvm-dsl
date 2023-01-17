@@ -9,6 +9,7 @@
     <version>1.0</version>
 
     <modules>
+        <module>jvm-dsl-api</module>
         <module>jvm-dsl-core</module>
         <module>jvm-dsl-java</module>
     </modules>

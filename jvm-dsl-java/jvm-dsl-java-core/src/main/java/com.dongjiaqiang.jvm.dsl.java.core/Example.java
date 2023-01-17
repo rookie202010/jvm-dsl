@@ -1,9 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.java.core;
 
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.consumer._Runnable;
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.function._1_Function;
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.supplier._1_Supplier;
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.supplier._LongSupplier;
+
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._Runnable;
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._1_Supplier;
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._LongSupplier;
 
 import java.util.List;
 import java.util.Optional;

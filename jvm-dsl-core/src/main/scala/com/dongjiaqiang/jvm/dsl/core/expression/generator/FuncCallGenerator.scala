@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
+import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, FuncCall, FuncCallChain, LiteralCall, LiteralCallChain, MethodCall, Part, StaticCall, VarCall, VarName}
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
-import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
-import com.dongjiaqiang.jvm.dsl.core.expression.{Expression, FuncCall, FuncCallChain, LiteralCall, LiteralCallChain, MethodCall, Part, StaticCall, VarCall, VarName}
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
+import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
@@ -47,7 +47,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
                 funcName: String, typeContext: TypeContext,
                 expressions: List[ExpressionContext]): FuncCall = {
     Option.apply( typeContext )
-      .map( t ⇒ DslType.unapply( t ) )
+      .map( t ⇒ toDslType( t ) )
     match {
       case Some( t ) ⇒
         new StaticCall( t, funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ).toArray )
