@@ -1,17 +1,20 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.callchain.CallChainExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 
-trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression]{
-  def revise(tails:List[Part],visitor: ExpressionVisitor[Expression]):Option[List[Part]]= {
+trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression] {
+  def revise(tails: List[Part], visitor: ExpressionVisitor[Expression]): Option[List[Part]] = {
 
     val reviseTails = tails.map {
       case varName: VarName ⇒
         varName
       case methodCall: MethodCall ⇒
-        new MethodCall(methodCall.methodScope, methodCall.name, methodCall.params.map(visitor.visit))
+        new MethodCall( methodCall.methodScope, methodCall.name, methodCall.params.map( visitor.visit ) )
     }
 
     val success = reviseTails.zip(tails)
@@ -45,32 +48,32 @@ trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression]{
       funcCallChain.head match {
         case methodCall: MethodCall⇒
           if(reviseTails.isDefined || params.isDefined) {
-            FuncCallChain(new MethodCall(methodCall.methodScope,
-              methodCall.name, params.getOrElse(methodCall.params)),
-              reviseTails.getOrElse(funcCallChain.tails))
+            expression.FuncCallChain( new MethodCall( methodCall.methodScope,
+              methodCall.name, params.getOrElse( methodCall.params ) ),
+              reviseTails.getOrElse( funcCallChain.tails ) )
           }else{
               funcCallChain
           }
         case staticCall: StaticCall⇒
           if(reviseTails.isDefined || params.isDefined) {
-            FuncCallChain(new StaticCall(staticCall.`type`, staticCall.name,
-              params.getOrElse(staticCall.params)), reviseTails.getOrElse(funcCallChain.tails))
+            expression.FuncCallChain( new StaticCall( staticCall.`type`, staticCall.name,
+              params.getOrElse( staticCall.params ) ), reviseTails.getOrElse( funcCallChain.tails ) )
           }else{
             funcCallChain
           }
         case literalCall: LiteralCall⇒
           val reviseLiteral = visitor.visit(literalCall.literal)
           if(reviseTails.isDefined || reviseLiteral!=literalCall.literal || params.isDefined){
-              FuncCallChain(new LiteralCall(reviseLiteral,literalCall.name,params.getOrElse(literalCall.params)),
-                reviseTails.getOrElse(funcCallChain.tails))
+            expression.FuncCallChain( new LiteralCall( reviseLiteral, literalCall.name, params.getOrElse( literalCall.params ) ),
+              reviseTails.getOrElse( funcCallChain.tails ) )
           }else{
               funcCallChain
           }
         case varCall:VarCall⇒
           val reviseVar = visitor.visit(varCall.varRef) .asInstanceOf[VarRef]
           if(reviseTails.isDefined || reviseVar!=varCall.varRef || params.isDefined){
-            FuncCallChain(new VarCall(reviseVar,varCall.name,params.getOrElse(varCall.params)),
-              reviseTails.getOrElse(funcCallChain.tails))
+            expression.FuncCallChain( new VarCall( reviseVar, varCall.name, params.getOrElse( varCall.params ) ),
+              reviseTails.getOrElse( funcCallChain.tails ) )
           }else{
             funcCallChain
           }

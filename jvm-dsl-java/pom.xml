@@ -17,6 +17,7 @@
     <name>jvm-dsl-java</name>
 
     <modules>
+        <module>jvm-dsl-java-api</module>
         <module>jvm-dsl-java-core</module>
         <module>jvm-dsl-java-json</module>
         <module>jvm-dsl-java-http</module>

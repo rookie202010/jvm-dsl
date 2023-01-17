@@ -1,8 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
 
-trait UnaryExpressionScanner extends UnaryExpressionVisitor[Unit]{
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.unary.expression.UnaryExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+
+trait UnaryExpressionScanner extends UnaryExpressionVisitor[Unit] {
   override def visit(negate: Negate, visitor: ExpressionVisitor[Unit]): Unit = {
 
   }

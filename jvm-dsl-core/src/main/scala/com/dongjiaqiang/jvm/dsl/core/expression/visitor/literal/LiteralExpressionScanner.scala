@@ -1,6 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
-import com.dongjiaqiang.jvm.dsl.core.expression._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 
 trait LiteralExpressionScanner extends LiteralExpressionVisitor[Unit] {
   override def visit(literal: IntLiteral, visitor: ExpressionVisitor[Unit]): Unit = {

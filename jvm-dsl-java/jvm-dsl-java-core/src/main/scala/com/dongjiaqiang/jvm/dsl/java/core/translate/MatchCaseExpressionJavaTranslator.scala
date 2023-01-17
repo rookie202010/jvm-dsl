@@ -1,12 +1,12 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
-import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.block.BlockExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
+import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaLocalVarDef, JavaTranslatorContext, JavaVarCall, JavaVarRef}
 import com.dongjiaqiang.jvm.dsl.java.core
-import com.dongjiaqiang.jvm.dsl.java.core.exception.JavaTranslatorException
-import com.dongjiaqiang.jvm.dsl.java.core.extend.{Failure, Success}
 
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.ArrayBuffer
@@ -198,17 +198,17 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
           case _: SomeType ⇒
             testCode( matched, "java.util.Optional.empty()", "java.util.Optional", "!=", counter )
           case _: LeftType ⇒
-            testCode( matched, classOf[core.extend.Left[_, _]].getCanonicalName,
-              classOf[core.extend.Left[_, _]].getCanonicalName, "instanceof", counter )
+            testCode( matched, classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Left[_, _]].getCanonicalName,
+              classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Left[_, _]].getCanonicalName, "instanceof", counter )
           case _: RightType ⇒
-            testCode( matched, classOf[core.extend.Right[_, _]].getCanonicalName,
-              classOf[core.extend.Right[_, _]].getCanonicalName, "instanceof", counter )
+            testCode( matched, classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Right[_, _]].getCanonicalName,
+              classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Right[_, _]].getCanonicalName, "instanceof", counter )
           case _: SuccessType ⇒
-            testCode( matched, classOf[Success[_]].getCanonicalName,
-              classOf[Success[_]].getCanonicalName, "instanceof", counter )
+            testCode( matched, classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Success[_]].getCanonicalName,
+              classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Success[_]].getCanonicalName, "instanceof", counter )
           case FailureType ⇒
-            testCode( matched, classOf[Failure[_]].getCanonicalName,
-              classOf[Failure[_]].getCanonicalName, "instanceof", counter )
+            testCode( matched, classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Failure[_]].getCanonicalName,
+              classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Failure[_]].getCanonicalName, "instanceof", counter )
           case clazzType: ClazzType ⇒
             testCode( matched, clazzType.clazzName,
               clazzType.clazzName, "instanceof", counter )
@@ -300,9 +300,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
     expression match {
       case matchHead: MatchHead ⇒
         val tailLiteral = new ListLiteral( Array( JavaVarCall( List( matched ),
-          "subList", Array( new IntLiteral( ${
-            matchHead.head.length
-          } ), JavaVarCall( List( matched ), "size", Array( ) ) ) ) ), listType )
+          "subList", Array( new IntLiteral( matchHead.head.length ), JavaVarCall( List( matched ), "size", Array( ) ) ) ) ), listType )
 
         matchHead.tail match {
           case Left( expression ) ⇒

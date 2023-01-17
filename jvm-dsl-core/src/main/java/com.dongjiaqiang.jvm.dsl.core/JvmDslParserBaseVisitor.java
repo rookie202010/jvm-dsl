@@ -407,16 +407,21 @@ public class JvmDslParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
     public T visitForStatementTwo(JvmDslParserParser.ForStatementTwoContext ctx) {
         return visitChildren(ctx);
     }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitForStatementThree(JvmDslParserParser.ForStatementThreeContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitForStatementThree(JvmDslParserParser.ForStatementThreeContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
@@ -829,18 +834,24 @@ public class JvmDslParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	@Override public T visitParenMultiOpExpr(JvmDslParserParser.ParenMultiOpExprContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitParenMultiOpParenExpr(JvmDslParserParser.ParenMultiOpParenExprContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitMultiOpParenExpr(JvmDslParserParser.MultiOpParenExprContext ctx) { return visitChildren(ctx);
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitParenMultiOpParenExpr(JvmDslParserParser.ParenMultiOpParenExprContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitMultiOpParenExpr(JvmDslParserParser.MultiOpParenExprContext ctx) {
+        return visitChildren(ctx);
     }
 
     /**
@@ -1142,9 +1153,9 @@ public class JvmDslParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 
     /**
      * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override
     public T visitByteType(JvmDslParserParser.ByteTypeContext ctx) {
@@ -1584,16 +1595,22 @@ public class JvmDslParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
      * {@inheritDoc}
      *
      * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitVariable(JvmDslParserParser.VariableContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitImportClazz(JvmDslParserParser.ImportClazzContext ctx) { return visitChildren(ctx); }
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitVariable(JvmDslParserParser.VariableContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitImportClazz(JvmDslParserParser.ImportClazzContext ctx) {
+        return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

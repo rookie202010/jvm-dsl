@@ -1,9 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.NumberDslType
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.`var`.VarExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.`type`.{LambdaType, NumberDslType}
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.`var`.VarExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaLambda, JavaMatchCase, JavaTranslatorContext}
 import com.dongjiaqiang.jvm.dsl.java.core
 
 trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
@@ -13,7 +14,7 @@ trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
   override def visit(localVarDef: LocalVarDef, visitor: ExpressionVisitor[String]): String = {
     val javaType = localVarDef.dslType match {
       case numberType: NumberDslType ⇒
-        core.toBasicType(numberType)
+        core.toBasicType( numberType )
       case _ ⇒ core.toJavaType(localVarDef.dslType)
     }
     localVarDef.assigned match {
@@ -21,15 +22,15 @@ trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
       case Some(expression) ⇒ {
         expression match {
           case matchCase: MatchCase ⇒
-            s"$javaType ${localVarDef.fieldScope.symbolName} = ${
-              visitor.visit(JavaMatchCase(localVarDef.dslType, ${
-                visitor.visit(matchCase)
-              }))
-            }"
-          case lambda: Lambda⇒
-
+            val javaMatchCase = JavaMatchCase( localVarDef.dslType, visitor.visit( matchCase ) )
+            s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( javaMatchCase )}"
+          case lambda: Lambda ⇒
+            localVarDef.dslType match {
+              case lambdaType: LambdaType ⇒
+                s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( JavaLambda( lambdaType, lambda ) )}"
+            }
           case _ ⇒
-            s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit(expression)}"
+            s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( expression )}"
         }
       }
     }
@@ -49,11 +50,6 @@ trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
 
 
   override def visit(lambda: Lambda, visitor: ExpressionVisitor[String]): String = {
-    //    if(javaTranslatorContext.javaTranslateConfig.getBoolean("java.translator.lambda.grammar.enable")) {
-    //      s"(${lambda.inputs.mkString(",")})->${visitor.visit(lambda)}"
-    //    }else{
-    //
-    //    }
     visitor.visit(lambda.body)
   }
 }

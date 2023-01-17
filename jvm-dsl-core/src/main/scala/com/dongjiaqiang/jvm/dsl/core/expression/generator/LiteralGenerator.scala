@@ -1,14 +1,15 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
-import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
+import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
 
-object LiteralGenerator extends IExpressionGenerator[LiteralContext,Expression] {
+object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression] {
 
   def expression(exprContext: ExprContext,
                  r: LiteralAndCallChainContext): Expression = {
@@ -56,7 +57,7 @@ object ClassLiteralGenerator extends IExpressionGenerator[ClassLiteralContext,Cl
   override def generate(exprContext: ExprContext,
                         ruleContext: ClassLiteralContext): ClazzLiteral = {
     val clazzName = ruleContext.clazzType( ).getText
-    val valueTypes = ruleContext.`type`( ).map( DslType.unapply ).toArray
+    val valueTypes = ruleContext.`type`( ).map( toDslType ).toArray
     val clazzType = new ClazzType( clazzName, valueTypes )
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )

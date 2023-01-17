@@ -2,11 +2,6 @@ package com.dongjiaqiang.jvm.dsl.core.config
 
 import com.typesafe.config.Config
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/20 
- * */
 object Configs {
 
   /**

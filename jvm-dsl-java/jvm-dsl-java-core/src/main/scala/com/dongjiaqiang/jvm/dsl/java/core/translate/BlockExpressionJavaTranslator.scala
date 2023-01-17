@@ -1,10 +1,12 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.block.BlockExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
+import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaTranslatorContext, JavaVarCall}
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._Runnable
 import com.dongjiaqiang.jvm.dsl.java.core
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.consumer._Runnable
 
 trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
 
@@ -141,6 +143,8 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
              |}.run()
              |
              |""".stripMargin
+        case _: Lambda ⇒
+          throw JavaTranslatorException( "illegal definition of a lambda expression alone in java" )
         case _ ⇒ visitor.visit( expression )
       }
     }

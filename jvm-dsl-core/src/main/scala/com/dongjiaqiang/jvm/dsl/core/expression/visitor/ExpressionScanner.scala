@@ -1,5 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor
-import com.dongjiaqiang.jvm.dsl.core.expression.Expression
+
+import com.dongjiaqiang.jvm.dsl.api.expression.Expression
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.`var`.VarExpressionScanner
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression.BinaryExpressionScanner
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.block.BlockExpressionScanner

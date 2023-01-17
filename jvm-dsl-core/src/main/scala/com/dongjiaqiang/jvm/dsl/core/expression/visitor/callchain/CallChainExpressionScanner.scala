@@ -1,9 +1,11 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.callchain.CallChainExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 
 
-trait CallChainExpressionScanner extends CallChainExpressionVisitor[Unit]{
+trait CallChainExpressionScanner extends CallChainExpressionVisitor[Unit] {
   override def visit(funcCallChain: FuncCallChain, visitor: ExpressionVisitor[Unit]): Unit = {
 
   }

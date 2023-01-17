@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.MatchCaseExpressionContext
-import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
-import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
+import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
@@ -19,7 +19,7 @@ object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpres
     val cases = ruleContext.caseExpression( ).map( ctx ⇒ {
       if (ctx.typeMatchExpression( ) != null) {
         val matchVar = MatchType( ctx.typeMatchExpression( ).localVariable( ).IDENTIFIER( ).getText,
-          DslType.unapply( ctx.typeMatchExpression( ).`type`( ) ) )
+          toDslType( ctx.typeMatchExpression( ).`type`( ) ) )
 
         val block = new Block( )
         exprContext.pushBlock( block )

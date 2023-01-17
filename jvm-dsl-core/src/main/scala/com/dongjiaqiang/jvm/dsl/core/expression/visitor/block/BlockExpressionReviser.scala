@@ -1,15 +1,18 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.block
 
-import com.dongjiaqiang.jvm.dsl.core.expression._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
+import com.dongjiaqiang.jvm.dsl.api.expression
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
   override def visit(block: Block,
                      visitor: ExpressionVisitor[Expression]): Block = {
-    val expressions = ExpressionReviser.revise[Expression,Expression](block.expressions.toArray,visitor)
+    val expressions = ExpressionReviser.revise[Expression, Expression]( block.expressions.toArray, visitor )
     if (expressions.isDefined) {
-      val newBlock = new Block()
-      expressions.get.foreach(e⇒newBlock.expressions.append(e))
+      val newBlock = new Block( )
+      expressions.get.foreach( e ⇒ newBlock.expressions.append( e ) )
       newBlock
     } else {
       block
@@ -158,7 +161,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     val reviseCases = ExpressionReviser.revise[Expression, Block, Expression, Block]( matchCase.cases, visitor, visitor )
     val reviseDefault = ExpressionReviser.revise[Expression, Block]( matchCase.default, visitor )
     if (reviseCases.isDefined || reviseDefault.isDefined) {
-      MatchCase( matchCase.matched, reviseCases.getOrElse( matchCase.cases ),
+      expression.MatchCase( matchCase.matched, reviseCases.getOrElse( matchCase.cases ),
         if (reviseDefault.isEmpty) matchCase.default else reviseDefault.flatten )
     } else {
       matchCase

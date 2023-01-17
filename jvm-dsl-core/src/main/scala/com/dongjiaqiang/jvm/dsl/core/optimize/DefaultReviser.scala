@@ -1,9 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
-import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.core.expression._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
-import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks

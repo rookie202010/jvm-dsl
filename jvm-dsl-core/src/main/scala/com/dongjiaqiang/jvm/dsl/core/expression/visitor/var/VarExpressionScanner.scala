@@ -1,6 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.`var`
-import com.dongjiaqiang.jvm.dsl.core.expression._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.`var`.VarExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 
 trait VarExpressionScanner extends VarExpressionVisitor[Unit] {
   override def visit(localVarDef: LocalVarDef, visitor: ExpressionVisitor[Unit]): Unit = {

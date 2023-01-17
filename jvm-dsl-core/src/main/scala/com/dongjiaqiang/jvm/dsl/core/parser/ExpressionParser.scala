@@ -1,9 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
+import com.dongjiaqiang.jvm.dsl.api.expression
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.scope._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
-import com.dongjiaqiang.jvm.dsl.core.`type`.DslType
 import com.dongjiaqiang.jvm.dsl.core.exception.ExpressionParserException
-import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.generator._
 import com.dongjiaqiang.jvm.dsl.core.program.{Clazz, Method, Program}
 import com.dongjiaqiang.jvm.dsl.core.scope._
@@ -264,11 +265,11 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
       def varDef(fieldScope: FieldScope, context: VarDefContext): LocalVarDef = {
         if (context.expression( ) == null) {
-          LocalVarDef( fieldScope, fieldScope.dslType, None )
+          expression.LocalVarDef( fieldScope, fieldScope.dslType, None )
         } else if (context.expression( ).lambdaExpression( ) != null) {
-          LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
+          expression.LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
         } else {
-          LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
+          expression.LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
         }
       }
 
@@ -408,7 +409,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
             .foreach(p ⇒ {
               updateExpression(
                 new CatchParameter( p.localVariable( ).IDENTIFIER( ).getText,
-                  DslType.unapply( p.`type`( ) ) )
+                  toDslType( p.`type`( ) ) )
               )
             } )
         }

@@ -1,7 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.block
 
-import com.dongjiaqiang.jvm.dsl.core.expression._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 
 
 trait BlockExpressionScanner extends BlockExpressionVisitor[Unit] {

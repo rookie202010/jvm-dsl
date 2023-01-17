@@ -1,7 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.binary.expression.BinaryExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 
 trait BinaryExpressionReviser extends BinaryExpressionVisitor[Expression] {
 

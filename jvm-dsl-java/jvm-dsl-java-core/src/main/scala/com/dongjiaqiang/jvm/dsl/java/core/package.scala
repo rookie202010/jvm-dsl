@@ -1,14 +1,13 @@
 package com.dongjiaqiang.jvm.dsl.java
 
-import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.consumer._
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.function._
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.predicate._
-import com.dongjiaqiang.jvm.dsl.java.core.lambda.supplier._
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._
 
 import java.util.Optional
 import java.util.concurrent.CompletableFuture
-
 
 package object core {
 
