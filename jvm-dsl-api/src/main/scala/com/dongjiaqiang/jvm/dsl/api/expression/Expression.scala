@@ -1,8 +1,9 @@
-package com.dongjiaqiang.jvm.dsl.core.expression
+package com.dongjiaqiang.jvm.dsl.api.expression
 
-import com.dongjiaqiang.jvm.dsl.core.`type`._
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.scope.{FieldScope, MethodScope}
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.expression.expression.getString
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.scope.{FieldScope, MethodScope}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
@@ -2076,5 +2077,20 @@ case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],final
               tryCatch.catches.sameElements( tryCatch.catches ) &&
               tryCatch.finallyBlock == finallyBlock
         case _ ⇒ false
+    }
+}
+
+package object expression {
+
+    def getString(start: String, end: String, sep: String, expressions: Array[Either[Expression, String]]): String =
+        s"$start${
+            expressions.map {
+                case Left( i ) ⇒ i.toString
+                case Right( j ) ⇒ j
+            }.mkString( sep )
+        }$end"
+
+    def getString[T](t: T, name: String, params: Array[Expression]): String = {
+        s"$t.$name(${params.mkString( "." )})"
     }
 }

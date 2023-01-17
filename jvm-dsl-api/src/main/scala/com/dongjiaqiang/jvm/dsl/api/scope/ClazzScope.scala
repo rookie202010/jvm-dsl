@@ -1,14 +1,14 @@
-package com.dongjiaqiang.jvm.dsl.core.scope
+package com.dongjiaqiang.jvm.dsl.api.scope
 
-import com.dongjiaqiang.jvm.dsl.core.scope
+import com.dongjiaqiang.jvm.dsl.api.scope
 
 import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
-class ClazzScope(val outerScopeIndex:Int, val name:String,
-                 val fields:MutableMap[String,FieldScope],
-                 val methods:MutableMap[String,MethodScope]) extends Scope {
-  def this(outScopeIndex:Int, name:String) {
-    this( outScopeIndex,name, MutableMap( ), MutableMap( ) )
+class ClazzScope(val outerScopeIndex: Int, val name: String,
+                 val fields: MutableMap[String, FieldScope],
+                 val methods: MutableMap[String, MethodScope]) extends Scope {
+  def this(outScopeIndex: Int, name: String) {
+    this( outScopeIndex, name, MutableMap( ), MutableMap( ) )
   }
 
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {

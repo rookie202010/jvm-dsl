@@ -1,4 +1,6 @@
-package com.dongjiaqiang.jvm.dsl.core.scope
+package com.dongjiaqiang.jvm.dsl.api.scope
+
+import com.dongjiaqiang.jvm.dsl.api.scope
 
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
@@ -8,7 +10,7 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
                    val importClasses: ArrayBuffer[String] = ArrayBuffer( ),
                    val importClassesFromPackage: MutableMap[String, String] = MutableMap( ),
                    val importPackages: MutableMap[String, String] = MutableMap( ),
-                   val lambdaBlockScope:ArrayBuffer[BlockScope] = ArrayBuffer()
+                   val lambdaBlockScope: ArrayBuffer[BlockScope] = ArrayBuffer( )
                   ) extends Scope {
 
   override def toString:String = "ProgramScope"
@@ -63,7 +65,6 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
    * resolve var refs in program (defined fields)
    */
   override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
-    import com.dongjiaqiang.jvm.dsl.core.scope
     scope.resolveVarRefs(index,refs,this, fields,skipCurrentScope = false,backRef = true,None)
   }
 

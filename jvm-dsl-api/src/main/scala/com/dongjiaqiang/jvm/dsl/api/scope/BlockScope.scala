@@ -1,6 +1,6 @@
-package com.dongjiaqiang.jvm.dsl.core.scope
+package com.dongjiaqiang.jvm.dsl.api.scope
 
-import com.dongjiaqiang.jvm.dsl.core.scope
+import com.dongjiaqiang.jvm.dsl.api.scope
 
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
