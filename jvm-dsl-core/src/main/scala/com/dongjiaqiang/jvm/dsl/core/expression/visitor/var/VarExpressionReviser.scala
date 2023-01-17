@@ -1,13 +1,13 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.`var`
 
-import com.dongjiaqiang.jvm.dsl.core.expression.{Expression, _}
+import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 
 trait VarExpressionReviser extends VarExpressionVisitor[Expression]{
   override def visit(localVarDef: LocalVarDef,visitor: ExpressionVisitor[Expression]): Expression={
       val assigned = ExpressionReviser.revise[Expression,Expression](localVarDef.assigned,visitor)
       if(assigned.isDefined){
-          LocalVarDef(localVarDef.fieldScope,assigned.get)
+        LocalVarDef( localVarDef.fieldScope, localVarDef.dslType, assigned.get )
       }else{
           localVarDef
       }
@@ -20,17 +20,17 @@ trait VarExpressionReviser extends VarExpressionVisitor[Expression]{
   override def visit(arrayVarRef: ArrayVarRef,visitor: ExpressionVisitor[Expression]): Expression={
       val indexExpression = visitor.visit(arrayVarRef.indexExpression)
       if(indexExpression!=arrayVarRef.indexExpression){
-          new ArrayVarRef(indexExpression,arrayVarRef.name,arrayVarRef.fieldScope)
+        new ArrayVarRef( indexExpression, arrayVarRef.name, arrayVarRef.fieldScope.dslType, arrayVarRef.fieldScope )
       }else{
           arrayVarRef
       }
   }
 
-  override def visit(mapVarRef: MapVarRef,visitor: ExpressionVisitor[Expression]): Expression={
-    val keyExpression = visitor.visit(mapVarRef.KeyExpression)
-    if(keyExpression!=mapVarRef.KeyExpression){
-      new MapVarRef(keyExpression,mapVarRef.name,mapVarRef.fieldScope)
-    }else{
+  override def visit(mapVarRef: MapVarRef,visitor: ExpressionVisitor[Expression]): Expression= {
+    val keyExpression = visitor.visit( mapVarRef.keyExpression )
+    if (keyExpression != mapVarRef.keyExpression) {
+      new MapVarRef( keyExpression, mapVarRef.name, mapVarRef.fieldScope.dslType, mapVarRef.fieldScope )
+    } else {
       mapVarRef
     }
   }

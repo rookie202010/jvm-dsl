@@ -1,13 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain
 
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression.{BoolLiteralCallChain, CharLiteralCallChain, ClazzLiteralCallChain, DoubleLiteralCallChain, FloatLiteralCallChain, FuncCallChain, IntLiteralCallChain, ListLiteralCallChain, LongLiteralCallChain, MapLiteralCallChain, OptionLiteralCallChain, SetLiteralCallChain, StringLiteralCallChain, TupleLiteralCallChain}
+import com.dongjiaqiang.jvm.dsl.core.expression._
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
 trait CallChainExpressionVisitor[T] {
 
   def visit(funcCallChain: FuncCallChain, visitor: ExpressionVisitor[T]): T={

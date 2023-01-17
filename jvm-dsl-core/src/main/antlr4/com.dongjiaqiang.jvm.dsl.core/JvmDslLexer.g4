@@ -41,7 +41,6 @@ BYTE:               'Byte';
 CHAR:               'Char';
 STRING:             'String';
 LIST:               'List';
-ARRAY:              'Array';
 SET:                'Set';
 MAP:                'Map';
 OPTION:             'Option';

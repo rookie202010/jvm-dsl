@@ -5,11 +5,27 @@ import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.scope.{FieldScope, MethodScope}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.language.postfixOps
 
-sealed trait Expression {
-    def visit[T](expressionVisitor: ExpressionVisitor[T]):T = {
-        expressionVisitor.visit(this)
+trait Expression {
+
+
+    def visit[T](expressionVisitor: ExpressionVisitor[T]): T = {
+        expressionVisitor.visit( this )
     }
+}
+
+
+/**
+ * <pre><code>
+ * program{
+ * def method()=Unit{
+ * A a = null; // null is Null
+ * }
+ * }
+ * <pre><code>
+ */
+object Null extends Expression {
 }
 
 
@@ -19,33 +35,51 @@ sealed trait Expression {
  *
  * <pre><code>
  * program{
- *      def method()=Unit{
- *          Int i = foo()*10; //LocalVarDef
- *          Long j; //LocalVarDef
- *      }
+ * def method()=Unit{
+ * Int i = foo()*10; //LocalVarDef
+ * Long j; //LocalVarDef
+ * }
  * }<pre><code>
  */
-case class LocalVarDef(fieldScope: FieldScope, assigned: Option[Expression]) extends Expression{
+case class LocalVarDef(fieldScope: FieldScope, dslType: DslType, assigned: Option[Expression]) extends Expression {
     override def toString: String = assigned match {
-        case Some(v)⇒s"${fieldScope.dslType} ${fieldScope.symbolName} = $v"
-        case None⇒s"${fieldScope.dslType} ${fieldScope.symbolName}"
+        case Some( v ) ⇒ s"${fieldScope.dslType} ${fieldScope.symbolName} = $v"
+        case None ⇒ s"${fieldScope.dslType} ${fieldScope.symbolName}"
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case localVarDef: LocalVarDef ⇒
+                localVarDef.fieldScope == fieldScope &&
+                  localVarDef.dslType == dslType &&
+                  localVarDef.assigned == assigned
+            case _ ⇒ false
+        }
     }
 }
 
 /**
  * <pre><code>
  * program{
- *      Foo foo = new Foo(a,b);
+ * Foo foo = new Foo(a,b);
  *
- *      def method()=Unit{
- *          Int i = foo()*10; //LocalVarDef
- *          foo.a * 10; // foo.a => VarRef
- *          i*10; // i => VarRef
- *      }
+ * def method()=Unit{
+ * Int i = foo()*10; //LocalVarDef
+ * foo.a * 10; // foo.a => VarRef
+ * i*10; // i => VarRef
+ * }
  * }<pre><code>
  */
-case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression{
-    override def toString: String = s"${name.mkString(".")}"
+case class VarRef(name: List[String], dslType: DslType, fieldScope: FieldScope) extends Expression {
+    override def toString: String = s"${name.mkString( "." )}"
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case varRef: VarRef ⇒
+                varRef.name == name && varRef.dslType == dslType && varRef.dslType == dslType
+            case _ ⇒ false
+        }
+    }
 }
 
 
@@ -54,39 +88,70 @@ case class VarRef(name: List[String], fieldScope: FieldScope) extends Expression
  *program{
  *      Array[Foo] fooArray = [new Foo(2,3),new Foo(1,2)];
  *
- *      def method()=Unit{
- *              Int i =0;
- *              Foo b = fooArray[i];  // fooArray[i] => ArrayVarRef
- *      }
+ * def method()=Unit{
+ * Int i =0;
+ * Foo b = fooArray[i];  // fooArray[i] => ArrayVarRef
+ * }
  *
  * }<pre><code>
  */
 class ArrayVarRef(val indexExpression: Expression,
                   override val name: List[String],
-                  override val fieldScope: FieldScope) extends VarRef( name, fieldScope ){
-    override def toString: String = s"${name.mkString(".")}[$indexExpression]"
+                  override val dslType: DslType,
+                  override val fieldScope: FieldScope) extends VarRef( name, dslType, fieldScope ) {
+    override def toString: String = s"${name.mkString( "." )}[$indexExpression]"
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case arrayVarRef: ArrayVarRef ⇒
+                arrayVarRef.indexExpression == indexExpression &&
+                  arrayVarRef.name == name &&
+                  arrayVarRef.dslType == dslType &&
+                  arrayVarRef.fieldScope == fieldScope
+            case _ ⇒ false
+        }
+    }
 }
 
 /**
- *<pre><code>
- *program{
- *      Map[Int,Foo] fooMap = {0:new Foo(2,3),1:new Foo(1,2)};
+ * <pre><code>
+ * program{
+ * Map[Int,Foo] fooMap = {0:new Foo(2,3),1:new Foo(1,2)};
  *
- *      def method()=Unit{
- *          Int i =0;
- *          Foo b = fooMap(i);  // fooMap(i) => MapVarRef
- *      }
- *}<pre><code>
+ * def method()=Unit{
+ * Int i =0;
+ * Foo b = fooMap(i);  // fooMap(i) => MapVarRef
+ * }
+ * }<pre><code>
  */
-class MapVarRef(val KeyExpression: Expression, override val name: List[String], override val fieldScope: FieldScope) extends VarRef( name, fieldScope ){
-    override def toString: String = s"${name.mkString(".")}($KeyExpression)"
+class MapVarRef(val keyExpression: Expression,
+                override val name: List[String],
+                override val dslType: DslType,
+                override val fieldScope: FieldScope) extends VarRef( name, dslType, fieldScope ) {
+    override def toString: String = s"${name.mkString( "." )}($keyExpression)"
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case mapVarRef: MapVarRef ⇒
+                mapVarRef.keyExpression == keyExpression &&
+                  mapVarRef.name == name &&
+                  mapVarRef.dslType == dslType &&
+                  mapVarRef.fieldScope == fieldScope
+            case _ ⇒ false
+        }
+    }
 }
 
 
+trait BaseLiteral
 //literal expression
 
 abstract class Literal[T, D <: DslType](val literal: T) extends Expression {
     val dslType: D
+
+    def resolvedType(dslType: DslType): Literal[T, D] = {
+        this
+    }
 }
 
 object Literal {
@@ -105,46 +170,103 @@ object Literal {
     def literal(literal: Char): CharLiteral = new CharLiteral( literal )
 }
 
-class IntLiteral(literal: Int) extends Literal[Int,IntType.type](literal){
+object UnitLiteral extends Literal[Unit, UnitType.type] with BaseLiteral {
+    override val dslType: UnitType.type = UnitType
+
+    override def equals(obj: Any): Boolean = {
+        obj.isInstanceOf[UnitLiteral.type]
+    }
+}
+
+class IntLiteral(literal: Int) extends Literal[Int, IntType.type]( literal ) with BaseLiteral {
     override val dslType: IntType.type = IntType
 
     override def toString: String = literal.toString
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case intLiteral: IntLiteral ⇒ intLiteral.literal == literal
+            case _ ⇒ false
+        }
+    }
 }
 
-class LongLiteral(literal:Long) extends Literal[Long,LongType.type](literal){
+class LongLiteral(literal: Long) extends Literal[Long, LongType.type]( literal ) with BaseLiteral {
     override val dslType: LongType.type = LongType
 
     override def toString: String = literal.toString
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case longLiteral: LongLiteral ⇒ longLiteral.literal == literal
+            case _ ⇒ false
+        }
+    }
 }
 
-class FloatLiteral(literal: Float) extends Literal[Float,FloatType.type](literal){
+class FloatLiteral(literal: Float) extends Literal[Float, FloatType.type]( literal ) with BaseLiteral {
     override val dslType: FloatType.type = FloatType
 
     override def toString: String = literal.toString
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case floatLiteral: FloatLiteral ⇒ floatLiteral.literal == literal
+            case _ ⇒ false
+        }
+    }
 }
 
-class DoubleLiteral(literal: Double) extends Literal[Double,DoubleType.type ](literal){
+class DoubleLiteral(literal: Double) extends Literal[Double, DoubleType.type]( literal ) with BaseLiteral {
     override val dslType: DoubleType.type = DoubleType
 
     override def toString: String = literal.toString
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case doubleLiteral: DoubleLiteral ⇒ doubleLiteral.literal == literal
+            case _ ⇒ false
+        }
+    }
 }
 
-class StringLiteral(literal:String) extends Literal[String,StringType.type ](literal){
+class StringLiteral(literal: String) extends Literal[String, StringType.type]( literal ) with BaseLiteral {
     override val dslType: StringType.type = StringType
 
     override def toString: String = literal
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case stringLiteral: StringLiteral ⇒ stringLiteral.literal == literal
+            case _ ⇒ false
+        }
+    }
 }
 
-class CharLiteral(literal: Char) extends Literal[Char,CharType.type ](literal){
+class CharLiteral(literal: Char) extends Literal[Char, CharType.type]( literal ) with BaseLiteral {
     override val dslType: CharType.type = CharType
 
     override def toString: String = literal.toString
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case charLiteral: CharLiteral ⇒ charLiteral.literal == literal
+            case _ ⇒ false
+        }
+    }
 }
 
-class BoolLiteral(literal: Boolean) extends Literal[Boolean,BoolType.type](literal){
+class BoolLiteral(literal: Boolean) extends Literal[Boolean, BoolType.type]( literal ) with BaseLiteral {
     override val dslType: BoolType.type = BoolType
 
     override def toString: String = literal.toString
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case boolLiteral: BoolLiteral ⇒ boolLiteral.literal == literal
+            case _ ⇒ false
+        }
+    }
 }
 
 /**
@@ -157,24 +279,103 @@ class BoolLiteral(literal: Boolean) extends Literal[Boolean,BoolType.type](liter
  *          }
  *      }
  *
- *      def method(Int a,Int b)=Unit{
- *          Foo foo = new Foo(a,b); // new Foo(a,b) => ClazzLiteral
- *          Foo foo = new Foo(1,2); // new Foo(1,2) => ClazzLiteral
- *      }
- *}<pre><code>
+ * def method(Int a,Int b)=Unit{
+ * Foo foo = new Foo(a,b); // new Foo(a,b) => ClazzLiteral
+ * Foo foo = new Foo(1,2); // new Foo(1,2) => ClazzLiteral
+ * }
+ * }<pre><code>
  */
 class ClazzLiteral(literal: Array[Expression],
-                   override val dslType: ClazzType) extends Literal[Array[Expression],ClazzType](literal){
-    override def toString: String = s"new ${dslType.clazzName}(${literal.mkString(",")})"
+                   override val dslType: ClazzType) extends Literal[Array[Expression], ClazzType]( literal ) {
+    override def toString: String = s"new ${dslType.clazzName}(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], ClazzType] = {
+        if (this.dslType.valueTypes.contains( UnResolvedType ) || this.dslType.valueTypes.isEmpty) {
+            new ClazzLiteral( literal, dslType.asInstanceOf[ClazzType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case clazzLiteral: ClazzLiteral =>
+                clazzLiteral.literal.sameElements( literal ) && clazzLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
+}
+
+/**
+ * <pre><code>
+ * program{
+ * class Foo(Int a,Int b){
+ * def foo()=Int{
+ * return a+b;
+ * }
+ *
+ * def method(Int a,Int b)=Unit{
+ * Array[Foo] array = new Array(new Foo(1,2),new Foo(2,3)); // new Array(new Foo(1,2),new Foo(2,3)) => ArrayLiteral
+ * }
+ * <pre><code>
+ */
+class ArrayLiteral(literal: Array[Expression], override val dslType: ArrayType) extends Literal[Array[Expression], ArrayType]( literal ) {
+    override def toString: String = s"new Array(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], ArrayType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new ArrayLiteral( literal, dslType.asInstanceOf[ArrayType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case arrayLiteral: ArrayLiteral ⇒
+                arrayLiteral.literal.sameElements( literal ) && arrayLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
+}
+
+class EitherLiteral(literal: Either[Expression, Expression],
+                    override val dslType: EitherType)
+  extends Literal[Either[Expression, Expression], EitherType]( literal ) {
+
+    override def toString: String = {
+        literal match {
+            case Left( left ) ⇒ s"Left($left)"
+            case Right( right ) ⇒ s"Right($right)"
+        }
+    }
+
+    override def resolvedType(dslType: DslType):
+    Literal[Either[Expression, Expression], EitherType] = {
+        if (this.dslType.leftType == UnResolvedType || this.dslType.rightType == UnResolvedType) {
+            new EitherLiteral( literal, dslType.asInstanceOf[EitherType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case eitherLiteral: EitherLiteral ⇒
+                eitherLiteral.literal == literal && eitherLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
+
 }
 
 /**
  *
- *<pre><code>
- *program{
- *      class Foo(Int a,Int b){
- *          def foo()=Int{
- *              return a+b;
+ * <pre><code>
+ * program{
+ * class Foo(Int a,Int b){
+ * def foo()=Int{
+ * return a+b;
  *          }
  *      }
  *
@@ -184,8 +385,24 @@ class ClazzLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class OptionLiteral(literal:Expression,
-                    override val dslType:OptionType) extends Literal[Expression,OptionType](literal){
+                    override val dslType:OptionType) extends Literal[Expression,OptionType](literal) {
     override def toString: String = s"?$literal"
+
+    override def resolvedType(dslType: DslType): Literal[Expression, OptionType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new OptionLiteral( literal, dslType.asInstanceOf[OptionType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case optionLiteral: OptionLiteral ⇒
+                optionLiteral.literal == literal && optionLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
 }
 
 /**
@@ -203,23 +420,54 @@ class OptionLiteral(literal:Expression,
  *}<pre><code>
  */
 class ListLiteral(literal:Array[Expression],
-                  override val dslType:ListType) extends Literal[Array[Expression],ListType](literal){
-    override def toString: String = s"[${literal.mkString(",")}]"
+                  override val dslType:ListType) extends Literal[Array[Expression],ListType](literal) {
+    override def toString: String = s"[${literal.mkString( "," )}]"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], ListType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new ListLiteral( literal, dslType.asInstanceOf[ListType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case listLiteral: ListLiteral ⇒
+                listLiteral.literal.sameElements( literal ) && listLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
 }
 
 /**
  *
- *<pre><code>
- *program{
+ * <pre><code>
+ * program{
  *
- *      def method()=Unit{
- *          Set[Int] set = (1,2,3); //(1,2,3) => SetLiteral
- *      }
- *}<pre><code>
+ * def method()=Unit{
+ * Set[Int] set = {1,2,3}; //{1,2,3} => SetLiteral
+ * }
+ * }<pre><code>
  */
 class SetLiteral(literal: Array[Expression],
-                 override val dslType: SetType) extends Literal[Array[Expression], SetType]( literal ){
-    override def toString: String = s"(${literal.mkString(",")})"
+                 override val dslType: SetType) extends Literal[Array[Expression], SetType]( literal ) {
+    override def toString: String = s"(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], SetType] = {
+        if (this.dslType.valueType == UnResolvedType) {
+            new SetLiteral( literal, dslType.asInstanceOf[SetType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case setLiteral: SetLiteral ⇒ setLiteral.literal.sameElements( literal ) && setLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
 }
 
 /**
@@ -234,8 +482,24 @@ class SetLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class TupleLiteral(literal: Array[Expression],
-                   override val dslType: TupleType) extends Literal[Array[Expression], TupleType]( literal ){
-    override def toString: String = s"(${literal.mkString(",")})"
+                   override val dslType: TupleType) extends Literal[Array[Expression], TupleType]( literal ) {
+    override def toString: String = s"(${literal.mkString( "," )})"
+
+    override def resolvedType(dslType: DslType): Literal[Array[Expression], TupleType] = {
+        if (this.dslType.valueTypes.contains( UnResolvedType )) {
+            new TupleLiteral( literal, dslType.asInstanceOf[TupleType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case tupleLiteral: TupleLiteral ⇒
+                tupleLiteral.literal.sameElements( literal ) && tupleLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
 }
 
 /**
@@ -250,24 +514,48 @@ class TupleLiteral(literal: Array[Expression],
  *}<pre><code>
  */
 class MapLiteral(literal: Array[(Expression, Expression)],
-                 override val dslType: MapType) extends Literal[Array[(Expression, Expression)], MapType]( literal ){
-    override def toString: String = s"{${literal.map(kv⇒kv._1.toString+":"+kv._2.toString).mkString(",")}}"
+                 override val dslType: MapType) extends Literal[Array[(Expression, Expression)], MapType]( literal ) {
+    override def toString: String = s"{${literal.map( kv ⇒ kv._1.toString + ":" + kv._2.toString ).mkString( "," )}}"
+
+    override def resolvedType(dslType: DslType): Literal[Array[(Expression, Expression)], MapType] = {
+        if (this.dslType.keyType == UnResolvedType || this.dslType.valueType == UnResolvedType) {
+            new MapLiteral( literal, dslType.asInstanceOf[MapType] )
+        } else {
+            this
+        }
+    }
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case mapLiteral: MapLiteral ⇒
+                literal.sameElements( mapLiteral.literal ) && dslType == mapLiteral.dslType
+            case _ ⇒ false
+        }
+    }
 }
 
 //async expression
 
 /**
- *<pre><code>
- *program{
- *      def method()=Unit{
- *          Future[Int] future = Async{ // Async{ ... } => Async
- *              return foo();
- *          }
- *      }
- *}<pre><code>
+ * <pre><code>
+ * program{
+ * def method()=Unit{
+ * Future[Int] future = Async{ // Async{ ... } => Async
+ * return foo();
+ * }
+ * }
+ * }<pre><code>
  */
-case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends Expression{
-    override def toString: String =s"Async $body"
+case class Async(body: Block, executor: Option[FieldScope], dslType: FutureType) extends Expression {
+    override def toString: String = s"Async $body"
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case async: Async =>
+                async.body == body && async.executor == executor && async.dslType == dslType
+            case _ => false
+        }
+    }
 
 }
 
@@ -279,14 +567,54 @@ case class Async(body: Block, executor: FieldScope, dslType: FutureType) extends
  *program{
  *      def method()=Unit{
  *          Try[Int] maySuccess = Try{ // Try{ ... } => Try
- *              return foo();
- *          }
- *      }
- *}<pre><code>
+ * return foo();
+ * }
+ * }
+ * }<pre><code>
  */
-case class Try(body: Block, dslType: TryType) extends Expression{
+case class Try(body: Block, dslType: TryType) extends Expression {
     override def toString: String = s"Try $body"
 
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case `try`: Try ⇒
+                `try`.body == body && `try`.dslType == dslType
+            case _ ⇒ false
+        }
+    }
+
+}
+
+//custom block expression
+
+/**
+ * <pre><code>
+ * program{
+ * def method()=Unit{
+ * String body = "body";
+ * Int len = body.length;
+ * Json maySuccess = Json{ // Json{ ... } => Json
+ * {"body":body,"len":len}
+ * }
+ *
+ * Json data = Json{
+ * [1,2,3]
+ * }
+ * }
+ * }<pre><code>
+ */
+case class CustomBlockExpression(name: String, body: Block, param: Option[FieldScope]) extends Expression {
+    override def toString: String = s"$name $body"
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case customBlockExpression: CustomBlockExpression ⇒
+                customBlockExpression.name == name &&
+                  customBlockExpression.body == body &&
+                  customBlockExpression.param == param
+            case _ ⇒ false
+        }
+    }
 }
 
 
@@ -294,90 +622,133 @@ case class Try(body: Block, dslType: TryType) extends Expression{
 
 
 /**
- *<pre><code>
- *program{
- *      def method()=Unit{
- *          Int=>Int lambda = p=>{  // p=> { ... } => Lambda
- *              return p*2;
- *          }
- *          lambda.apply(2);
- *      }
- *}<pre><code>
+ * <pre><code>
+ * program{
+ * def method()=Unit{
+ * Int=>Int lambda = p=>{  // p=> { ... } => Lambda
+ * return p*2;
+ * }
+ * lambda.apply(2);
+ * }
+ * }<pre><code>
  */
-case class Lambda(inputs: Array[String], body: Block) extends Expression{
+case class Lambda(inputs: Array[String], body: Block) extends Expression {
     override def toString: String =
         s"""
-           |(${inputs.mkString(",")}=>$body
+           |(${inputs.mkString( "," )}=>$body
            |""".stripMargin
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case lambda: Lambda ⇒
+                lambda.inputs.sameElements( inputs ) && lambda.body == body
+            case _ ⇒ false
+        }
+    }
 }
 
 
 //match case expression
 
-/**<pre><code>
- * a=>{
- *      case d:Int=> {}
+/** <pre><code>
+ * a match {
+ * case d:Int=> {}
  * }
  * <pre><code>
+ *
  *@see MatchCase
  */
-case class MatchType(name: String, dslType: DslType) extends Expression{
+case class MatchType(name: String, dslType: DslType) extends Expression {
     override def toString: String = s"$name:$dslType"
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case matchType: MatchType ⇒
+                matchType.name == name && matchType.dslType == dslType
+            case _ ⇒ false
+        }
+    }
 }
 
 /**
  * <pre><code>
- * a=>{
+ * a match {
  * case one:two:tail=>{}
  * }
  * <pre><code>
  *
  * @see MatchCase
  */
-case class MatchHead(head: Array[Either[Expression, String]], tail: Either[Expression, String]) extends Expression{
-    override def toString: String = s"${getString("","",":",head)}:${tail match {
-        case Left(i)⇒i.toString
-        case Right(j)⇒j
-    }}"
+case class MatchHead(head: Array[Either[Expression, String]], tail: Either[Expression, String]) extends Expression {
+    override def toString: String = s"${getString( "", "", ":", head )}:${
+        tail match {
+            case Left( i ) ⇒ i.toString
+            case Right( j ) ⇒ j
+        }
+    }"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case matchHead: MatchHead ⇒ matchHead.head.sameElements( head ) && matchHead.tail == tail
+        case _ => false
+    }
 }
 
 /**
  * <pre><code>
- * a=>{
+ * a match {
  * case [1,2,b]=>{}
  * }
  * <pre><code>
  *
  * @see MatchCase
  */
-case class MatchList(expressions: Array[Either[Expression, String]]) extends Expression{
-    override def toString: String = getString("[","]",",",expressions)
+case class MatchList(expressions: Array[Either[Expression, String]]) extends Expression {
+    override def toString: String = getString( "[", "]", ",", expressions )
+
+    override def equals(obj: Any): Boolean = obj match {
+        case matchList: MatchList =>
+            matchList.expressions.sameElements( expressions )
+        case _ ⇒ false
+    }
 }
 
 /**
  * <pre><code>
- * a=>{
+ * a match {
  * case (a1,a2,a3)=>{}
  * }
  * <pre><code>
  *
  * @see MatchCase
  */
-case class MatchTuple(expressions: Array[Either[Expression, String]]) extends Expression{
-    override def toString: String = getString("(",")",",",expressions)
+case class MatchTuple(expressions: Array[Either[Expression, String]]) extends Expression {
+    override def toString: String = getString( "(", ")", ",", expressions )
+
+    override def equals(obj: Any): Boolean = obj match {
+        case matchTuple: MatchTuple ⇒ matchTuple.expressions.sameElements( expressions )
+        case _ ⇒ false
+    }
 }
 
 /**
  * <pre><code>
- * a=>{
+ * a match {
  * case Foo(d,c,b)=>{}
  * }
  * <pre><code>
  *
  * @see MatchCase
  */
-case class MatchClass(dslType: DslType, expressions: Array[Either[Expression, String]]) extends Expression{
-    override def toString: String = s"${dslType.asInstanceOf[ClazzType].clazzName}${getString("(",")",",",expressions)}"
+case class MatchClass(dslType: DslType, expressions: Array[Either[Expression, String]]) extends Expression {
+    override def toString: String = s"${dslType.asInstanceOf[ClazzType].clazzName}${getString( "(", ")", ",", expressions )}"
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case matchClass: MatchClass ⇒
+                matchClass.dslType == dslType && matchClass.expressions.sameElements( expressions )
+            case _ ⇒ false
+        }
+    }
 }
 
 
@@ -395,16 +766,24 @@ case class MatchClass(dslType: DslType, expressions: Array[Either[Expression, St
  *}
  *<pre><code>
  */
-case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default: Option[Block]) extends Expression{
+case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default: Option[Block]) extends Expression {
     override def toString: String =
         s"""
-          |$matched match {
-          |     ${cases.map(`case`⇒{
-            "case "+`case`._1.toString+" => "+`case`._2.toString
-        }).mkString("\n")}
-          |  ${if(default.isDefined) "default =>"+ default.get}
-          |}
-          |""".stripMargin
+           |$matched match {
+           |     ${
+            cases.map( `case` ⇒ {
+                "case " + `case`._1.toString + " => " + `case`._2.toString
+            } ).mkString( "\n" )
+        }
+           |  ${if (default.isDefined) "default =>" + default.get}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case matchCase: MatchCase ⇒
+            matchCase.matched == matched && matchCase.cases.sameElements( cases ) && matchCase.default == default
+        case _ ⇒ false
+    }
 }
 
 //assign expression
@@ -418,8 +797,14 @@ case class MatchCase(matched: VarRef, cases: Array[(Expression, Block)], default
  * }
  * <pre><code>
  */
-case class Assign(varRef: VarRef, assigned: Expression) extends Expression{
+case class Assign(varRef: VarRef, assigned: Expression) extends Expression {
     override def toString: String = s"$varRef = $assigned"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case assign: Assign ⇒
+            assign.varRef == varRef && assign.assigned == assigned
+        case _ => false
+    }
 }
 
 
@@ -441,8 +826,13 @@ sealed trait UnaryExpression extends Expression {
  * }
  * <pre><code>
  */
-case class Negate(child:Expression) extends UnaryExpression{
+case class Negate(child:Expression) extends UnaryExpression {
     override def toString: String = s"!$child"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case negate: Negate ⇒ negate.child == child
+        case _ ⇒ false
+    }
 }
 
 /**
@@ -454,8 +844,13 @@ case class Negate(child:Expression) extends UnaryExpression{
  * }
  * <pre><code>
  */
-case class Opposite(child: Expression) extends UnaryExpression{
+case class Opposite(child: Expression) extends UnaryExpression {
     override def toString: String = s"(-$child)"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case opposite: Opposite ⇒ opposite.child == child
+        case _ ⇒ false
+    }
 }
 
 /**
@@ -467,8 +862,13 @@ case class Opposite(child: Expression) extends UnaryExpression{
  * }
  * <pre><code>
  */
-case class Cast(child: Expression, castType: DslType) extends UnaryExpression{
+case class Cast(child: Expression, castType: DslType) extends UnaryExpression {
     override def toString: String = s"($castType)$child"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case cast: Cast ⇒ cast.child == child && cast.castType == castType
+        case _ ⇒ false
+    }
 }
 
 /**
@@ -480,8 +880,13 @@ case class Cast(child: Expression, castType: DslType) extends UnaryExpression{
  * }
  * <pre><code>
  */
-case class Instanceof(child: Expression,judgeType: DslType) extends UnaryExpression{
+case class Instanceof(child: Expression,judgeType: DslType) extends UnaryExpression {
     override def toString: String = s"$child instanceof $judgeType"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case instanceof: Instanceof ⇒ instanceof.child == child && instanceof.judgeType == judgeType
+        case _ ⇒ false
+    }
 }
 
 /**
@@ -496,8 +901,13 @@ case class Instanceof(child: Expression,judgeType: DslType) extends UnaryExpress
  * }
  * <pre><code>
  */
-case class Paren(child:Expression) extends UnaryExpression{
+case class Paren(child:Expression) extends UnaryExpression {
     override def toString: String = s"($child)"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case paren: Paren ⇒ paren.child == child
+        case _ ⇒ false
+    }
 }
 
 //binary expression
@@ -519,33 +929,64 @@ sealed trait BinaryExpression extends Expression{
  * }
  * <pre><code>
  */
-case class Div(left:Expression, right:Expression) extends BinaryExpression{
+case class Div(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left/$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case div: Div ⇒
+            div.left == left && div.right == right
+        case _ ⇒ false
+    }
 }
-case class Mul(left:Expression, right:Expression) extends BinaryExpression{
+case class Mul(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left*$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case mul: Mul ⇒
+            mul.left == left && mul.right == right
+        case _ ⇒ false
+    }
 }
-case class Mod(left:Expression, right:Expression) extends BinaryExpression{
+case class Mod(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left%$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case mod: Mod ⇒
+            mod.left == left && mod.right == right
+        case _ ⇒ false
+    }
 }
 
 //additive expression
 
 /**
  * <pre><code>
- *program{
- *      def method()=Unit{
- *          Long j = 1-2; // 1-2 => Sub
- *          Long i = (a+b)*c; // a+b => Add
- *      }
+ * program{
+ * def method()=Unit{
+ * Long j = 1-2; // 1-2 => Sub
+ * Long i = (a+b)*c; // a+b => Add
+ * }
  * }
  * <pre><code>
  */
-case class Add(left:Expression, right:Expression) extends BinaryExpression{
+case class Add(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left+$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case add: Add ⇒
+            add.left == left && add.right == right
+        case _ ⇒ false
+    }
 }
-case class Sub(left:Expression, right:Expression) extends BinaryExpression{
+
+case class Sub(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left-$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case sub: Sub ⇒
+            sub.left == left && sub.right == right
+        case _ ⇒ false
+    }
 }
 
 //shit expression
@@ -553,22 +994,43 @@ case class Sub(left:Expression, right:Expression) extends BinaryExpression{
 /**
  * <pre><code>
  *program{
- *      def method()=Unit{
- *          Int j = 1&lt;&lt;2; // 1&lt;&lt;2 => LeftShit
- *          Int k = 1>>2; // 1>>2 => RightShift
- *          Int i = 1>>>2; // 1>>>2 => UnsignedRightShift
- *      }
+ * def method()=Unit{
+ * Int j = 1&lt;&lt;2; // 1&lt;&lt;2 => LeftShit
+ * Int k = 1>>2; // 1>>2 => RightShift
+ * Int i = 1>>>2; // 1>>>2 => UnsignedRightShift
+ * }
  * }
  * <pre><code>
  */
-case class LeftShift(left:Expression, right:Expression) extends BinaryExpression{
+case class LeftShift(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left<<$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case leftShift: LeftShift ⇒
+            leftShift.left == left && leftShift.right == right
+        case _ ⇒ false
+    }
+
 }
-case class RightShift(left:Expression, right:Expression) extends BinaryExpression{
+
+case class RightShift(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left>>$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case rightShift: RightShift ⇒
+            rightShift.left == left && rightShift.right == right
+        case _ ⇒ false
+    }
 }
-case class UnsignedRightShift(left:Expression,right:Expression) extends BinaryExpression{
+
+case class UnsignedRightShift(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left>>>$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case unsignedRightShift: UnsignedRightShift ⇒
+            unsignedRightShift.left == left && unsignedRightShift.right == right
+        case _ ⇒ false
+    }
 }
 
 //relation expression
@@ -586,17 +1048,44 @@ case class UnsignedRightShift(left:Expression,right:Expression) extends BinaryEx
  * <pre><code>
  */
 
-case class Lt(left:Expression, right:Expression) extends BinaryExpression{
+case class Lt(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left<$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case lt: Lt ⇒
+            lt.left == left && lt.right == right
+        case _ ⇒ false
+    }
 }
-case class Gt(left:Expression, right:Expression) extends BinaryExpression{
+
+case class Gt(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left>$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case gt: Gt ⇒
+            gt.left == left && gt.right == right
+        case _ ⇒ false
+    }
 }
-case class Le(left:Expression, right:Expression) extends BinaryExpression{
+
+case class Le(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left<=$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case le: Le ⇒
+            le.left == left && le.right == right
+        case _ ⇒ false
+    }
 }
-case class Ge(left:Expression, right:Expression) extends BinaryExpression{
+
+case class Ge(left: Expression, right: Expression) extends BinaryExpression {
     override def toString: String = s"$left>=$right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case ge: Ge ⇒
+            ge.left == left && ge.right == right
+        case _ ⇒ false
+    }
 }
 
 //equality expression
@@ -612,11 +1101,23 @@ case class Ge(left:Expression, right:Expression) extends BinaryExpression{
  * <pre><code>
  */
 
-case class Eq(left:Expression, right:Expression) extends BinaryExpression{
+case class Eq(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left ==  $right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case eq: Eq ⇒
+            eq.left == left && eq.right == right
+        case _ ⇒ false
+    }
 }
-case class NotEq(left:Expression, right:Expression) extends BinaryExpression{
+case class NotEq(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left !=  $right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case notEq: NotEq ⇒
+            notEq.left == left && notEq.right == right
+        case _ ⇒ false
+    }
 }
 
 //bit and expression
@@ -631,8 +1132,14 @@ case class NotEq(left:Expression, right:Expression) extends BinaryExpression{
  * <pre><code>
  */
 
-case class BitAnd(left:Expression, right:Expression) extends BinaryExpression{
-    override def toString: String = s"$left &   $right"
+case class BitAnd(left:Expression, right:Expression) extends BinaryExpression {
+    override def toString: String = s"$left &  $right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case bitAnd: BitAnd ⇒
+            bitAnd.left == left && bitAnd.right == right
+        case _ ⇒ false
+    }
 }
 
 //exclusive or expression
@@ -646,8 +1153,14 @@ case class BitAnd(left:Expression, right:Expression) extends BinaryExpression{
  * }
  * <pre><code>
  */
-case class Caret(left:Expression, right:Expression) extends BinaryExpression{
-    override def toString: String = s"$left ^   $right"
+case class Caret(left:Expression, right:Expression) extends BinaryExpression {
+    override def toString: String = s"$left ^  $right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case caret: Caret ⇒
+            caret.left == left && caret.right == right
+        case _ ⇒ false
+    }
 }
 
 //inclusive or expression
@@ -661,8 +1174,14 @@ case class Caret(left:Expression, right:Expression) extends BinaryExpression{
  * }
  * <pre><code>
  */
-case class BitOr(left:Expression, right:Expression) extends BinaryExpression{
+case class BitOr(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left |   $right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case bitOr: BitOr ⇒
+            bitOr.left == left && bitOr.right == right
+        case _ ⇒ false
+    }
 }
 
 //and expression
@@ -676,8 +1195,14 @@ case class BitOr(left:Expression, right:Expression) extends BinaryExpression{
  * }
  * <pre><code>
  */
-case class And(left:Expression, right:Expression) extends BinaryExpression{
+case class And(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left &&  $right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case and: And ⇒
+            and.left == left && and.right == right
+        case _ ⇒ false
+    }
 }
 
 //or expression
@@ -691,8 +1216,14 @@ case class And(left:Expression, right:Expression) extends BinaryExpression{
  * }
  * <pre><code>
  */
-case class Or(left:Expression, right:Expression) extends BinaryExpression{
+case class Or(left:Expression, right:Expression) extends BinaryExpression {
     override def toString: String = s"$left ||  $right"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case or: Or ⇒
+            or.left == left && or.right == right
+        case _ ⇒ false
+    }
 }
 
 
@@ -710,59 +1241,157 @@ case class Or(left:Expression, right:Expression) extends BinaryExpression{
  * }
  * <pre><code>
  */
-case class FuncCallChain(head:FuncCall, tails:List[Part]) extends Expression{
-    override def toString: String = s"$head.${tails.mkString(".")}"
+case class FuncCallChain(head:FuncCall, tails:List[Part]) extends Expression {
+    override def toString: String = s"$head.${tails.mkString( "." )}"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case funcCallChain: FuncCallChain ⇒
+            funcCallChain.head == head && funcCallChain.tails == tails
+        case _ ⇒ false
+    }
 }
 
 class LiteralCallChain[T,D<:DslType](val head:Literal[T,D],val tails:List[Part]) extends Expression{
     override def toString: String = s"$head.${tails.mkString(".")}"
 }
 
-class IntLiteralCallChain(override val head:IntLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Int,IntType.type ](head, tails)
+class IntLiteralCallChain(override val head: IntLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Int, IntType.type]( head, tails ) {
+    override def equals(obj: Any): Boolean = obj match {
+        case intLiteralCallChain: IntLiteralCallChain ⇒
+            intLiteralCallChain.head == head && intLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
-class LongLiteralCallChain(override val head:LongLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Long,LongType.type ](head, tails)
+class LongLiteralCallChain(override val head: LongLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Long, LongType.type]( head, tails ) {
 
-class FloatLiteralCallChain(override val head:FloatLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Float,FloatType.type ](head, tails)
+    override def equals(obj: Any): Boolean = obj match {
+        case longLiteralCallChain: LongLiteralCallChain ⇒
+            longLiteralCallChain.head == head && longLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
-class DoubleLiteralCallChain(override val head:DoubleLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Double,DoubleType.type ](head, tails)
+class FloatLiteralCallChain(override val head: FloatLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Float, FloatType.type]( head, tails ) {
+    override def equals(obj: Any): Boolean = obj match {
+        case floatLiteralCallChain: FloatLiteralCallChain ⇒
+            floatLiteralCallChain.head == head && floatLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
-class StringLiteralCallChain(override val head:StringLiteral,override val tails:List[Part])
-  extends LiteralCallChain[String,StringType.type ](head, tails)
+class DoubleLiteralCallChain(override val head: DoubleLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Double, DoubleType.type]( head, tails ) {
+    override def equals(obj: Any): Boolean = obj match {
+        case doubleLiteralCallChain: DoubleLiteralCallChain ⇒
+            doubleLiteralCallChain.head == head && doubleLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
-class CharLiteralCallChain(override val head:CharLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Char,CharType.type ](head, tails)
+class StringLiteralCallChain(override val head: StringLiteral, override val tails: List[Part])
+  extends LiteralCallChain[String, StringType.type]( head, tails ) {
 
-class BoolLiteralCallChain(override val head:BoolLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Boolean,BoolType.type ](head, tails)
+    override def equals(obj: Any): Boolean = obj match {
+        case stringLiteralCallChain: StringLiteralCallChain ⇒
+            stringLiteralCallChain.head == head && stringLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
-class ClazzLiteralCallChain(override val head:ClazzLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Array[Expression],ClazzType](head, tails)
+class CharLiteralCallChain(override val head: CharLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Char, CharType.type]( head, tails ) {
 
-class OptionLiteralCallChain(override val head:OptionLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Expression,OptionType](head, tails)
+    override def equals(obj: Any): Boolean = obj match {
+        case charLiteralCallChain: CharLiteralCallChain ⇒
+            charLiteralCallChain.head == head && charLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
-class ListLiteralCallChain(override val head:ListLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Array[Expression],ListType](head, tails)
+class BoolLiteralCallChain(override val head: BoolLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Boolean, BoolType.type]( head, tails ) {
 
-class SetLiteralCallChain(override val head:SetLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Array[Expression],SetType](head, tails)
+    override def equals(obj: Any): Boolean = obj match {
+        case boolLiteralCallChain: BoolLiteralCallChain ⇒
+            boolLiteralCallChain.head == head && boolLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
-class TupleLiteralCallChain(override val head:TupleLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Array[Expression],TupleType](head, tails)
+class ClazzLiteralCallChain(override val head: ClazzLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Array[Expression], ClazzType]( head, tails ) {
 
-class MapLiteralCallChain(override val head:MapLiteral,override val tails:List[Part])
-  extends LiteralCallChain[Array[(Expression,Expression)],MapType](head, tails)
+    override def equals(obj: Any): Boolean = obj match {
+        case clazzLiteralCallChain: ClazzLiteralCallChain ⇒
+            clazzLiteralCallChain.head == head && clazzLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
+
+class OptionLiteralCallChain(override val head: OptionLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Expression, OptionType]( head, tails ) {
+
+    override def equals(obj: Any): Boolean = obj match {
+        case optionLiteralCallChain: OptionLiteralCallChain ⇒
+            optionLiteralCallChain.head == head && optionLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
+
+class ListLiteralCallChain(override val head: ListLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Array[Expression], ListType]( head, tails ) {
+
+    override def equals(obj: Any): Boolean = obj match {
+        case listLiteralCallChain: ListLiteralCallChain ⇒
+            listLiteralCallChain.head == head && listLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
+
+class SetLiteralCallChain(override val head: SetLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Array[Expression], SetType]( head, tails ) {
+
+    override def equals(obj: Any): Boolean = obj match {
+        case setLiteralCallChain: SetLiteralCallChain ⇒
+            setLiteralCallChain.head == head && setLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
+
+class TupleLiteralCallChain(override val head: TupleLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Array[Expression], TupleType]( head, tails ) {
+
+    override def equals(obj: Any): Boolean = obj match {
+        case tupleLiteralCallChain: TupleLiteralCallChain ⇒
+            tupleLiteralCallChain.head == head && tupleLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
+
+class MapLiteralCallChain(override val head: MapLiteral, override val tails: List[Part])
+  extends LiteralCallChain[Array[(Expression, Expression)], MapType]( head, tails ) {
+    override def equals(obj: Any): Boolean = obj match {
+        case mapLiteralCallChain: MapLiteralCallChain ⇒
+            mapLiteralCallChain.head == head && mapLiteralCallChain.tails == tails
+        case _ ⇒ false
+    }
+}
 
 trait Part{
     val name:String
 }
 
-class VarName(override val name:String) extends Part{
+class VarName(override val name:String) extends Part {
     override def toString: String = name
+
+    override def equals(obj: Any): Boolean = obj match {
+        case varName: VarName ⇒ varName.name == name
+        case _ ⇒ false
+    }
 }
 
 //func call expression
@@ -774,30 +1403,62 @@ trait FuncCall extends Expression {
 //method call expression
 class MethodCall(val methodScope:MethodScope,
                  override val name:String,
-                 override val params:Array[Expression]) extends FuncCall with Part{
-    override def toString: String = getString("",name, params)
+                 override val params:Array[Expression]) extends FuncCall with Part {
+    override def toString: String = getString( "", name, params )
+
+    override def equals(obj: Any): Boolean = obj match {
+        case methodCall: MethodCall ⇒
+            methodCall.params.sameElements( params ) &&
+              methodCall.methodScope == methodScope &&
+              methodCall.name == name
+        case _ ⇒ false
+    }
 }
 
 
 //static call expression
 class StaticCall(val `type`:DslType,
                  override val name:String,
-                 override val params:Array[Expression]) extends FuncCall{
-    override def toString: String = getString(`type`,name, params)
+                 override val params:Array[Expression]) extends FuncCall {
+    override def toString: String = getString( `type`, name, params )
+
+    override def equals(obj: Any): Boolean = obj match {
+        case staticCall: StaticCall ⇒
+            staticCall.params.sameElements( params ) &&
+              staticCall.`type` == `type` &&
+              staticCall.name == name
+        case _ ⇒ false
+    }
 }
 
 //literal call expression
 class LiteralCall(val literal: Expression,
                   override val name:String,
-                  override val params:Array[Expression]) extends FuncCall{
-    override def toString: String = getString(literal,name, params)
+                  override val params:Array[Expression]) extends FuncCall {
+    override def toString: String = getString( literal, name, params )
+
+    override def equals(obj: Any): Boolean = obj match {
+        case literalCall: LiteralCall ⇒
+            literalCall.params.sameElements( params ) &&
+              literalCall.literal == literal &&
+              literalCall.name == name
+        case _ ⇒ false
+    }
 }
 
 //var call expression
 class VarCall(val varRef:VarRef,
               override val name:String,
-              override val params:Array[Expression]) extends FuncCall{
-    override def toString: String = getString(varRef,name, params)
+              override val params:Array[Expression]) extends FuncCall {
+    override def toString: String = getString( varRef, name, params )
+
+    override def equals(obj: Any): Boolean = obj match {
+        case varCall: VarCall ⇒
+            varCall.params.sameElements( params ) &&
+              varCall.varRef == varRef &&
+              varCall.name == name
+        case _ ⇒ false
+    }
 }
 
 
@@ -814,13 +1475,19 @@ class VarCall(val varRef:VarRef,
  * }
  * <pre><code>
  */
-class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Expression{
+class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Expression {
     override def toString: String =
         s"""
-          |{
-          |     ${expressions.map(e⇒e+";").mkString("\n")}
-          |}
-          |""".stripMargin
+           |{
+           |     ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case block: Block ⇒
+            block.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
 //for statement expression
@@ -840,24 +1507,42 @@ class Block(val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends E
 class ForLoop(val loopVarDef:LocalVarDef,
               val loopVarCondition:Expression,
               val loopVarUpdate:Expression,
-              override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+              override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions ) {
     override def toString: String =
         s"""
-          |for($loopVarDef;$loopVarCondition;$loopVarUpdate){
-          |     ${expressions.map(e⇒e+";").mkString("\n")}
-          |}
-          |""".stripMargin
+           |for($loopVarDef;$loopVarCondition;$loopVarUpdate){
+           |     ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case forLoop: ForLoop ⇒
+            forLoop.loopVarDef == loopVarDef &&
+              forLoop.loopVarCondition == loopVarCondition &&
+              forLoop.loopVarUpdate == loopVarUpdate &&
+              forLoop.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
 case class For(loopVarDef:LocalVarDef,
                loopVarCondition:Expression,
                loopVarUpdate:Expression,
-               body:Block) extends Expression{
+               body:Block) extends Expression {
     override def toString: String =
         s"""
-          |for($loopVarDef;$loopVarCondition;$loopVarUpdate)
-          | $body
-          |""".stripMargin
+           |for($loopVarDef;$loopVarCondition;$loopVarUpdate)
+           | $body
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case `for`: For ⇒
+            `for`.loopVarDef == loopVarDef &&
+              `for`.loopVarCondition == loopVarCondition &&
+              `for`.loopVarUpdate == loopVarUpdate &&
+              `for`.body == body
+        case _ ⇒ false
+    }
 }
 
 /**
@@ -874,22 +1559,40 @@ case class For(loopVarDef:LocalVarDef,
 
 class ForLoopCollection(val localVarDef: LocalVarDef,
                         val looped:Expression,
-                        override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+                        override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions ) {
     override def toString: String =
         s"""
-          |for($localVarDef:$looped){
-          |    ${expressions.map(e⇒e+";").mkString("\n")}
-          |}
-          |""".stripMargin
+           |for($localVarDef:$looped){
+           |    ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case forLoopCollection: ForLoopCollection ⇒
+            forLoopCollection.localVarDef == localVarDef &&
+              forLoopCollection.looped == looped &&
+              forLoopCollection.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
 case class ForCollection(localVarDef: LocalVarDef,
-                    looped:Expression,body:Block) extends Expression{
+                    looped:Expression,body:Block) extends Expression {
     override def toString: String =
         s"""
-          |for($localVarDef:$looped)
-          | $body
-          |""".stripMargin
+           |for($localVarDef:$looped)
+           | $body
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case forCollection: ForCollection ⇒
+                forCollection.localVarDef == localVarDef &&
+                  forCollection.looped == looped &&
+                  forCollection.body == body
+            case _ ⇒ false
+        }
+    }
 }
 /**
  * <pre><code>
@@ -905,23 +1608,42 @@ case class ForCollection(localVarDef: LocalVarDef,
 class ForLoopMap(val loopKeyDef:LocalVarDef,
                  val loopValueDef:LocalVarDef,
                  val looped:Expression,
-                 override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+                 override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions ) {
     override def toString: String =
         s"""
-          |for($loopKeyDef,$loopValueDef:$looped){
-          |     ${expressions.map(e⇒e+";").mkString("\n")}
-          |}
-          |""".stripMargin
+           |for($loopKeyDef,$loopValueDef:$looped){
+           |     ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case forLoopMap: ForLoopMap ⇒
+            forLoopMap.loopKeyDef == loopKeyDef &&
+              forLoopMap.loopValueDef == loopValueDef &&
+              forLoopMap.looped == looped &&
+              forLoopMap.expressions == expressions
+        case _ ⇒ false
+    }
+
 }
 
 case class ForMap(loopKeyDef:LocalVarDef,
              loopValueDef:LocalVarDef,
-             looped:Expression,body:Block) extends Expression{
+             looped:Expression,body:Block) extends Expression {
     override def toString: String =
         s"""
-          |for($loopKeyDef,$loopValueDef:$looped)
-          |     $body
-          |""".stripMargin
+           |for($loopKeyDef,$loopValueDef:$looped)
+           |     $body
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case forMap: ForMap ⇒
+            forMap.loopKeyDef == loopKeyDef &&
+              forMap.loopValueDef == loopValueDef &&
+              forMap.looped == looped &&
+              forMap.body == body
+        case _ ⇒ false
+    }
 }
 
 //while statement expression
@@ -942,19 +1664,36 @@ case class ForMap(loopKeyDef:LocalVarDef,
  * <pre><code>
  */
 
-class WhileCondition(val expression: Expression) extends Expression{
+class WhileCondition(val expression: Expression) extends Expression {
     override def toString: String = s"while($expression)"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case whileCondition: WhileCondition => whileCondition.expression == expression
+        case _ ⇒ false
+    }
 }
-class WhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions){
-    override def toString: String = s"${expressions.map(e⇒e+";").mkString("\n")}"
+class WhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions ) {
+    override def toString: String = s"${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case whileBlock: WhileBlock ⇒ whileBlock.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
-case class While(condition: Expression, body:Block) extends Expression{
+case class While(condition: Expression, body:Block) extends Expression {
     override def toString: String =
         s"""
-          |while($condition)
-          |$body
-          |""".stripMargin
+           |while($condition)
+           |$body
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case `while`: While ⇒
+            `while`.condition == condition &&
+              `while`.body == body
+        case _ ⇒ false
+    }
 }
 
 //do while statement expression
@@ -975,25 +1714,43 @@ case class While(condition: Expression, body:Block) extends Expression{
  * <pre><code>
  */
 
-class DoWhileCondition(val expression: Expression) extends Expression{
+class DoWhileCondition(val expression: Expression) extends Expression {
     override def toString: String = s"while($expression)"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case doWhileCondition: DoWhileCondition ⇒
+            doWhileCondition.expression == expression
+        case _ ⇒ false
+    }
 }
-class DoWhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions){
+class DoWhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuffer[Expression]()) extends Block(expressions ) {
     override def toString: String =
         s"""
-          |do{
-          |    ${expressions.map(e⇒e+";").mkString("\n")}
-          |};
-          |""".stripMargin
+           |do{
+           |    ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |};
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case doWhileBlock: DoWhileBlock ⇒ doWhileBlock.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
-case class DoWhile(condition:Expression,body:Block) extends Expression{
+case class DoWhile(condition:Expression,body:Block) extends Expression {
     override def toString: String =
         s"""
-          |do
-          | $body
-          |while($condition)
-          |""".stripMargin
+           |do
+           | $body
+           |while($condition)
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case doWhile: DoWhile ⇒
+            doWhile.condition == condition &&
+              doWhile.body == body
+        case _ ⇒ false
+    }
 }
 
 //break statement
@@ -1014,8 +1771,10 @@ case class DoWhile(condition:Expression,body:Block) extends Expression{
  * <pre><code>
  */
 
-object Break extends Expression{
+object Break extends Expression {
     override def toString: String = "break"
+
+    override def equals(obj: Any): Boolean = obj.isInstanceOf[Break.type]
 }
 
 //continue statement
@@ -1036,8 +1795,10 @@ object Break extends Expression{
  * <pre><code>
  */
 
-object Continue extends Expression{
+object Continue extends Expression {
     override def toString: String = "continue"
+
+    override def equals(obj: Any): Boolean = obj.isInstanceOf[Continue.type]
 }
 
 //throw statement
@@ -1052,8 +1813,14 @@ object Continue extends Expression{
  * <pre><code>
  */
 
-case class Throw(expression: Expression) extends Expression{
+case class Throw(expression: Expression) extends Expression {
     override def toString: String = s"throw $expression"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case `throw`: Throw ⇒
+            `throw`.expression == expression
+        case _ ⇒ false
+    }
 }
 
 //return statement
@@ -1068,8 +1835,14 @@ case class Throw(expression: Expression) extends Expression{
  * <pre><code>
  */
 
-case class Return(expression: Expression) extends Expression{
+case class Return(expression: Expression) extends Expression {
     override def toString: String = s"return $expression"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case `return`: Return ⇒
+            `return`.expression == expression
+        case _ ⇒ false
+    }
 }
 
 //assert statement
@@ -1083,8 +1856,14 @@ case class Return(expression: Expression) extends Expression{
  * }
  * <pre><code>
  */
-case class Assert(expression: Expression) extends Expression{
+case class Assert(expression: Expression) extends Expression {
     override def toString: String = s"assert $expression"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case `assert`: Assert ⇒
+            `assert`.expression == expression
+        case _ ⇒ false
+    }
 }
 
 //synchronized statement
@@ -1093,32 +1872,52 @@ case class Assert(expression: Expression) extends Expression{
  * <pre><code>
  *program{
  *      def method(Int i)=Unit{
- *        sync(lock){   //sync(lock) => SyncCondition
- *             foo();   //{ foo();} => SyncBlock
- *        }
- *      }   //sync(...){ ...} => Sync
+ * sync(lock){   //sync(lock) => SyncCondition
+ * foo();   //{ foo();} => SyncBlock
+ * }
+ * }   //sync(...){ ...} => Sync
  * }
  * <pre><code>
  */
 
-class SyncCondition(val expression: Expression) extends Expression{
+class SyncCondition(val expression: Expression) extends Expression {
     override def toString: String = s"sync($expression)"
-}
-class SyncBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
-    override def toString: String =
-        s"""
-          |{
-          |   ${expressions.map(e⇒e+";").mkString("\n")}
-          |}
-          |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case syncCondition: SyncCondition ⇒
+            syncCondition.expression == expression
+        case _ ⇒ false
+    }
 }
 
-case class Sync(condition: Expression,body:Block) extends Expression{
+class SyncBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions ) {
     override def toString: String =
         s"""
-          |sync($condition)
-          | $body
-          |""".stripMargin
+           |{
+           |   ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case syncBlock: SyncBlock ⇒
+            syncBlock.expressions == expressions
+        case _ ⇒ false
+    }
+}
+
+case class Sync(condition: Expression,body:Block) extends Expression {
+    override def toString: String =
+        s"""
+           |sync($condition)
+           | $body
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case sync: Sync ⇒
+            sync.condition == condition &&
+              sync.body == body
+        case _ ⇒ false
+    }
 }
 
 //if statement
@@ -1139,20 +1938,37 @@ case class Sync(condition: Expression,body:Block) extends Expression{
  * <pre><code>
  */
 
-class IfCondition(val expression: Expression,val first:Boolean) extends Expression{
-    override def toString: String = if(first) s"if($expression)" else s"else if($expression)"
+class IfCondition(val expression: Expression,val first:Boolean) extends Expression {
+    override def toString: String = if (first) s"if($expression)" else s"else if($expression)"
+
+    override def equals(obj: Any): Boolean = obj match {
+        case ifCondition: IfCondition ⇒
+            ifCondition.expression == expression && ifCondition.first == first
+        case _ ⇒ false
+    }
 }
-class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions) {
+class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions ) {
     override def toString: String =
         s"""
            |{
-           |    ${expressions.map(e ⇒ e + ";").mkString("\n")}
+           |    ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
            |}
            |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case ifBlock: IfBlock ⇒
+            ifBlock.expressions == expressions
+        case _ ⇒ false
+    }
+
 }
 
-case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Expression{
-
+case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Expression {
+    override def equals(obj: Any): Boolean = obj match {
+        case `if`: If ⇒
+            `if`.cases.sameElements( cases ) && default == `if`.default
+        case _ ⇒ false
+    }
 }
 
 //try statement
@@ -1175,38 +1991,62 @@ case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Ex
  * <pre><code>
  */
 
-class TryBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions ){
+class TryBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions ) {
     override def toString: String =
         s"""
            |try{
-           |    ${expressions.map(e⇒e+";").mkString("\n")}
+           |    ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
            |}
            |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case tryBlock: TryBlock ⇒
+            tryBlock.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
-class CatchParameter(val name: String, val dslType: DslType) extends Expression{
+class CatchParameter(val name: String, val dslType: DslType) extends Expression {
     override def toString: String =
         s"""
            |catch($dslType $name)
            |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case catchParameter: CatchParameter ⇒
+            catchParameter.name == name && catchParameter.dslType == dslType
+        case _ ⇒ false
+    }
 }
 
-class CatchBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions ){
+class CatchBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer( )) extends Block( expressions ) {
     override def toString: String =
         s"""
-          |{
-          |     ${expressions.map(e⇒e+";").mkString("\n")}
-          |}
-          |""".stripMargin
+           |{
+           |     ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case catchBlock: CatchBlock ⇒
+            catchBlock.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
-class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions){
+class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) extends Block(expressions ) {
     override def toString: String =
         s"""
-          |finally{
-          |      ${expressions.map(e⇒e+";").mkString("\n")}
-          |}
-          |""".stripMargin
+           |finally{
+           |      ${expressions.map( e ⇒ e + ";" ).mkString( "\n" )}
+           |}
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case finallyBlock: FinallyBlock ⇒
+            finallyBlock.expressions == expressions
+        case _ ⇒ false
+    }
 }
 
 case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],finallyBlock:Option[Block]) extends Expression {
@@ -1217,14 +2057,24 @@ case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],final
 
            |${catches.map{
             `catch`⇒ s"catch(${`catch`._1._2} ${`catch`._1._1}) ${`catch`._2}"
-        }.mkString("\n")}
+        }.mkString( "\n" )
+        }
 
            |${
             finallyBlock match {
-            case Some(
-            block)⇒
-                "finally"+block
-            case None⇒""
-        }}
-          |""".stripMargin
+                case Some(
+                block ) ⇒
+                    "finally" + block
+                case None ⇒ ""
+            }
+        }
+           |""".stripMargin
+
+    override def equals(obj: Any): Boolean = obj match {
+        case tryCatch: TryCatch ⇒
+            tryCatch.tryBlock == tryCatch.tryBlock &&
+              tryCatch.catches.sameElements( tryCatch.catches ) &&
+              tryCatch.finallyBlock == finallyBlock
+        case _ ⇒ false
+    }
 }

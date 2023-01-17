@@ -1,12 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.expression.{Assert, Assign, Break, Continue, Return, Throw}
+import com.dongjiaqiang.jvm.dsl.core.expression._
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
 trait StatementExpressionScanner extends StatementExpressionVisitor[Unit]{
   override def visit(assign: Assign, visitor: ExpressionVisitor[Unit]): Unit = {
 

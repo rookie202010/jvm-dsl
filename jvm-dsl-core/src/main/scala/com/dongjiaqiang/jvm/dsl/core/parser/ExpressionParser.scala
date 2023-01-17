@@ -263,10 +263,12 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
       blockStack.push(currentBlock)
 
       def varDef(fieldScope: FieldScope, context: VarDefContext): LocalVarDef = {
-        if (context.expression( ).lambdaExpression( ) != null) {
-          LocalVarDef( fieldScope, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
+        if (context.expression( ) == null) {
+          LocalVarDef( fieldScope, fieldScope.dslType, None )
+        } else if (context.expression( ).lambdaExpression( ) != null) {
+          LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
         } else {
-          LocalVarDef( fieldScope, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
+          LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
         }
       }
 
@@ -309,7 +311,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
         case ContextType.FOR_LOOP_MAP ⇒
 
           val (_, keyFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.head
-          val (_, valueFieldScope) = currentBlock.asInstanceOf[ForStatementBlockScope].initFields.last
+          val (_, valueFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.last
           val context = parseContext.getNextRule[ForStatementThreeContext]
 
           //key var def
@@ -557,9 +559,9 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   override def enterThrowOrSideEffectExpr(ctx: JvmDslParserParser.ThrowOrSideEffectExprContext): Unit = {
     updateExpression( {
       if (ctx.throwReturnOrSideEffectStatement( ).THROW( ) != null) {
-        new Throw( ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) ) )
+        Throw( ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) ) )
       } else if (ctx.throwReturnOrSideEffectStatement( ).RETURN( ) != null) {
-        new Return( ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) ) )
+        Return( ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) ) )
       } else {
         ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) )
       }

@@ -85,7 +85,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
         val parts = c.funcCallChain( ).part( ).map( p ⇒ {
           partExpression( p, exprContext )
         } )
-        new FuncCallChain( funcCall, parts.toList )
+        FuncCallChain( funcCall, parts.toList )
     }
   }
 }

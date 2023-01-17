@@ -3,11 +3,6 @@ package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
 import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 
-/**
- * @author: rookie
- * @mail: dongjiaqiang@qiniu.com
- * @date: 2022/12/26 
- * */
 trait StatementExpressionVisitor[T] {
 
   def visit(assign: Assign, visitor: ExpressionVisitor[T]): T={

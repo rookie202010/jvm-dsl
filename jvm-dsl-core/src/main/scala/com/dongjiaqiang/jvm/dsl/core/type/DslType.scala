@@ -1,93 +1,100 @@
 package com.dongjiaqiang.jvm.dsl.core.`type`
+
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 
 trait DslType {
-    val name:String
+  val name: String
 }
 
+trait NumberDslType extends DslType
+
+trait BasicDslType extends DslType
+
+
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.TypeContext
-object DslType{
-    import scala.collection.convert.ImplicitConversionsToScala._
-    def unapply(typeContext:TypeContext):DslType={
-        typeContext match {
-          case _:IntTypeContext⇒IntType
-          case _:LongTypeContext⇒LongType
-          case _:FloatTypeContext⇒FloatType
-          case _:DoubleTypeContext⇒DoubleType
-          case _:StringTypeContext⇒StringType
-          case _:CharTypeContext⇒CharType
-          case context: ListTypeContext⇒
-            new ListType(unapply(context.`type`()))
-          case context: ArrayTypeContext⇒
-            new ArrayType(unapply(context))
-          case context: SetTypeContext⇒
-            new SetType(unapply(context.`type`()))
-          case  context: MapTypeContext⇒
-            new MapType(unapply(context.`type`(0)),unapply(context.`type`(1)))
-          case context: TupleTypeContext⇒
-            new TupleType(context.`type`().map(`type`⇒unapply(`type`)).toArray)
-          case context:OptionTypeContext⇒
-            new OptionType(unapply(context.`type`()))
-          case context:FutureTypeContext⇒
-            new FutureType(unapply(context.`type`()))
-          case context:LambdaOneInOneOutTypeContext⇒
-            new LambdaType(Array(unapply(context.`type`().head)),Array(unapply(context.`type`.last)))
-          case context:LambdaOneInMoreOutTypeContext⇒
-            new LambdaType(Array(unapply(context.`type`())),context.types().`type`().map(unapply).toArray)
-          case context:LambdaZeroInOneOutTypeContext⇒
-            new LambdaType(Array(),Array(unapply(context.`type`())))
-          case context:LambdaZeroInMoreOutTypeContext⇒
-            new LambdaType(Array(),context.types().`type`().map(unapply).toArray)
-          case context:LambdaMoreInOneOutTypeContext⇒
-            new LambdaType(context.types().`type`().map(unapply).toArray,Array(unapply(context.`type`())))
-          case context:LambdaMoreInMoreOutTypeContext⇒
-            new LambdaType(context.types(0).`type`().map(unapply).toArray,
-              context.types(1).`type`().map(unapply).toArray)
-          case context:ParameterizedClassTypeContext⇒
-              new ClazzType(context.clazzType().IDENTIFIER().getText,context.`type`().map(unapply).toArray)
-          case context:ClassTypeContext⇒
-            new ClazzType(context.clazzType().IDENTIFIER().getText,Array())
+
+object DslType {
+
+  import scala.collection.convert.ImplicitConversionsToScala._
+
+  def unapply(typeContext: TypeContext): DslType = {
+    typeContext match {
+      case _: IntTypeContext ⇒ IntType
+      case _: LongTypeContext ⇒ LongType
+      case _: FloatTypeContext ⇒ FloatType
+      case _: DoubleTypeContext ⇒ DoubleType
+      case _: StringTypeContext ⇒ StringType
+      case _: CharTypeContext ⇒ CharType
+      case _: BoolTypeContext ⇒ BoolType
+      case context: ListTypeContext ⇒
+        new ListType( unapply( context.`type`( ) ) )
+      //      case context: ArrayTypeContext ⇒
+      //       new ArrayType( unapply( context ) )
+      case context: SetTypeContext ⇒
+        new SetType( unapply( context.`type`( ) ) )
+      case context: MapTypeContext ⇒
+        new MapType( unapply( context.`type`( 0 ) ), unapply( context.`type`( 1 ) ) )
+      case context: TupleTypeContext ⇒
+        new TupleType( context.`type`( ).map( `type` ⇒ unapply( `type` ) ).toArray )
+      case context: OptionTypeContext ⇒
+        new OptionType( unapply( context.`type`( ) ) )
+      case context: FutureTypeContext ⇒
+        new FutureType( unapply( context.`type`( ) ) )
+      case context: LambdaTypeContext ⇒
+        new LambdaType( Some( unapply( context.`type`( ).head ) ), unapply( context.`type`.last ) )
+      case context: SupplierTypeContext ⇒
+        new LambdaType( None, unapply( context.`type`( ) ) )
+      case context: ParameterizedClassTypeContext ⇒
+        new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, context.`type`( ).map( unapply ).toArray )
+      case context: ClassTypeContext ⇒
+        if (context.clazzType( ).IDENTIFIER( ).getText == "Unit") {
+          UnitType
+        } else if (context.clazzType( ).IDENTIFIER( ).getText == "Any") {
+          AnyType
+        } else {
+          new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, Array( ) )
         }
     }
+  }
 }
 
 //base type
-object IntType extends DslType{
+object IntType extends NumberDslType with BasicDslType {
   override val name: String = "Int"
 
 }
 
-object LongType extends DslType{
+object LongType extends NumberDslType with BasicDslType {
   override val name: String = "Long"
 
 }
 
-object FloatType extends DslType{
+object FloatType extends NumberDslType with BasicDslType {
   override val name: String = "Float"
 
 }
 
-object DoubleType extends DslType{
+object DoubleType extends NumberDslType with BasicDslType {
   override val name: String = "Double"
 
 }
 
-object StringType extends DslType{
+object StringType extends DslType with BasicDslType {
   override val name: String = "String"
 
 }
 
-object CharType extends DslType{
+object CharType extends DslType with BasicDslType {
   override val name: String = "Char"
 
 }
 
-object ByteType extends DslType{
+object ByteType extends DslType with BasicDslType {
   override val name: String = "Byte"
 
 }
 
-object BoolType extends DslType {
+object BoolType extends DslType with BasicDslType {
   override val name: String = "Bool"
 }
 
@@ -97,6 +104,10 @@ object UnResolvedType extends DslType {
 
 object AnyType extends DslType {
   override val name: String = "Any"
+}
+
+object UnitType extends DslType {
+  override val name: String = "Unit"
 }
 
 //collection type
@@ -132,35 +143,84 @@ class MapType(val keyType:DslType, val valueType:DslType) extends DslType {
     }
 }
 
-class OptionType(val valueType:DslType) extends DslType{
+class OptionType(val valueType: DslType) extends DslType {
   override val name: String = "Option"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case option: OptionType ⇒ valueType equals  option.valueType
+      case option: OptionType ⇒ valueType == option.valueType
       case _ ⇒ false
     }
-
-
 }
 
-class ArrayType(val valueType:DslType) extends DslType{
+class SomeType(val valueType: DslType) extends DslType {
+  override val name: String = "Some"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case someType: SomeType ⇒ valueType == someType.valueType
+      case _ ⇒ false
+    }
+}
+
+object NoneType extends DslType {
+  override val name: String = "None"
+}
+
+class ArrayType(val valueType: DslType) extends DslType {
   override val name: String = "Array"
 
   override def equals(obj: Any): scala.Boolean =
-      obj match {
-        case array: ArrayType ⇒ valueType == array.valueType
-        case _⇒false
-      }
+    obj match {
+      case array: ArrayType ⇒ valueType == array.valueType
+      case _ ⇒ false
+    }
 }
 
-class TupleType(val valueTypes:Array[DslType]) extends DslType{
+class EitherType(val leftType: DslType, val rightType: DslType) extends DslType {
+  override val name: String = "Either"
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case eitherType: EitherType ⇒
+        eitherType.leftType == leftType && eitherType.rightType == rightType
+      case _ ⇒ false
+    }
+  }
+}
+
+class LeftType(val leftType: DslType) extends DslType {
+  override val name: String = "Left"
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case leftType: LeftType ⇒
+        leftType.leftType == leftType
+      case _ ⇒ false
+    }
+  }
+}
+
+class RightType(val rightType: DslType) extends DslType {
+  override val name: String = "Left"
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case leftType: RightType ⇒
+        leftType.rightType == leftType
+      case _ ⇒ false
+    }
+  }
+}
+
+
+class TupleType(val valueTypes: Array[DslType]) extends DslType {
   override val name: String = "Tuple"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
       case tupleType: TupleType ⇒
-        valueTypes.sameElements(tupleType.valueTypes)
+        valueTypes.sameElements( tupleType.valueTypes )
       case _ ⇒ false
     }
 }
@@ -187,14 +247,28 @@ class TryType(val valueType: DslType) extends DslType {
     }
 }
 
-class LambdaType(val inputTypes: Array[DslType], val outputTypes: Array[DslType]) extends DslType {
+class SuccessType(val valueType: DslType) extends DslType {
+  override val name: String = "Success"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case successType: SuccessType ⇒
+        valueType == successType.valueType
+      case _ ⇒ false
+    }
+}
+
+object FailureType extends DslType {
+  override val name: String = "Failure"
+}
+
+class LambdaType(val inputType: Option[DslType], val outputType: DslType) extends DslType {
   override val name: String = "Lambda"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
       case lambdaType: LambdaType ⇒
-        inputTypes.sameElements( lambdaType.inputTypes ) &&
-          outputTypes.sameElements( lambdaType.outputTypes )
+        lambdaType.inputType == inputType && outputType == lambdaType.outputType
       case _ ⇒ false
     }
 }

@@ -41,16 +41,41 @@ trait BlockExpressionVisitor[T] {
     throw new UnsupportedOperationException("not supported")
   }
 
-  def visit(asyncBlock: Async, visitor: ExpressionVisitor[T]): T={
-    throw new UnsupportedOperationException("not supported")
+  def visit(asyncBlock: Async, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
   }
 
-  def visit(tryBlock: Try, visitor: ExpressionVisitor[T]): T={
-    throw new UnsupportedOperationException("not supported")
+  def visit(tryBlock: Try, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
   }
 
-  def visit(matchCase: MatchCase, visitor: ExpressionVisitor[T]): T={
-    throw new UnsupportedOperationException("not supported")
+  def visit(customBlockExpression: CustomBlockExpression, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
   }
+
+  def visit(matchCase: MatchCase, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(matchType: MatchType, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(matchHead: MatchHead, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(matchList: MatchList, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(matchTuple: MatchTuple, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(matchClass: MatchClass, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
 
 }

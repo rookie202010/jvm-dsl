@@ -8,7 +8,7 @@ import scala.collection.convert.ImplicitConversionsToScala._
 
 object ParenGenerator extends IExpressionGenerator[ParenExpressionContext, Expression] {
   override def generate(exprContext: ExprContext, ruleContext: ParenExpressionContext): Expression = {
-    new Paren( OrGenerator.generate( exprContext, ruleContext.conditionalOrExpression( ) ) )
+    Paren( OrGenerator.generate( exprContext, ruleContext.conditionalOrExpression( ) ) )
   }
 }
 
@@ -18,16 +18,16 @@ object OrGenerator extends IExpressionGenerator[ConditionalOrExpressionContext, 
       case c: ConditionalAndExprContext ⇒
         AndGenerator.generate( exprContext, c.conditionalAndExpression( ) )
       case c: OrOpExprContext ⇒
-        new Or( generate( exprContext, c.conditionalOrExpression( ) ),
+        Or( generate( exprContext, c.conditionalOrExpression( ) ),
           AndGenerator.generate( exprContext, c.conditionalAndExpression( ) ) )
       case c: OrOpParenExprContext ⇒
-        new Or( generate( exprContext, c.conditionalOrExpression( ) ),
+        Or( generate( exprContext, c.conditionalOrExpression( ) ),
           ParenGenerator.generate( exprContext, c.parenExpression( ) ) )
       case c: ParenOrOpExprContext ⇒
-        new Or( ParenGenerator.generate( exprContext, c.parenExpression( ) ),
+        Or( ParenGenerator.generate( exprContext, c.parenExpression( ) ),
           generate( exprContext, c.conditionalOrExpression( ) ) )
       case c: ParenOrOpParenExprContext ⇒
-        new Or( ParenGenerator.generate( exprContext, c.parenExpression( ).head ),
+        Or( ParenGenerator.generate( exprContext, c.parenExpression( ).head ),
           ParenGenerator.generate( exprContext, c.parenExpression( ).last ) )
     }
   }
@@ -39,16 +39,16 @@ object AndGenerator extends IExpressionGenerator[ConditionalAndExpressionContext
       case c: InclusiveOrExprContext ⇒
         InclusiveOrGenerator.generate( exprContext, c.inclusiveOrExpression( ) )
       case c: AndOpExprContext ⇒
-        new And( generate( exprContext, c.conditionalAndExpression( ) ),
+        And( generate( exprContext, c.conditionalAndExpression( ) ),
           InclusiveOrGenerator.generate( exprContext, c.inclusiveOrExpression( ) ) )
       case c: AndOpParenExprContext ⇒
-        new And( generate( exprContext, c.conditionalAndExpression( ) ),
+        And( generate( exprContext, c.conditionalAndExpression( ) ),
           ParenGenerator.generate( exprContext, c.parenExpression( ) ) )
       case c: ParenAndOpExprContext ⇒
-        new BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ) ),
+        BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ) ),
           generate( exprContext, c.conditionalAndExpression( ) ) )
       case c: ParenAndOpParenExprContext ⇒
-        new BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ).head ),
+        BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ).head ),
           ParenGenerator.generate( exprContext, c.parenExpression( ).last ) )
     }
   }
@@ -60,16 +60,16 @@ object InclusiveOrGenerator extends IExpressionGenerator[InclusiveOrExpressionCo
       case c: ExclusiveOrExprContext ⇒
         ExclusiveOrGenerator.generate( exprContext, c.exclusiveOrExpression( ) )
       case c: BitOrOpExprContext ⇒
-        new BitOr( generate( exprContext, c.inclusiveOrExpression( ) ),
+        BitOr( generate( exprContext, c.inclusiveOrExpression( ) ),
           ExclusiveOrGenerator.generate( exprContext, c.exclusiveOrExpression( ) ) )
       case c: BitOrParenOpExprContext ⇒
-        new BitOr( generate( exprContext, c.inclusiveOrExpression( ) ),
+        BitOr( generate( exprContext, c.inclusiveOrExpression( ) ),
           ParenGenerator.generate( exprContext, c.parenExpression( ) ) )
       case c: ParenBitOrOpExprContext ⇒
-        new BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ) ),
+        BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ) ),
           generate( exprContext, c.inclusiveOrExpression( ) ) )
       case c: ParenBitOrOpParenExprContext ⇒
-        new BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ).last ),
+        BitOr( ParenGenerator.generate( exprContext, c.parenExpression( ).last ),
           ParenGenerator.generate( exprContext, c.parenExpression( ).head ) )
     }
   }
@@ -84,19 +84,19 @@ object ExclusiveOrGenerator extends IExpressionGenerator[ExclusiveOrExpressionCo
       case c: CaretOpExprContext ⇒
         val left = generate( exprContext, c.exclusiveOrExpression( ) )
         val right = BitAndGenerator.generate( exprContext, c.bitAndExpression( ) )
-        new Caret( left, right )
+        Caret( left, right )
       case c: CaretOpParenExprContext ⇒
         val left = generate( exprContext, c.exclusiveOrExpression( ) )
         val right = ParenGenerator.generate( exprContext, c.parenExpression( ) )
-        new Caret( left, right )
+        Caret( left, right )
       case c: ParenCaretOpExprContext ⇒
         val left = ParenGenerator.generate( exprContext, c.parenExpression( ) )
         val right = generate( exprContext, c.exclusiveOrExpression( ) )
-        new Caret( left, right )
+        Caret( left, right )
       case c: ParenCaretOpParenExprContext ⇒
         val left = ParenGenerator.generate( exprContext, c.parenExpression( ).head )
         val right = ParenGenerator.generate( exprContext, c.parenExpression( ).last )
-        new Caret( left, right )
+        Caret( left, right )
     }
   }
 }
@@ -109,19 +109,19 @@ object BitAndGenerator extends IExpressionGenerator[BitAndExpressionContext,Expr
       case c: BitAndOpExprContext ⇒
         val left = generate( exprContext, c.bitAndExpression( ) )
         val right = EqualityGenerator.generate( exprContext, c.equalityExpression( ) )
-        new BitAnd( left, right )
+        BitAnd( left, right )
       case c: BitAndOpParenExprContext ⇒
         val left = generate( exprContext, c.bitAndExpression( ) )
         val right = ParenGenerator.generate( exprContext, c.parenExpression( ) )
-        new BitAnd( left, right )
+        BitAnd( left, right )
       case c: ParenBitAnOpExprContext ⇒
         val left = ParenGenerator.generate( exprContext, c.parenExpression( ) )
         val right = generate( exprContext, c.bitAndExpression( ) )
-        new BitAnd( left, right )
+        BitAnd( left, right )
       case c: ParenBitAndOpParenExprContext ⇒
         val left = ParenGenerator.generate( exprContext, c.parenExpression( ).head )
         val right = ParenGenerator.generate( exprContext, c.parenExpression( ).last )
-        new BitAnd( left, right )
+        BitAnd( left, right )
       }
   }
 }
@@ -130,9 +130,9 @@ object EqualityGenerator extends IExpressionGenerator[EqualityExpressionContext,
 
   def generator(left: Expression, right: Expression, c: EqualityOperationContext): Expression = {
     if (c.EQUAL()!=null) {
-      new Eq( left, right )
+      Eq( left, right )
     } else{
-      new NotEq( left, right )
+      NotEq( left, right )
     }
   }
 
@@ -164,13 +164,13 @@ object RelationGenerator extends IExpressionGenerator[RelationExpressionContext,
 
   def generator(left: Expression, right: Expression, c: RelationOperationContext): Expression = {
     if (c.LT()!=null) {
-      new Lt( left, right )
+      Lt( left, right )
     } else if (c.GT()!=null) {
-      new Gt( left, right )
+      Gt( left, right )
     } else if(c.LE()!=null){
-      new Le(left,right)
+      Le( left, right )
     }else{
-      new Ge(left,right)
+      Ge( left, right )
     }
   }
 
@@ -202,11 +202,11 @@ object ShiftGenerator extends IExpressionGenerator[ShiftExpressionContext,Expres
 
   def generator(left:Expression,right:Expression,c:ShiftOperationContext):Expression={
       if(c.GT().size()==3){
-        new UnsignedRightShift(left,right)
+        UnsignedRightShift( left, right )
       }else if(c.LT().size()==2){
-        new LeftShift(left,right)
+        LeftShift( left, right )
       }else{
-        new RightShift(left,right)
+        RightShift( left, right )
       }
   }
 
@@ -238,9 +238,9 @@ object AdditiveGenerator extends IExpressionGenerator[AdditiveExpressionContext,
 
   def generator(left: Expression, right: Expression, c: AdditiveOperationContext): Expression = {
     if (c.ADD() != null) {
-      new Add( left, right )
+      Add( left, right )
     } else {
-      new Sub( left, right )
+      Sub( left, right )
     }
   }
 
@@ -273,11 +273,11 @@ object MultiplicativeGenerator extends IExpressionGenerator[MultiplicativeExpres
 
   def generator(left:Expression,right:Expression,c:MultiplicativeOperationContext): Expression ={
     if (c.DIV( ) != null) {
-      new Div( left, right )
+      Div( left, right )
     } else if (c.MOD( ) != null) {
-      new Mod( left, right )
+      Mod( left, right )
     } else {
-      new Mul( left, right )
+      Mul( left, right )
     }
   }
 

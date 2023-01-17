@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain
 
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
-import com.dongjiaqiang.jvm.dsl.core.expression.{BoolLiteralCallChain, CharLiteralCallChain, ClazzLiteral, ClazzLiteralCallChain, DoubleLiteralCallChain, Expression, FloatLiteralCallChain, FuncCall, FuncCallChain, IntLiteralCallChain, ListLiteral, ListLiteralCallChain, LiteralCall, LongLiteralCallChain, MapLiteral, MapLiteralCallChain, MethodCall, OptionLiteral, OptionLiteralCallChain, Part, SetLiteral, SetLiteralCallChain, StaticCall, StringLiteralCallChain, TupleLiteral, TupleLiteralCallChain, VarCall, VarName, VarRef}
+import com.dongjiaqiang.jvm.dsl.core.expression._
 
 
 trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression]{
@@ -143,48 +143,60 @@ trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression]{
   override def visit(literalCallChain: ListLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
       val head = visitor.visit(literalCallChain.head).asInstanceOf[ListLiteral]
       val tails = revise(literalCallChain.tails,visitor)
-      if(head!=literalCallChain.head || tails.isDefined){
-          new ListLiteralCallChain(head,tails.getOrElse(literalCallChain.tails))
-      }
+    if (head != literalCallChain.head || tails.isDefined) {
+      new ListLiteralCallChain( head, tails.getOrElse( literalCallChain.tails ) )
+    } else {
+      literalCallChain
+    }
   }
 
   override def visit(literalCallChain: OptionLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
     val head = visitor.visit(literalCallChain.head).asInstanceOf[OptionLiteral]
     val tails = revise(literalCallChain.tails,visitor)
-    if(head!=literalCallChain.head || tails.isDefined){
-      new OptionLiteralCallChain(head,tails.getOrElse(literalCallChain.tails))
+    if (head != literalCallChain.head || tails.isDefined) {
+      new OptionLiteralCallChain( head, tails.getOrElse( literalCallChain.tails ) )
+    } else {
+      literalCallChain
     }
   }
 
   override def visit(literalCallChain: TupleLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
     val head = visitor.visit(literalCallChain.head).asInstanceOf[TupleLiteral]
     val tails = revise(literalCallChain.tails,visitor)
-    if(head!=literalCallChain.head || tails.isDefined){
-      new TupleLiteralCallChain(head,tails.getOrElse(literalCallChain.tails))
+    if (head != literalCallChain.head || tails.isDefined) {
+      new TupleLiteralCallChain( head, tails.getOrElse( literalCallChain.tails ) )
+    } else {
+      literalCallChain
     }
   }
 
   override def visit(literalCallChain: MapLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
     val head = visitor.visit(literalCallChain.head).asInstanceOf[MapLiteral]
     val tails = revise(literalCallChain.tails,visitor)
-    if(head!=literalCallChain.head || tails.isDefined){
-      new MapLiteralCallChain(head,tails.getOrElse(literalCallChain.tails))
+    if (head != literalCallChain.head || tails.isDefined) {
+      new MapLiteralCallChain( head, tails.getOrElse( literalCallChain.tails ) )
+    } else {
+      literalCallChain
     }
   }
 
   override def visit(literalCallChain: SetLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
     val head = visitor.visit(literalCallChain.head).asInstanceOf[SetLiteral]
     val tails = revise(literalCallChain.tails,visitor)
-    if(head!=literalCallChain.head || tails.isDefined){
-      new SetLiteralCallChain(head,tails.getOrElse(literalCallChain.tails))
+    if (head != literalCallChain.head || tails.isDefined) {
+      new SetLiteralCallChain( head, tails.getOrElse( literalCallChain.tails ) )
+    } else {
+      literalCallChain
     }
   }
 
   override def visit(literalCallChain: ClazzLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
     val head = visitor.visit(literalCallChain.head).asInstanceOf[ClazzLiteral]
     val tails = revise(literalCallChain.tails,visitor)
-    if(head!=literalCallChain.head || tails.isDefined){
-      new ClazzLiteralCallChain(head,tails.getOrElse(literalCallChain.tails))
+    if (head != literalCallChain.head || tails.isDefined) {
+      new ClazzLiteralCallChain( head, tails.getOrElse( literalCallChain.tails ) )
+    } else {
+      literalCallChain
     }
   }
 }

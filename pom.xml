@@ -10,6 +10,7 @@
 
     <modules>
         <module>jvm-dsl-core</module>
+        <module>jvm-dsl-java</module>
     </modules>
 
     <properties>

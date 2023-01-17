@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.block
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 
 trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
   override def visit(block: Block,
@@ -134,22 +134,68 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
 
   override def visit(tryBlock: Try,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    val newBody = visit(tryBlock.body,visitor)
-    if(newBody!=tryBlock.body){
-        Try(newBody,tryBlock.dslType)
-    }else{
-        tryBlock
+    val newBody = visit( tryBlock.body, visitor )
+    if (newBody != tryBlock.body) {
+      Try( newBody, tryBlock.dslType )
+    } else {
+      tryBlock
+    }
+  }
+
+
+  override def visit(customBlockExpression: CustomBlockExpression,
+                     visitor: ExpressionVisitor[Expression]): Expression = {
+    val newBody = visit( customBlockExpression.body, visitor )
+    if (newBody != customBlockExpression.body) {
+      customBlockExpression.copy( body = newBody )
+    } else {
+      customBlockExpression
     }
   }
 
   override def visit(matchCase: MatchCase,
                      visitor: ExpressionVisitor[Expression]): Expression = {
-    val reviseCases = ExpressionReviser.revise[Expression,Block,Expression,Block](matchCase.cases,visitor,visitor)
-    val reviseDefault = ExpressionReviser.revise[Expression,Block](matchCase.default,visitor)
-    if(reviseCases.isDefined || reviseDefault.isDefined ){
-      If(reviseCases.getOrElse(matchCase.cases),reviseDefault.getOrElse(matchCase.default))
-    }else{
+    val reviseCases = ExpressionReviser.revise[Expression, Block, Expression, Block]( matchCase.cases, visitor, visitor )
+    val reviseDefault = ExpressionReviser.revise[Expression, Block]( matchCase.default, visitor )
+    if (reviseCases.isDefined || reviseDefault.isDefined) {
+      MatchCase( matchCase.matched, reviseCases.getOrElse( matchCase.cases ),
+        if (reviseDefault.isEmpty) matchCase.default else reviseDefault.flatten )
+    } else {
       matchCase
     }
+  }
+
+  override def visit(matchType: MatchType, visitor: ExpressionVisitor[Expression]): Expression = {
+    matchType
+  }
+
+  override def visit(matchHead: MatchHead, visitor: ExpressionVisitor[Expression]): Expression = {
+    MatchHead( matchHead.head.map( {
+      case Left( expression ) ⇒ Left( visitor.visit( expression ) )
+      case right ⇒ right
+    } ), matchHead.tail match {
+      case Left( expression ) ⇒ Left( visitor.visit( expression ) )
+      case right ⇒ right
+    } )
+  }
+
+  def revise(expressions: Array[Either[Expression, String]],
+             visitor: ExpressionVisitor[Expression]): Array[Either[Expression, String]] = {
+    expressions.map( {
+      case Left( expression ) ⇒ Left( visitor.visit( expression ) )
+      case right ⇒ right
+    } )
+  }
+
+  override def visit(matchList: MatchList, visitor: ExpressionVisitor[Expression]): Expression = {
+    MatchList( revise( matchList.expressions, visitor ) )
+  }
+
+  override def visit(matchTuple: MatchTuple, visitor: ExpressionVisitor[Expression]): Expression = {
+    MatchTuple( revise( matchTuple.expressions, visitor ) )
+  }
+
+  override def visit(matchClass: MatchClass, visitor: ExpressionVisitor[Expression]): Expression = {
+    MatchClass( matchClass.dslType, revise( matchClass.expressions, visitor ) )
   }
 }

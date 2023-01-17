@@ -14,29 +14,29 @@ object AssignGenerator extends IExpressionGenerator[AssignmentContext,Assign] {
     val expression = ExpressionGenerator.generate( exprContext, assignmentContext.expression( ) )
 
     if (assignOperatorContext.ASSIGN( ) != null) {
-      new Assign( varRef, expression )
+      Assign( varRef, expression )
     } else if (assignOperatorContext.OR_ASSIGN( ) != null) {
-      new Assign( varRef, new Or( varRef, expression ) )
+      Assign( varRef, Or( varRef, expression ) )
     } else if (assignOperatorContext.AND_ASSIGN( ) != null) {
-      new Assign( varRef, new And( varRef, expression ) )
+      Assign( varRef, And( varRef, expression ) )
     } else if (assignOperatorContext.ADD_ASSIGN( ) != null) {
-      new Assign( varRef, new Add( varRef, expression ) )
+      Assign( varRef, Add( varRef, expression ) )
     } else if (assignOperatorContext.DIV_ASSIGN( ) != null) {
-      new Assign( varRef, new Div( varRef, expression ) )
+      Assign( varRef, Div( varRef, expression ) )
     } else if (assignOperatorContext.LSHIFT_ASSIGN( ) != null) {
-      new Assign( varRef, new LeftShift( varRef, expression ) )
+      Assign( varRef, LeftShift( varRef, expression ) )
     } else if (assignOperatorContext.MOD_ASSIGN( ) != null) {
-      new Assign( varRef, new Mod( varRef, expression ) )
+      Assign( varRef, Mod( varRef, expression ) )
     } else if (assignOperatorContext.MUL_ASSIGN( ) != null) {
-      new Assign( varRef, new Mul( varRef, expression ) )
+      Assign( varRef, Mul( varRef, expression ) )
     } else if (assignOperatorContext.RSHIFT_ASSIGN( ) != null) {
-      new Assign( varRef, new RightShift( varRef, expression ) )
+      Assign( varRef, RightShift( varRef, expression ) )
     } else if (assignOperatorContext.SUB_ASSIGN( ) != null) {
-      new Assign( varRef, new Sub( varRef, expression ) )
+      Assign( varRef, Sub( varRef, expression ) )
     } else if (assignOperatorContext.URSHIFT_ASSIGN( ) != null) {
-      new Assign( varRef, new UnsignedRightShift( varRef, expression ) )
+      Assign( varRef, UnsignedRightShift( varRef, expression ) )
     } else if (assignOperatorContext.XOR_ASSIGN( ) != null) {
-      new Assign( varRef, new Caret( varRef, expression ) )
+      Assign( varRef, Caret( varRef, expression ) )
     } else {
       null
     }
@@ -52,14 +52,14 @@ object AssignGenerator extends IExpressionGenerator[AssignmentContext,Assign] {
       val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
       val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
 
-      generate( new ArrayVarRef( indexExpr, variable.name, variable.fieldScope ),
+      generate( new ArrayVarRef( indexExpr, variable.name, variable.fieldScope.dslType, variable.fieldScope ),
         ruleContext.assignOperator( ), exprContext, ruleContext )
 
     } else {
       val variable = VarGenerator.generate( exprContext, ruleContext.mapVariable( ).variable( ) )
       val indexExpr = OrGenerator.generate( exprContext, ruleContext.mapVariable( ).conditionalOrExpression( ) )
 
-      generate( new MapVarRef( indexExpr, variable.name, variable.fieldScope ), ruleContext.assignOperator( ),
+      generate( new MapVarRef( indexExpr, variable.name, variable.fieldScope.dslType, variable.fieldScope ), ruleContext.assignOperator( ),
         exprContext, ruleContext )
     }
   }
