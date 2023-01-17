@@ -1,5 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
+import com.dongjiaqiang.jvm.dsl.core.`type`.BoolType
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement.StatementExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression._
@@ -24,24 +25,40 @@ trait StatementExpressionJavaTranslator extends StatementExpressionVisitor[Strin
 
 
   override def visit(assert: Assert, visitor: ExpressionVisitor[String]): String = {
-    s"assert ${visitor.visit( assert.expression )}"
+    assert.expression match {
+      case matchCase:MatchCase⇒
+        s"assert ${
+          visitor.visit(JavaMatchCase(BoolType, ${
+            visitor.visit(matchCase)
+          }))
+        }"
+      case _⇒
+        s"assert ${visitor.visit(assert.expression)}"
+    }
   }
 
   override def visit(returnExpr: Return, visitor: ExpressionVisitor[String]): String = {
     returnExpr.expression match {
       case UnitLiteral ⇒ "return"
-      case _ ⇒ {
+      case _ ⇒
         returnExpr.expression match {
           case matchCase: MatchCase ⇒
-            s"return ${
-              visitor.visit( JavaMatchCase( visitor.currentMethodScope.returnType, ${
-                visitor.visit( matchCase )
-              } ) )
-            }"
+            if (visitor.currentLambdaScope != null) {
+              s"return ${
+                visitor.visit(JavaMatchCase(visitor.currentLambdaScope.outputType, ${
+                  visitor.visit(matchCase)
+                }))
+              }"
+            } else {
+              s"return ${
+                visitor.visit(JavaMatchCase(visitor.currentMethodScope.returnType, ${
+                  visitor.visit(matchCase)
+                }))
+              }"
+            }
           case _ ⇒
-            s"return ${visitor.visit( returnExpr.expression )}"
+            s"return ${visitor.visit(returnExpr.expression)}"
         }
-      }
     }
   }
 
