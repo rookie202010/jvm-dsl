@@ -8,7 +8,7 @@ import com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain.CallChainExpre
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal.LiteralExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement.StatementExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression.UnaryExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
+import com.dongjiaqiang.jvm.dsl.core.scope.{ClazzScope, MethodScope, ProgramScope}
 
 
 trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
@@ -17,20 +17,27 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
   with CallChainExpressionVisitor[T]
   with BlockExpressionVisitor[T]
   with StatementExpressionVisitor[T]
-  with VarExpressionVisitor[T]{
+  with VarExpressionVisitor[T] {
 
   val programScope: ProgramScope
 
+  var currentClazzScope: ClazzScope = _
 
-    def visit(expression:Expression):T={
-        expression match {
-          case v:IntLiteral⇒ visit( v, this )
-          case v:LongLiteral⇒ visit( v, this )
-          case v:FloatLiteral ⇒visit( v, this )
-          case v: DoubleLiteral ⇒ visit( v, this )
-          case v: BoolLiteral ⇒ visit( v, this )
-          case v: StringLiteral ⇒ visit( v, this )
-          case v: CharLiteral ⇒ visit( v, this )
+  var currentMethodScope: MethodScope = _
+
+  def defaultVisit(expression: Expression, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def visit(expression: Expression): T = {
+    expression match {
+      case v: IntLiteral ⇒ visit( v, this )
+      case v: LongLiteral ⇒ visit( v, this )
+      case v: FloatLiteral ⇒ visit( v, this )
+      case v: DoubleLiteral ⇒ visit( v, this )
+      case v: BoolLiteral ⇒ visit( v, this )
+      case v: StringLiteral ⇒ visit( v, this )
+      case v: CharLiteral ⇒ visit( v, this )
           case v: ListLiteral ⇒ visit( v, this )
           case v: MapLiteral ⇒ visit( v, this )
           case v: TupleLiteral ⇒ visit( v, this )
@@ -39,7 +46,8 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
           case v: OptionLiteral ⇒ visit( v, this )
           case v: ArrayLiteral ⇒ visit( v, this )
           case v: EitherLiteral ⇒ visit( v, this )
-          case UnitLiteral ⇒ visit( UnitLiteral, this )
+      case UnitLiteral ⇒ visit( UnitLiteral, this )
+      case Null ⇒ visit( Null, this )
 
           case v: Div ⇒ visit( v, this )
           case v: Mul ⇒ visit( v, this )
@@ -103,16 +111,18 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
           case v:Assert⇒visit( v ,this )
 
           case v:Negate⇒visit( v ,this )
-          case v:Opposite⇒visit( v ,this )
-          case v:Cast⇒visit( v ,this )
-          case v:Instanceof⇒visit( v ,this )
-          case v:Paren⇒visit( v ,this )
+      case v: Opposite ⇒ visit( v, this )
+      case v: Cast ⇒ visit( v, this )
+      case v: Instanceof ⇒ visit( v, this )
+      case v: Paren ⇒ visit( v, this )
 
-          case v:LocalVarDef⇒visit( v, this )
-          case v:VarRef⇒visit( v, this )
-          case v:ArrayVarRef⇒visit( v, this )
-          case v:MapVarRef⇒visit( v, this )
-          case v:Lambda⇒visit( v, this )
+      case v: LocalVarDef ⇒ visit( v, this )
+      case v: VarRef ⇒ visit( v, this )
+      case v: ArrayVarRef ⇒ visit( v, this )
+      case v: MapVarRef ⇒ visit( v, this )
+      case v: Lambda ⇒ visit( v, this )
+
+      case _ ⇒ defaultVisit( expression, this )
         }
     }
 }

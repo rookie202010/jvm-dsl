@@ -69,4 +69,9 @@ trait LiteralExpressionVisitor[T] {
   def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[T]): T = {
     throw new UnsupportedOperationException( "not supported" )
   }
+
+  def visit(literal: Null.type, visitor: ExpressionVisitor[T]): T = {
+    throw new UnsupportedOperationException( "not supported" )
+  }
+
 }

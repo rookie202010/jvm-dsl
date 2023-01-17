@@ -81,4 +81,8 @@ trait LiteralExpressionScanner extends LiteralExpressionVisitor[Unit] {
   override def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[Unit]): Unit = {
 
   }
+
+  override def visit(literal: Null.type, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
 }

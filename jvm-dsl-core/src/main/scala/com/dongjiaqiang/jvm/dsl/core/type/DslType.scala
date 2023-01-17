@@ -6,7 +6,9 @@ trait DslType {
   val name: String
 }
 
-abstract class NumberDslType extends DslType
+trait NumberDslType extends DslType
+
+trait BasicDslType extends DslType
 
 
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.TypeContext
@@ -23,6 +25,7 @@ object DslType {
       case _: DoubleTypeContext ⇒ DoubleType
       case _: StringTypeContext ⇒ StringType
       case _: CharTypeContext ⇒ CharType
+      case _: BoolTypeContext ⇒ BoolType
       case context: ListTypeContext ⇒
         new ListType( unapply( context.`type`( ) ) )
       //      case context: ArrayTypeContext ⇒
@@ -56,42 +59,42 @@ object DslType {
 }
 
 //base type
-object IntType extends NumberDslType {
+object IntType extends NumberDslType with BasicDslType {
   override val name: String = "Int"
 
 }
 
-object LongType extends NumberDslType {
+object LongType extends NumberDslType with BasicDslType {
   override val name: String = "Long"
 
 }
 
-object FloatType extends NumberDslType {
+object FloatType extends NumberDslType with BasicDslType {
   override val name: String = "Float"
 
 }
 
-object DoubleType extends NumberDslType {
+object DoubleType extends NumberDslType with BasicDslType {
   override val name: String = "Double"
 
 }
 
-object StringType extends DslType{
+object StringType extends DslType with BasicDslType {
   override val name: String = "String"
 
 }
 
-object CharType extends DslType{
+object CharType extends DslType with BasicDslType {
   override val name: String = "Char"
 
 }
 
-object ByteType extends DslType{
+object ByteType extends DslType with BasicDslType {
   override val name: String = "Byte"
 
 }
 
-object BoolType extends DslType {
+object BoolType extends DslType with BasicDslType {
   override val name: String = "Bool"
 }
 
@@ -140,16 +143,28 @@ class MapType(val keyType:DslType, val valueType:DslType) extends DslType {
     }
 }
 
-class OptionType(val valueType:DslType) extends DslType{
+class OptionType(val valueType: DslType) extends DslType {
   override val name: String = "Option"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case option: OptionType ⇒ valueType equals  option.valueType
+      case option: OptionType ⇒ valueType == option.valueType
       case _ ⇒ false
     }
+}
 
+class SomeType(val valueType: DslType) extends DslType {
+  override val name: String = "Some"
 
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case someType: SomeType ⇒ valueType == someType.valueType
+      case _ ⇒ false
+    }
+}
+
+object NoneType extends DslType {
+  override val name: String = "None"
 }
 
 class ArrayType(val valueType: DslType) extends DslType {
@@ -173,6 +188,31 @@ class EitherType(val leftType: DslType, val rightType: DslType) extends DslType 
     }
   }
 }
+
+class LeftType(val leftType: DslType) extends DslType {
+  override val name: String = "Left"
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case leftType: LeftType ⇒
+        leftType.leftType == leftType
+      case _ ⇒ false
+    }
+  }
+}
+
+class RightType(val rightType: DslType) extends DslType {
+  override val name: String = "Left"
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case leftType: RightType ⇒
+        leftType.rightType == leftType
+      case _ ⇒ false
+    }
+  }
+}
+
 
 class TupleType(val valueTypes: Array[DslType]) extends DslType {
   override val name: String = "Tuple"
@@ -205,6 +245,21 @@ class TryType(val valueType: DslType) extends DslType {
         valueType == tryType.valueType
       case _ ⇒ false
     }
+}
+
+class SuccessType(val valueType: DslType) extends DslType {
+  override val name: String = "Success"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case successType: SuccessType ⇒
+        valueType == successType.valueType
+      case _ ⇒ false
+    }
+}
+
+object FailureType extends DslType {
+  override val name: String = "Failure"
 }
 
 class LambdaType(val inputType: Option[DslType], val outputType: DslType) extends DslType {

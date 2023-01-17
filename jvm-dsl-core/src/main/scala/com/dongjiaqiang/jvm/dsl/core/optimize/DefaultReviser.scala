@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
-import com.dongjiaqiang.jvm.dsl.core.`type`.{ArrayType, DslType, EitherType, UnResolvedType}
+import com.dongjiaqiang.jvm.dsl.core.`type`._
 import com.dongjiaqiang.jvm.dsl.core.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 import com.dongjiaqiang.jvm.dsl.core.scope.ProgramScope
@@ -81,9 +81,22 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
   }
 
   override def visit(block: Block, visitor: ExpressionVisitor[Expression]): Block = {
-    val newExpression = ArrayBuffer[Expression]( )
-    revise( block.expressions, newExpression )
-    super.visit( new Block( newExpression ), visitor )
+    if (block.expressions.exists( expr ⇒ {
+      expr.isInstanceOf[WhileCondition] ||
+        expr.isInstanceOf[DoWhileBlock] ||
+        expr.isInstanceOf[ForLoop] ||
+        expr.isInstanceOf[ForLoopCollection] ||
+        expr.isInstanceOf[ForLoopMap] ||
+        expr.isInstanceOf[SyncCondition] ||
+        expr.isInstanceOf[IfCondition] ||
+        expr.isInstanceOf[TryBlock]
+    } )) {
+      val newExpression = ArrayBuffer[Expression]( )
+      revise( block.expressions.clone( ), newExpression )
+      super.visit( new Block( newExpression ), visitor )
+    } else {
+      super.visit( block, visitor )
+    }
   }
 
   override def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[Expression]): Expression = {
@@ -103,5 +116,31 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
         ) )
       case _ ⇒ literal
     }
+  }
+
+  override def visit(matchClass: MatchClass, visitor: ExpressionVisitor[Expression]): Expression = {
+    MatchClass( dslType = matchClass.dslType match {
+      case clazzType: ClazzType ⇒
+        clazzType.clazzName match {
+          //EitherType
+          case "Left" ⇒
+            new LeftType( UnResolvedType )
+          case "Right" ⇒
+            new RightType( UnResolvedType )
+
+          //TryType
+          case "Success" ⇒
+            new SuccessType( UnResolvedType )
+          case "Failure" ⇒
+            FailureType
+
+          //OptionType
+          case "Some" ⇒
+            new SomeType( UnResolvedType )
+
+          case _ ⇒
+            clazzType
+        }
+    }, revise( matchClass.expressions, visitor ) )
   }
 }

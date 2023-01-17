@@ -19,19 +19,21 @@ trait ExpressionReviser extends ExpressionVisitor[Expression]
   with LiteralExpressionReviser
   with StatementExpressionReviser
   with UnaryExpressionReviser
-  with VarExpressionReviser
+  with VarExpressionReviser {
+  override def defaultVisit(expression: Expression, visitor: ExpressionVisitor[Expression]): Expression = expression
+}
 
 object ExpressionReviser{
   def revise[T <: Expression, RT: ClassTag](origin: Option[T], visitor: ExpressionVisitor[Expression]): Option[Option[RT]] = {
     val revise = origin.map( visitor.visit )
     val success = origin match {
       case Some( expr ) ⇒ revise match {
-        case Some( reviseExpr ) ⇒ expr == reviseExpr
+        case Some( reviseExpr ) ⇒ expr != reviseExpr
         case None ⇒ false
       }
       case None ⇒ revise match {
-        case None ⇒ true
-        case Some( _ ) ⇒ false
+        case None ⇒ false
+        case Some( _ ) ⇒ true
       }
     }
     if (success) {

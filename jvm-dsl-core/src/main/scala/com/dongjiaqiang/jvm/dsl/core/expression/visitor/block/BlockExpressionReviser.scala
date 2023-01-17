@@ -158,7 +158,8 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     val reviseCases = ExpressionReviser.revise[Expression, Block, Expression, Block]( matchCase.cases, visitor, visitor )
     val reviseDefault = ExpressionReviser.revise[Expression, Block]( matchCase.default, visitor )
     if (reviseCases.isDefined || reviseDefault.isDefined) {
-      If( reviseCases.getOrElse( matchCase.cases ), reviseDefault.getOrElse( matchCase.default ) )
+      MatchCase( matchCase.matched, reviseCases.getOrElse( matchCase.cases ),
+        if (reviseDefault.isEmpty) matchCase.default else reviseDefault.flatten )
     } else {
       matchCase
     }
@@ -178,8 +179,8 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     } )
   }
 
-  private def revise(expressions: Array[Either[Expression, String]],
-                     visitor: ExpressionVisitor[Expression]): Array[Either[Expression, String]] = {
+  def revise(expressions: Array[Either[Expression, String]],
+             visitor: ExpressionVisitor[Expression]): Array[Either[Expression, String]] = {
     expressions.map( {
       case Left( expression ) ⇒ Left( visitor.visit( expression ) )
       case right ⇒ right

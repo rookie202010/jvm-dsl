@@ -26,6 +26,7 @@ case class Program(programScope: ProgramScope,
 
     val methodResult = methods.map {
       case (methodName, method) ⇒
+        expressionVisitor.currentMethodScope = method.methodScope
         val result = expressionVisitor.visit( method.body )
         (methodName, result)
     }
@@ -34,6 +35,8 @@ case class Program(programScope: ProgramScope,
       case (clazzName, clazz) ⇒
         (clazzName, clazz.methods.map {
           case (methodName, method) ⇒
+            expressionVisitor.currentMethodScope = method.methodScope
+            expressionVisitor.currentClazzScope = clazz.clazzScope
             val result = expressionVisitor.visit( method.body )
             (methodName, result)
         })

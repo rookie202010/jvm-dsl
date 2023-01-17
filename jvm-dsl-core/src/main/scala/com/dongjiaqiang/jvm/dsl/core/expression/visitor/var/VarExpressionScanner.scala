@@ -16,7 +16,7 @@ trait VarExpressionScanner extends VarExpressionVisitor[Unit] {
   }
 
   override def visit(mapVarRef: MapVarRef, visitor: ExpressionVisitor[Unit]): Unit = {
-    visitor.visit( mapVarRef.KeyExpression )
+    visitor.visit( mapVarRef.keyExpression )
   }
 
   override def visit(lambda: Lambda, visitor: ExpressionVisitor[Unit]): Unit = {

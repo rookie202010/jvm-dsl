@@ -1,5 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.core.expression
 
+import com.dongjiaqiang.jvm.dsl.core.optimize.DefaultReviser
 import com.dongjiaqiang.jvm.dsl.core.parser.{ExpressionParser, SymbolDefParser}
 import com.dongjiaqiang.jvm.dsl.core.{JvmDslLexer, JvmDslParserParser}
 import org.antlr.v4.runtime.tree.ParseTreeWalker
@@ -34,7 +35,15 @@ class ExpressionParserSuit extends AnyFunSuite {
                   Int i = 10;
 
                   def foo1(String=>String format,String str)=Any{
-                      return ;
+
+                       Int uu = str match{
+                        case "dd"=>{ return 1;}
+                        case 12=>{ return 2;}
+                        case "yy"=>{ return 3;}
+                        default=>{return 5;}
+                      };
+
+
                   }
 
                   def foo2(String format,String str)=String{
@@ -87,9 +96,68 @@ class ExpressionParserSuit extends AnyFunSuite {
     ParseTreeWalker.DEFAULT.walk( expressionParser, new JvmDslParserParser( new CommonTokenStream( new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) ) ) )
       .program( ) )
 
+    //  expressionParser.program.visit(new DefaultTypeChecker(expressionParser.programScope))
+
+    val programScope = expressionParser.program.revise( new DefaultReviser( expressionParser.programScope ) )
+
     assert( expressionParser.program.methods.isEmpty )
     assert( symbolDefParser.programScope.classes.isEmpty )
     assert( symbolDefParser.programScope.methods.isEmpty )
   }
 
+  test( "define xx empty program" ) {
+    val input =
+      """program {
+
+
+
+class A(Int a1,Int b1){}
+
+                  def xx()=Bool{
+                    return true;
+                  }
+
+
+                    def foo1(String=>String format,String str)=Any{
+
+                         Int x = str match{
+                          case ["dd",A(dd,[1,1,x])]=>{ return 1;}
+                          case Left(12)=>{ return 2;}
+                          case Array(1,2,None)=>{ return 3;}
+                          default => {
+
+                              Int d = 100;
+                              while(xx()){
+                                  d+=10;
+                              }
+
+                              str match {
+                                  case 10=>{ return 10;}
+                              }
+
+                              return d;
+                          }
+                        };
+
+
+                    }
+
+                   }
+          """
+    val symbolDefParser = new SymbolDefParser( )
+    ParseTreeWalker.DEFAULT.walk( symbolDefParser, new JvmDslParserParser( new CommonTokenStream( new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) ) ) )
+      .program( ) )
+
+    val expressionParser = new ExpressionParser( symbolDefParser.programScope )
+    ParseTreeWalker.DEFAULT.walk( expressionParser, new JvmDslParserParser( new CommonTokenStream( new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) ) ) )
+      .program( ) )
+
+    //  expressionParser.program.visit(new DefaultTypeChecker(expressionParser.programScope))
+
+    val programScope = expressionParser.program.revise( new DefaultReviser( expressionParser.programScope ) )
+
+    assert( expressionParser.program.methods.isEmpty )
+    assert( symbolDefParser.programScope.classes.isEmpty )
+    assert( symbolDefParser.programScope.methods.isEmpty )
+  }
 }

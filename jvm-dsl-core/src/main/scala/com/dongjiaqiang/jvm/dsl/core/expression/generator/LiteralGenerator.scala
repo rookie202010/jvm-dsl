@@ -44,6 +44,8 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext,Expression] 
       MapLiteralGenerator.generate( exprContext, ruleContext.mapLiteral( ) )
     } else if (ruleContext.tupleLiteral( ) != null) {
       TupleLiteralGenerator.generate( exprContext, ruleContext.tupleLiteral( ) )
+    } else if (ruleContext.nulLiteral( ) != null) {
+      Null
     } else {
       null
     }

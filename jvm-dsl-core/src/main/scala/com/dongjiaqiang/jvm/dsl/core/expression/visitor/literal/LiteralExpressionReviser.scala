@@ -110,4 +110,8 @@ trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression]{
   override def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[Expression]): Expression = {
     literal
   }
+
+  override def visit(literal: Null.type, visitor: ExpressionVisitor[Expression]): Expression = {
+    literal
+  }
 }

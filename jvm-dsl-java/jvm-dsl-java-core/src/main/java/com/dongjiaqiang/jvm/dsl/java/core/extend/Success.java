@@ -81,6 +81,11 @@ public class Success<T> implements Try<T> {
     }
 
     @Override
+    public Throwable getException() {
+        throw new IllegalStateException("no failure!");
+    }
+
+    @Override
     public T get() {
         return value;
     }

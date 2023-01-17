@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.`var`
 
-import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 import com.dongjiaqiang.jvm.dsl.core.expression._
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionVisitor}
 
 trait VarExpressionReviser extends VarExpressionVisitor[Expression]{
   override def visit(localVarDef: LocalVarDef,visitor: ExpressionVisitor[Expression]): Expression={
@@ -26,11 +26,11 @@ trait VarExpressionReviser extends VarExpressionVisitor[Expression]{
       }
   }
 
-  override def visit(mapVarRef: MapVarRef,visitor: ExpressionVisitor[Expression]): Expression={
-    val keyExpression = visitor.visit(mapVarRef.KeyExpression)
-    if(keyExpression!=mapVarRef.KeyExpression){
+  override def visit(mapVarRef: MapVarRef,visitor: ExpressionVisitor[Expression]): Expression= {
+    val keyExpression = visitor.visit( mapVarRef.keyExpression )
+    if (keyExpression != mapVarRef.keyExpression) {
       new MapVarRef( keyExpression, mapVarRef.name, mapVarRef.fieldScope.dslType, mapVarRef.fieldScope )
-    }else{
+    } else {
       mapVarRef
     }
   }

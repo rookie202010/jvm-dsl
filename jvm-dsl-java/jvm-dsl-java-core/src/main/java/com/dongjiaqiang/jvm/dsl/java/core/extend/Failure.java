@@ -15,6 +15,8 @@ public class Failure<T> implements Try<T> {
         this.exception = e;
     }
 
+
+    @Override
     public Throwable getException() {
         return exception;
     }

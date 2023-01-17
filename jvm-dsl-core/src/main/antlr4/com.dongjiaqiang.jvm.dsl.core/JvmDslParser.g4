@@ -1,6 +1,6 @@
 grammar JvmDslParser;
 
-//import JvmDslLexer;
+import JvmDslLexer;
 
 //@header {package com.dongjiaqiang.jvm.dsl.core;}
 
@@ -301,6 +301,7 @@ literal :   baseLiteral
         |   setLiteral
         |   mapLiteral
         |   tupleLiteral
+        |   nulLiteral
         ;
 
 baseLiteral :   numberLiteral
@@ -314,6 +315,8 @@ numberLiteral   :   INT_LITERAL
                 |   FLOAT_LITERAL
                 |   LONG_LITERAL
                 |   DOUBLE_LITERAL  ;
+
+nulLiteral  : NULL_LITERAL;
 
 //list literal  ex. [], [1,2,3],    [[1,1],[2,1,1],[3,3,1,1]]
 listLiteral:    |   LBRACK literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACK

@@ -6,13 +6,11 @@ import com.dongjiaqiang.jvm.dsl.java.core.lambda.function._
 import com.dongjiaqiang.jvm.dsl.java.core.lambda.predicate._
 import com.dongjiaqiang.jvm.dsl.java.core.lambda.supplier._
 
-import java.util
 import java.util.Optional
 import java.util.concurrent.CompletableFuture
 
 
 package object core {
-
 
   def toBasicType(dslType: DslType): String = {
     dslType match {
@@ -43,11 +41,11 @@ package object core {
 
 
       case `type`: ListType ⇒
-        String.format( "%s<%s>", classOf[util.ArrayList[_]].getCanonicalName, toJavaType( `type`.valueType ) )
+        String.format( "%s<%s>", classOf[java.util.ArrayList[_]].getCanonicalName, toJavaType( `type`.valueType ) )
       case `type`: SetType ⇒
-        String.format( "%s<%s>", classOf[util.HashSet[_]].getCanonicalName, toJavaType( `type`.valueType ) )
+        String.format( "%s<%s>", classOf[java.util.HashSet[_]].getCanonicalName, toJavaType( `type`.valueType ) )
       case `type`: MapType ⇒
-        String.format( "%s<%s,%s>", classOf[util.HashMap[_, _]].getCanonicalName, toJavaType( `type`.keyType ), toJavaType( `type`.valueType ) )
+        String.format( "%s<%s,%s>", classOf[java.util.HashMap[_, _]].getCanonicalName, toJavaType( `type`.keyType ), toJavaType( `type`.valueType ) )
       case `type`: OptionType ⇒
         String.format( "%s<%s>", classOf[Optional[_]].getCanonicalName, toJavaType( `type`.valueType ) )
       case `type`: TupleType ⇒

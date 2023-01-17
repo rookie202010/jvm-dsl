@@ -37,6 +37,8 @@ public interface Try<T> {
 
     T get() throws Throwable;
 
+    Throwable getException();
+
     static <T> Try<T> apply(_1_Supplier<? extends T> supplier) {
 
         try {

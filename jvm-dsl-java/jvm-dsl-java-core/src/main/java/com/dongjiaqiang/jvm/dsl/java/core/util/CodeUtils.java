@@ -1,4 +1,4 @@
-package com.dongjiaqiang.jvm.dsl.java.core;
+package com.dongjiaqiang.jvm.dsl.java.core.util;
 
 import com.dongjiaqiang.jvm.dsl.java.core.lambda.consumer._Runnable;
 import com.dongjiaqiang.jvm.dsl.java.core.lambda.supplier._1_Supplier;
@@ -78,5 +78,18 @@ public class CodeUtils {
             }
         }, executor);
     }
+
+//    public static <K,T> boolean compare(List<K> matchedList, Tuple2<String,Tuple2<Integer, Either<Object,>>>){
+//        if(matchedList.size()!=matchList.size()){
+//            return false;
+//        }else{
+//            for(int i=0;i<matchedList.size();i++){
+//                if(!matchedList.get(i).equals(matchList.get(i))){
+//                    return false;
+//                }
+//            }
+//            return true;
+//        }
+//    }
 
 }
