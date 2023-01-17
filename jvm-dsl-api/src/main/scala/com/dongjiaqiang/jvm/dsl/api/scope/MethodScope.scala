@@ -1,8 +1,7 @@
-package com.dongjiaqiang.jvm.dsl.core.scope
+package com.dongjiaqiang.jvm.dsl.api.scope
 
-import com.dongjiaqiang.jvm.dsl.core
-import com.dongjiaqiang.jvm.dsl.core.`type`.{ClazzType, DslType}
-import com.dongjiaqiang.jvm.dsl.core.scope
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.scope
 
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 
@@ -10,8 +9,8 @@ import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
  * <pre><code>
  * program{
  *
- *  Int i = 100;
- *  Int j = 200;
+ * Int i = 100;
+ * Int j = 200;
  *
  *  def foo(Int i)=Int{ //name = foo, outerScopeIndex = 2, parentScope is programScope
  *    return i;
@@ -124,9 +123,9 @@ class MethodScope(val name: String,
    */
   override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope]= {
       refs match {
-        case "this"::refs⇒
-            core.scope.resolveVarRefs(index,refs,this, params,skipCurrentScope = true,backRef = true,Some(parentScope))
-        case _ ⇒ core.scope.resolveVarRefs(index,refs,this, params,skipCurrentScope = false,backRef = true,Some(parentScope))
+        case "this" :: refs ⇒
+          scope.resolveVarRefs( index, refs, this, params, skipCurrentScope = true, backRef = true, Some( parentScope ) )
+        case _ ⇒ scope.resolveVarRefs( index, refs, this, params, skipCurrentScope = false, backRef = true, Some( parentScope ) )
 
       }
   }

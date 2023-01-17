@@ -1,16 +1,17 @@
-package com.dongjiaqiang.jvm.dsl.core.scope
-import com.dongjiaqiang.jvm.dsl.core.`type`.{AnyType, ClazzType, DslType, UnResolvedType}
-import com.dongjiaqiang.jvm.dsl.core.scope
+package com.dongjiaqiang.jvm.dsl.api.scope
+
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.scope
 
 /**
- *  field scope
+ * field scope
  * <pre><code>
  * program{
  *
- *    Int a = 1;// outerScopeIndex = 0, symbolName = a,dslType = IntType,belong to programScope
+ * Int a = 1;// outerScopeIndex = 0, symbolName = a,dslType = IntType,belong to programScope
  *
- *    def foo(Long a)=Unit{ // outerScopeIndex = 0,symbolName = a,dslType = LongType,belong to methodScope foo
- *        a = 10;
+ * def foo(Long a)=Unit{ // outerScopeIndex = 0,symbolName = a,dslType = LongType,belong to methodScope foo
+ * a = 10;
  *
  *        {
  *          c = 100;

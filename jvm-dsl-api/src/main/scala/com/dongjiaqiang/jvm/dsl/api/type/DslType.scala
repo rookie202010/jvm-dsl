@@ -1,6 +1,4 @@
-package com.dongjiaqiang.jvm.dsl.core.`type`
-
-import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
+package com.dongjiaqiang.jvm.dsl.api.`type`
 
 trait DslType {
   val name: String
@@ -10,53 +8,6 @@ trait NumberDslType extends DslType
 
 trait BasicDslType extends DslType
 
-
-import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.TypeContext
-
-object DslType {
-
-  import scala.collection.convert.ImplicitConversionsToScala._
-
-  def unapply(typeContext: TypeContext): DslType = {
-    typeContext match {
-      case _: IntTypeContext ⇒ IntType
-      case _: LongTypeContext ⇒ LongType
-      case _: FloatTypeContext ⇒ FloatType
-      case _: DoubleTypeContext ⇒ DoubleType
-      case _: StringTypeContext ⇒ StringType
-      case _: CharTypeContext ⇒ CharType
-      case _: BoolTypeContext ⇒ BoolType
-      case context: ListTypeContext ⇒
-        new ListType( unapply( context.`type`( ) ) )
-      //      case context: ArrayTypeContext ⇒
-      //       new ArrayType( unapply( context ) )
-      case context: SetTypeContext ⇒
-        new SetType( unapply( context.`type`( ) ) )
-      case context: MapTypeContext ⇒
-        new MapType( unapply( context.`type`( 0 ) ), unapply( context.`type`( 1 ) ) )
-      case context: TupleTypeContext ⇒
-        new TupleType( context.`type`( ).map( `type` ⇒ unapply( `type` ) ).toArray )
-      case context: OptionTypeContext ⇒
-        new OptionType( unapply( context.`type`( ) ) )
-      case context: FutureTypeContext ⇒
-        new FutureType( unapply( context.`type`( ) ) )
-      case context: LambdaTypeContext ⇒
-        new LambdaType( Some( unapply( context.`type`( ).head ) ), unapply( context.`type`.last ) )
-      case context: SupplierTypeContext ⇒
-        new LambdaType( None, unapply( context.`type`( ) ) )
-      case context: ParameterizedClassTypeContext ⇒
-        new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, context.`type`( ).map( unapply ).toArray )
-      case context: ClassTypeContext ⇒
-        if (context.clazzType( ).IDENTIFIER( ).getText == "Unit") {
-          UnitType
-        } else if (context.clazzType( ).IDENTIFIER( ).getText == "Any") {
-          AnyType
-        } else {
-          new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, Array( ) )
-        }
-    }
-  }
-}
 
 //base type
 object IntType extends NumberDslType with BasicDslType {
