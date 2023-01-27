@@ -43,7 +43,7 @@ class ClazzScope(val outerScopeIndex: Int, val name: String,
       }
 
   /**
-   *
+   *<pre><code>
    *  clazz scope in program
    *
    *  program{
@@ -59,7 +59,7 @@ class ClazzScope(val outerScopeIndex: Int, val name: String,
    *
    *
    *  }
-   *
+   *<pre><code>
    * resolve ref in current or outer scope
    *
    * @param index ref index

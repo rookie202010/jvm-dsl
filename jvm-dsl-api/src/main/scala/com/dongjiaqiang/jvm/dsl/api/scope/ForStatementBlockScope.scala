@@ -31,9 +31,8 @@ class ForStatementBlockScope(override val outerScopeIndex: Int, val initFields: 
       case _⇒false
     }
 
-  /*
-   *
-   *
+  /**
+   *<pre><code>
    * program{
    *    def method()=Unit{
    *        Int i = 100;
@@ -43,10 +42,10 @@ class ForStatementBlockScope(override val outerScopeIndex: Int, val initFields: 
    *    }
    * }
    * resolve ref in current or outer scope
-   *
+   *<pre><code>
    * @param index ref index
    * @param refs  ref names
-   */
+   **/
   override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
     refs match {
       case "this"::childRef ⇒ scope.resolveVarRefs(index,childRef,this,fields,skipCurrentScope = true,backRef = true,Some(topScope))

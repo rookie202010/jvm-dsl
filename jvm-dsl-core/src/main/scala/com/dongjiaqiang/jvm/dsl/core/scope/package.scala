@@ -19,8 +19,6 @@ package object scope {
       case _: BoolTypeContext ⇒ BoolType
       case context: ListTypeContext ⇒
         new ListType( toDslType( context.`type`( ) ) )
-      //      case context: ArrayTypeContext ⇒
-      //       new ArrayType( unapply( context ) )
       case context: SetTypeContext ⇒
         new SetType( toDslType( context.`type`( ) ) )
       case context: MapTypeContext ⇒

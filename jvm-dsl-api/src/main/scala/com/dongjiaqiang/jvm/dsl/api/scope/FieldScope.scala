@@ -8,11 +8,10 @@ import com.dongjiaqiang.jvm.dsl.api.scope
  * <pre><code>
  * program{
  *
- * Int a = 1;// outerScopeIndex = 0, symbolName = a,dslType = IntType,belong to programScope
+ *    Int a = 1;// outerScopeIndex = 0, symbolName = a,dslType = IntType,belong to programScope
  *
- * def foo(Long a)=Unit{ // outerScopeIndex = 0,symbolName = a,dslType = LongType,belong to methodScope foo
- * a = 10;
- *
+ *    def foo(Long a)=Unit{ // outerScopeIndex = 0,symbolName = a,dslType = LongType,belong to methodScope foo
+ *        a = 10;
  *        {
  *          c = 100;
  *          a = 200;

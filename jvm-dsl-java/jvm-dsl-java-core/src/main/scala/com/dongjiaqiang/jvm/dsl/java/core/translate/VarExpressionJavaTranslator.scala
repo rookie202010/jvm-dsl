@@ -1,11 +1,11 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{LambdaType, NumberDslType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{FutureType, LambdaType, NumberDslType, TryType}
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.`var`.VarExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression._
-import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaLambda, JavaMatchCase, JavaTranslatorContext}
-import com.dongjiaqiang.jvm.dsl.java.core
+import com.dongjiaqiang.jvm.dsl.java.api
+import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaAsync, JavaCustomBlockExpression, JavaLambda, JavaMatchCase, JavaTranslatorContext, JavaTry}
 
 trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
 
@@ -14,12 +14,12 @@ trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
   override def visit(localVarDef: LocalVarDef, visitor: ExpressionVisitor[String]): String = {
     val javaType = localVarDef.dslType match {
       case numberType: NumberDslType ⇒
-        core.toBasicType( numberType )
-      case _ ⇒ core.toJavaType(localVarDef.dslType)
+        api.toBasicType( numberType,javaTranslatorContext )
+      case _ ⇒ api.toJavaType(localVarDef.dslType,javaTranslatorContext)
     }
     localVarDef.assigned match {
       case None ⇒ s"$javaType ${localVarDef.fieldScope.symbolName}"
-      case Some(expression) ⇒ {
+      case Some(expression) ⇒
         expression match {
           case matchCase: MatchCase ⇒
             val javaMatchCase = JavaMatchCase( localVarDef.dslType, visitor.visit( matchCase ) )
@@ -29,10 +29,21 @@ trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
               case lambdaType: LambdaType ⇒
                 s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( JavaLambda( lambdaType, lambda ) )}"
             }
+          case async: Async⇒
+            localVarDef.dslType match {
+              case futureType: FutureType⇒
+                s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( JavaAsync( async.body,async.executor,futureType ) )}"
+            }
+          case `try`:Try⇒
+            localVarDef.dslType match {
+              case tryType:TryType⇒
+                s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( JavaTry( `try`.body,tryType) )}"
+            }
+          case customBlockExpression: CustomBlockExpression⇒
+            s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( JavaCustomBlockExpression( customBlockExpression,localVarDef.dslType) )}"
           case _ ⇒
             s"$javaType ${localVarDef.fieldScope.symbolName} = ${visitor.visit( expression )}"
         }
-      }
     }
   }
 

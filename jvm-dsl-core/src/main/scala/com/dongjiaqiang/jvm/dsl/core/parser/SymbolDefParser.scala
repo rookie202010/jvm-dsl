@@ -280,11 +280,14 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
   override def enterForStatementTwo(ctx: JvmDslParserParser.ForStatementTwoContext): Unit = {
+
     /**
+     * <pre><code>
      * for(Int i:list){
      * //two statement
      * }
-     */
+     * <pre><code>
+     **/
     enterForStatement( List( ctx.varDef( ) ) )
     stack.incStatement( )
   }

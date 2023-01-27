@@ -14,7 +14,7 @@ object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpres
       List( ruleContext.localVariable( ).IDENTIFIER( ).getText ) )
 
     //todo
-    val matched = VarRef( List( ruleContext.localVariable( ).IDENTIFIER( ).getText ), fieldScope.get.dslType, fieldScope.get )
+    val matched = VarRef( List( ruleContext.localVariable( ).IDENTIFIER( ).getText ),fieldScope)
 
     val cases = ruleContext.caseExpression( ).map( ctx ⇒ {
       if (ctx.typeMatchExpression( ) != null) {

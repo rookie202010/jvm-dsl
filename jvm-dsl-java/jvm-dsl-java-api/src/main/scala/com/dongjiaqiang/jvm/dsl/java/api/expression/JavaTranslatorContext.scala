@@ -1,5 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.java.api.expression
 
+import com.dongjiaqiang.jvm.dsl.api.`type`.DslType
+import com.dongjiaqiang.jvm.dsl.java.api.`type`.JavaTypeTranslator
 import com.typesafe.config.Config
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -14,7 +16,9 @@ import scala.collection.mutable.{ArrayBuffer, Map ⇒ MMap}
  *
  * methodName -> methodCode
  */
-case class JavaTranslatorContext(packageName: String,
+case class JavaTranslatorContext(customBlockExpressionJavaTranslators: Map[String,CustomBlockExpressionTranslator],
+                                 customDslTypeTranslator:Map[DslType,JavaTypeTranslator],
+                                 packageName: String,
                                  javaTranslateConfig: Config,
                                  systemGenerateMethods: MMap[String, ArrayBuffer[String]] = MMap( ),
                                  systemGenerateProgramMethods: ArrayBuffer[String] = ArrayBuffer( ),

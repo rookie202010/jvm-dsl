@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParserException
 import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
@@ -22,7 +23,6 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression]
   }
 
   override def generate(exprContext: ExprContext, ruleContext: LiteralContext): Expression = {
-    // val varRef = VariableGenerator.generator(currentExpressionIndex,currentScope,ruleContext.variable())
     if (ruleContext.baseLiteral( ) != null) {
       BaseLiteralGenerator.generate( exprContext, ruleContext.baseLiteral( ) )
     } else if (ruleContext.classLiteral( ) != null) {
@@ -33,7 +33,7 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression]
 
       val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
       val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
-      new ArrayVarRef( indexExpr, variable.name, variable.fieldScope.dslType, variable.fieldScope )
+      new ArrayVarRef( indexExpr, variable.name, variable.fieldScope )
 
     } else if (ruleContext.optionalLiteral( ) != null) {
       OptionLiteralGenerator.generate( exprContext, ruleContext.optionalLiteral( ) )
@@ -48,7 +48,7 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression]
     } else if (ruleContext.nulLiteral( ) != null) {
       Null
     } else {
-      null
+      throw ExpressionParserException("never happen here!")
     }
   }
 }

@@ -10,6 +10,7 @@ trait BasicDslType extends DslType
 
 
 //base type
+
 object IntType extends NumberDslType with BasicDslType {
   override val name: String = "Int"
 
@@ -62,54 +63,133 @@ object UnitType extends DslType {
 }
 
 //collection type
-class ListType(val valueType: DslType) extends DslType {
-  override val name: String = "List"
+
+case class ListType(parameterType: DslType) extends DslType {
+  override val name: String = s"List[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case listType: ListType ⇒ valueType == listType.valueType
+      case listType: ListType ⇒ parameterType == listType.parameterType
       case _ ⇒ false
 
     }
 }
 
-class SetType(val valueType:DslType) extends DslType {
-  override val name: String = "Set"
+case class SetType(val parameterType:DslType) extends DslType {
+  override val name: String = s"Set[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case setType: SetType ⇒ valueType == setType.valueType
-      case _ ⇒ false
-    }
-
-}
-
-class MapType(val keyType:DslType, val valueType:DslType) extends DslType {
-  override val name: String = "Map"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case mapType: MapType ⇒ valueType == mapType.valueType && keyType == mapType.keyType
+      case setType: SetType ⇒ parameterType == setType.parameterType
       case _ ⇒ false
     }
 }
 
-class OptionType(val valueType: DslType) extends DslType {
-  override val name: String = "Option"
+case class MapType(keyParameterType:DslType, valueParameterType:DslType) extends DslType {
+  override val name: String = s"Map[${keyParameterType.name},${valueParameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case option: OptionType ⇒ valueType == option.valueType
+      case mapType: MapType ⇒ valueParameterType == mapType.valueParameterType && keyParameterType == mapType.keyParameterType
       case _ ⇒ false
     }
 }
 
-class SomeType(val valueType: DslType) extends DslType {
-  override val name: String = "Some"
+case class OptionType(parameterType: DslType) extends DslType {
+  override val name: String = s"Option[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case someType: SomeType ⇒ valueType == someType.valueType
+      case option: OptionType ⇒ parameterType == option.parameterType
+      case _ ⇒ false
+    }
+}
+
+case class ArrayType(parameterType: DslType) extends DslType {
+  override val name: String = s"Array[${parameterType.name}]"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case array: ArrayType ⇒ parameterType == array.parameterType
+      case _ ⇒ false
+    }
+}
+
+case class TupleType(parameterTypes: Array[DslType]) extends DslType {
+  override val name: String = s"(${parameterTypes.map(_.name).mkString(",")})"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case tupleType: TupleType ⇒
+        parameterTypes.sameElements( tupleType.parameterTypes )
+      case _ ⇒ false
+    }
+}
+
+case class FutureType(parameterType: DslType) extends DslType {
+  override val name: String = s"Future[${parameterType.name}]"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case futureType: FutureType ⇒
+        parameterType == futureType.parameterType
+      case _ ⇒ false
+    }
+}
+
+case class TryType(parameterType: DslType) extends DslType {
+  override val name: String = s"Try[${parameterType.name}]"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case tryType: TryType ⇒
+        parameterType == tryType.parameterType
+      case _ ⇒ false
+    }
+}
+
+case class LambdaType(mayInputType: Option[DslType], outputType: DslType) extends DslType {
+  override val name: String = mayInputType match {
+    case None⇒s"()=>${outputType.name}"
+    case Some(inputType)⇒
+        inputType match {
+          case tupleType: TupleType⇒s"(${tupleType.parameterTypes.map(_.name).mkString(",")})=>${outputType.name}"
+          case _⇒s"${inputType.name}=>${outputType.name}"
+        }
+  }
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case lambdaType: LambdaType ⇒
+        lambdaType.mayInputType == mayInputType && outputType == lambdaType.outputType
+      case _ ⇒ false
+    }
+}
+
+//clazzType
+case class ClazzType(clazzName:String,parameterTypes:Array[DslType]) extends DslType {
+  override val name: String = if(parameterTypes.isEmpty) {
+    s"$clazzName"
+  }else{
+    s"$clazzName[${parameterTypes.map(_.name).mkString(",")}]"
+  }
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case clazzType: ClazzType ⇒ clazzType.clazzName == clazzName &&
+        parameterTypes.sameElements(clazzType.parameterTypes)
+      case _ ⇒ false
+    }
+}
+
+//resolve in expression reviser
+
+class SomeType(val parameterType: DslType) extends DslType {
+  override val name: String = s"Some[${parameterType.name}]"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case someType: SomeType ⇒ parameterType == someType.parameterType
       case _ ⇒ false
     }
 }
@@ -118,122 +198,55 @@ object NoneType extends DslType {
   override val name: String = "None"
 }
 
-class ArrayType(val valueType: DslType) extends DslType {
-  override val name: String = "Array"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case array: ArrayType ⇒ valueType == array.valueType
-      case _ ⇒ false
-    }
-}
-
-class EitherType(val leftType: DslType, val rightType: DslType) extends DslType {
-  override val name: String = "Either"
+case class EitherType(leftParameterType: DslType, rightParameterType: DslType) extends DslType {
+  override val name: String = s"Either[${leftParameterType.name},${rightParameterType.name}]"
 
   override def equals(obj: Any): Boolean = {
     obj match {
       case eitherType: EitherType ⇒
-        eitherType.leftType == leftType && eitherType.rightType == rightType
+        eitherType.leftParameterType == leftParameterType && eitherType.rightParameterType == rightParameterType
       case _ ⇒ false
     }
   }
 }
 
-class LeftType(val leftType: DslType) extends DslType {
-  override val name: String = "Left"
+class LeftType(val parameterType: DslType) extends DslType {
+  override val name: String = s"Left[${parameterType.name}"
 
   override def equals(obj: Any): Boolean = {
     obj match {
       case leftType: LeftType ⇒
-        leftType.leftType == leftType
+        leftType.parameterType == leftType
       case _ ⇒ false
     }
   }
 }
 
-class RightType(val rightType: DslType) extends DslType {
-  override val name: String = "Left"
+class RightType(val parameterType: DslType) extends DslType {
+  override val name: String = s"Right[${parameterType.name}"
 
   override def equals(obj: Any): Boolean = {
     obj match {
       case leftType: RightType ⇒
-        leftType.rightType == leftType
+        leftType.parameterType == leftType
       case _ ⇒ false
     }
   }
 }
 
-
-class TupleType(val valueTypes: Array[DslType]) extends DslType {
-  override val name: String = "Tuple"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case tupleType: TupleType ⇒
-        valueTypes.sameElements( tupleType.valueTypes )
-      case _ ⇒ false
-    }
-}
-
-class FutureType(val valueType: DslType) extends DslType {
-  override val name: String = "Future"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case futureType: FutureType ⇒
-        valueType == futureType.valueType
-      case _ ⇒ false
-    }
-}
-
-class TryType(val valueType: DslType) extends DslType {
-  override val name: String = "Try"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case tryType: TryType ⇒
-        valueType == tryType.valueType
-      case _ ⇒ false
-    }
-}
-
-class SuccessType(val valueType: DslType) extends DslType {
-  override val name: String = "Success"
+class SuccessType(val parameterType: DslType) extends DslType {
+  override val name: String = s"Success[${parameterType.name}"
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
       case successType: SuccessType ⇒
-        valueType == successType.valueType
+        parameterType == successType.parameterType
       case _ ⇒ false
     }
 }
 
 object FailureType extends DslType {
   override val name: String = "Failure"
-}
-
-class LambdaType(val inputType: Option[DslType], val outputType: DslType) extends DslType {
-  override val name: String = "Lambda"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case lambdaType: LambdaType ⇒
-        lambdaType.inputType == inputType && outputType == lambdaType.outputType
-      case _ ⇒ false
-    }
-}
-
-//clazzType
-class ClazzType(val clazzName:String,val valueTypes:Array[DslType]) extends DslType {
-  override val name: String = "Clazz"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case clazzType: ClazzType ⇒ clazzType.clazzName == clazzName &&
-        valueTypes.sameElements(clazzType.valueTypes)
-      case _ ⇒ false
-    }
 }
 
 

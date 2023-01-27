@@ -23,7 +23,7 @@ trait VarExpressionReviser extends VarExpressionVisitor[Expression] {
   override def visit(arrayVarRef: ArrayVarRef,visitor: ExpressionVisitor[Expression]): Expression={
       val indexExpression = visitor.visit(arrayVarRef.indexExpression)
       if(indexExpression!=arrayVarRef.indexExpression){
-        new ArrayVarRef( indexExpression, arrayVarRef.name, arrayVarRef.fieldScope.dslType, arrayVarRef.fieldScope )
+        new ArrayVarRef( indexExpression, arrayVarRef.name,arrayVarRef.fieldScope )
       }else{
           arrayVarRef
       }
@@ -32,7 +32,7 @@ trait VarExpressionReviser extends VarExpressionVisitor[Expression] {
   override def visit(mapVarRef: MapVarRef,visitor: ExpressionVisitor[Expression]): Expression= {
     val keyExpression = visitor.visit( mapVarRef.keyExpression )
     if (keyExpression != mapVarRef.keyExpression) {
-      new MapVarRef( keyExpression, mapVarRef.name, mapVarRef.fieldScope.dslType, mapVarRef.fieldScope )
+      new MapVarRef( keyExpression, mapVarRef.name,  mapVarRef.fieldScope )
     } else {
       mapVarRef
     }

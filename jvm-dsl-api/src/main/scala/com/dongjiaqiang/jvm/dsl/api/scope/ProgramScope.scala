@@ -21,6 +21,10 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
     this( MutableMap( ), MutableMap( ), MutableMap( ) )
   }
 
+  def isClazzType(name:String):Boolean={
+      importClasses.contains(name) || importClassesFromPackage.contains(name)
+  }
+
   override def addScope(symbolName: String, fieldScope: FieldScope): ProgramScope = {
     duplicateSymbol( symbolName )
     fields.put( symbolName, fieldScope )

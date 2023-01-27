@@ -79,17 +79,15 @@ public class CodeUtils {
         }, executor);
     }
 
-//    public static <K,T> boolean compare(List<K> matchedList, Tuple2<String,Tuple2<Integer, Either<Object,>>>){
-//        if(matchedList.size()!=matchList.size()){
-//            return false;
-//        }else{
-//            for(int i=0;i<matchedList.size();i++){
-//                if(!matchedList.get(i).equals(matchList.get(i))){
-//                    return false;
-//                }
-//            }
-//            return true;
-//        }
-//    }
-
+    public static String mkString(String str,String sep){
+        StringBuilder sb = new StringBuilder();
+        char[] cs = str.toCharArray();
+        for(int i=0;i<cs.length;i++){
+            sb.append(cs[i]);
+            if(i<cs.length-1) {
+                sb.append(sep);
+            }
+        }
+        return sb.toString();
+    }
 }

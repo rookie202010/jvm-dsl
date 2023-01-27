@@ -1,12 +1,13 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
+import com.dongjiaqiang.jvm.dsl.api.`type`.{FutureType, UnitType}
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
-import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaTranslatorContext, JavaVarCall}
+import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaAsync, JavaCustomBlockExpression, JavaTranslatorContext, JavaVarCall}
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._Runnable
-import com.dongjiaqiang.jvm.dsl.java.core
 
 trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
 
@@ -14,29 +15,6 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
   val javaTranslatorContext: JavaTranslatorContext
 
   //block compute expression
-
-  override def visit(asyncBlock: Async, visitor: ExpressionVisitor[String]): String = {
-    if (asyncBlock.body.expressions.exists( _.isInstanceOf[Return] )) {
-      asyncBlock.executor match {
-        case Some( executor ) ⇒
-          s"com.dongjiaqiang.jvm.dsl.java.core.supplyAsync(()->${visitor.visit( asyncBlock.body )},${executor.symbolName})"
-        case None ⇒
-          s"com.dongjiaqiang.jvm.dsl.java.core.supplyAsync(()->${visitor.visit( asyncBlock.body )})"
-      }
-    } else {
-      asyncBlock.executor match {
-        case Some( executor ) ⇒
-          s"com.dongjiaqiang.jvm.dsl.java.core.runAsync(()->${visitor.visit( asyncBlock.body )},${executor.symbolName})"
-        case None ⇒
-          s"com.dongjiaqiang.jvm.dsl.java.core.runAsync(()->${visitor.visit( asyncBlock.body )})"
-      }
-    }
-  }
-
-  override def visit(tryBlock: Try, visitor: ExpressionVisitor[String]): String = {
-    s"com.dongjiaqiang.jvm.dsl.java.core.extend.Try.apply(()->${visitor.visit( tryBlock.body )})"
-  }
-
 
   override def visit(forExpr: For, visitor: ExpressionVisitor[String]): String = {
     s"""
@@ -59,8 +37,8 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
     forMap.body.expressions.insert( 0, keyDef, valueDef )
 
     s"""
-       |for(java.util.Map.Entry<${core.toJavaType( forMap.loopKeyDef.dslType )},
-       |   ${core.toJavaType( forMap.loopValueDef.dslType )}> $sysEntryVar:${visitor.visit( forMap.looped )})
+       |for(java.util.Map.Entry<${api.toJavaType( forMap.loopKeyDef.dslType,javaTranslatorContext )},
+       |   ${api.toJavaType( forMap.loopValueDef.dslType,javaTranslatorContext )}> $sysEntryVar:${visitor.visit( forMap.looped )})
        | ${visitor.visit( forMap.body )}
        |""".stripMargin
   }
@@ -115,7 +93,7 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
       .map {
         case ((name, dslType), body) ⇒
           s"""
-             |catch(${core.toJavaType( dslType )} $name)
+             |catch(${api.toJavaType( dslType ,javaTranslatorContext)} $name)
              | ${visitor.visit( body )}
 
              |""".stripMargin
@@ -143,8 +121,14 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
              |}.run()
              |
              |""".stripMargin
+        case async: Async⇒
+          visitor.visit(JavaAsync(async.body,async.executor,new FutureType(UnitType)))
+        case _: Try⇒
+          throw JavaTranslatorException("illegal definition of a try block alone in java")
         case _: Lambda ⇒
           throw JavaTranslatorException( "illegal definition of a lambda expression alone in java" )
+        case customBlockExpression: CustomBlockExpression⇒
+          visitor.visit(JavaCustomBlockExpression(customBlockExpression,UnitType))
         case _ ⇒ visitor.visit( expression )
       }
     }

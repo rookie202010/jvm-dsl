@@ -9,22 +9,22 @@ import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
  * <pre><code>
  * program{
  *
- * Int i = 100;
- * Int j = 200;
+ *      Int i = 100;
+ *      Int j = 200;
  *
- *  def foo(Int i)=Int{ //name = foo, outerScopeIndex = 2, parentScope is programScope
- *    return i;
- *  }
+ *      def foo(Int i)=Int{ //name = foo, outerScopeIndex = 2, parentScope is programScope
+ *        return i;
+ *      }
  *
- *  class Foo(Int k,Int z){
- *    def foo1()=Int{ //name = foo1, outerScopeIndex = 2, parentScope is classScope foo
- *      return k;
- *    }
+ *      class Foo(Int k,Int z){
+ *        def foo1()=Int{ //name = foo1, outerScopeIndex = 2, parentScope is classScope foo
+ *          return k;
+ *        }
  *
- *    def foo2()=Int{ //name = foo2, outerScopeIndex = 3, parentScope is classScope foo
- *      return z;
- *    }
- *  }
+ *        def foo2()=Int{ //name = foo2, outerScopeIndex = 3, parentScope is classScope foo
+ *          return z;
+ *        }
+ *      }
  * }
  * method scope
  *<pre><code>
@@ -83,7 +83,7 @@ class MethodScope(val name: String,
     }
 
   /**
-   *
+   *<pre><code>
    * 1. methodScope in program
    * program {
    *    class A(D d,String b){
@@ -115,7 +115,7 @@ class MethodScope(val name: String,
    *
    *    }
    * }
-   *
+   *<pre><code>
    * resolve ref in current or parent scope
    *
    * @param index ref index
@@ -126,7 +126,6 @@ class MethodScope(val name: String,
         case "this" :: refs ⇒
           scope.resolveVarRefs( index, refs, this, params, skipCurrentScope = true, backRef = true, Some( parentScope ) )
         case _ ⇒ scope.resolveVarRefs( index, refs, this, params, skipCurrentScope = false, backRef = true, Some( parentScope ) )
-
       }
   }
 

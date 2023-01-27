@@ -53,14 +53,14 @@ object AssignGenerator extends IExpressionGenerator[AssignmentContext, Assign] {
       val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
       val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
 
-      generate( new ArrayVarRef( indexExpr, variable.name, variable.fieldScope.dslType, variable.fieldScope ),
+      generate( new ArrayVarRef( indexExpr, variable.name,  variable.fieldScope ),
         ruleContext.assignOperator( ), exprContext, ruleContext )
 
     } else {
       val variable = VarGenerator.generate( exprContext, ruleContext.mapVariable( ).variable( ) )
       val indexExpr = OrGenerator.generate( exprContext, ruleContext.mapVariable( ).conditionalOrExpression( ) )
 
-      generate( new MapVarRef( indexExpr, variable.name, variable.fieldScope.dslType, variable.fieldScope ), ruleContext.assignOperator( ),
+      generate( new MapVarRef( indexExpr, variable.name,  variable.fieldScope ), ruleContext.assignOperator( ),
         exprContext, ruleContext )
     }
   }
