@@ -102,18 +102,18 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
 
   override def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[Expression]): Expression = {
     literal.dslType.clazzName match {
-      case "Array" ⇒ new ArrayLiteral( literal.literal, new ArrayType( literal.dslType.valueTypes.headOption.getOrElse( UnResolvedType ) ) )
+      case "Array" ⇒ new ArrayLiteral( literal.literal, new ArrayType( literal.dslType.parameterTypes.headOption.getOrElse( UnResolvedType ) ) )
       case "Left" ⇒
         val list = literal.literal
         new EitherLiteral( Left( list.head ), new EitherType(
-          literal.dslType.valueTypes.headOption.getOrElse( UnResolvedType ),
-          literal.dslType.valueTypes.lastOption.getOrElse( UnResolvedType )
+          literal.dslType.parameterTypes.headOption.getOrElse( UnResolvedType ),
+          literal.dslType.parameterTypes.lastOption.getOrElse( UnResolvedType )
         ) )
       case "Right" ⇒
         val list = literal.literal
         new EitherLiteral( Right( list.head ), new EitherType(
-          literal.dslType.valueTypes.headOption.getOrElse( UnResolvedType ),
-          literal.dslType.valueTypes.lastOption.getOrElse( UnResolvedType )
+          literal.dslType.parameterTypes.headOption.getOrElse( UnResolvedType ),
+          literal.dslType.parameterTypes.lastOption.getOrElse( UnResolvedType )
         ) )
       case _ ⇒ literal
     }

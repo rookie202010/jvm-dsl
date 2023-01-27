@@ -31,7 +31,7 @@ trait Scope {
    * resolve method in current scope
    */
   def resolveMethod(name: String): Option[MethodScope] = {
-    throw new UnsupportedOperationException( s"can not resolve $name in current scope" )
+    throw new UnsupportedOperationException( s"can not resolve method $name in current scope" )
   }
 
   /**
@@ -95,21 +95,4 @@ trait Scope {
   def addScope(blockScope: BlockScope): Scope = {
     this
   }
-
-
-  //  def addScope(p: ParameterContext, programScope: ProgramScope, belongScope: Scope): Scope = {
-  //    val symbolName = p.localVariable( ).IDENTIFIER( ).getText
-  //    val dslType = com.dongjiaqiang.jvm.dsl.api.scope.t( p.`type`( ) )
-  //    addScope( symbolName, new FieldScope( 0, symbolName, dslType, belongScope, programScope, false ) )
-  //    incStatement( )
-  //    this
-  //  }
-  //
-  //  def addScope(ps: java.util.List[ParameterContext], belongScope: Scope, programScope: ProgramScope): Scope = {
-  //    import scala.collection.convert.ImplicitConversionsToScala._
-  //    ps.foreach {
-  //      p ⇒ addScope( p, programScope, belongScope )
-  //    }
-  //    this
-  //  }
 }

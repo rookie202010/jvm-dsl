@@ -1,13 +1,18 @@
 package com.dongjiaqiang.jvm.dsl.java.core;
 
 
+import com.dongjiaqiang.jvm.dsl.java.api.extend.Try;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._Runnable;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._1_Supplier;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._LongSupplier;
+import com.dongjiaqiang.jvm.dsl.java.api.util.CodeUtils;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 
 class A<T> {
@@ -40,41 +45,21 @@ class B<T> extends A<T> {
         this.b = b;
     }
 
+    public static int m(){
+        try{
+            return 1;
+        }catch (Exception e){
+            return 2;
+        }finally {
 
+        }
+    }
 }
 
 public class Example {
 
     public static void main(String[] args) throws Exception {
-
-        Optional<Integer> optionalInteger = Optional.of(1);
-
-
-        new _LongSupplier() {
-            @Override
-            public long getAsLong() throws Exception {
-                if (optionalInteger.isPresent()) {
-                    return 1;
-                } else {
-                    return 2;
-                }
-            }
-        }.getAsLong();
-
-        new _1_Supplier<Long>() {
-            @Override
-            public Long get() throws Exception {
-                return null;
-            }
-        }.get();
-
-        new _Runnable() {
-            @Override
-            public void run() throws Exception {
-
-            }
-        }.run();
-
+       // System.out.println();
 //       // CodeUtils.ofList(xx.s)
 //        List<Integer> xx = new ArrayList<>();
 //        new ArrayList<>(xx.subList(0,10));

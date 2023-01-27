@@ -18,7 +18,7 @@ member :    funcDef
         ;
 
 importDependency   :   importClazzStatement
-                        usingPackageStatement   ;
+                   |   usingPackageStatement   ;
 
 block   :   LBRACE  blockStatements?    RBRACE
         ;

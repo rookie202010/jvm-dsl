@@ -4,9 +4,9 @@ import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
 import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaLocalVarDef, JavaTranslatorContext, JavaVarCall, JavaVarRef}
-import com.dongjiaqiang.jvm.dsl.java.core
 
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.ArrayBuffer
@@ -30,13 +30,13 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
    */
   private def translateMatchType(matched: VarRef, matchCondition: MatchType, body: Block): String = {
 
-    if (matched.dslType.isInstanceOf[AnyType.type] || matched.dslType.isInstanceOf[UnResolvedType.type] || matched.dslType == matchCondition.dslType) {
+    if (matched.getDslType.isInstanceOf[AnyType.type] || matched.getDslType.isInstanceOf[UnResolvedType.type] || matched.getDslType == matchCondition.dslType) {
       body.expressions.insert( 0, JavaLocalVarDef( matchCondition.name, matchCondition.dslType, Some( Cast( JavaVarRef( matched.name ), matchCondition.dslType ) ) ) )
       s"""
          |${matched.name.mkString( "." )} instanceof ${matchCondition.dslType}
          |""".stripMargin
     } else {
-      throw JavaTranslatorException( s"match case about match type defined error because matched type is ${matched.dslType} match type is ${matchCondition.dslType}" )
+      throw JavaTranslatorException( s"match case about match type defined error because matched type is ${matched.getDslType} match type is ${matchCondition.dslType}" )
     }
   }
 
@@ -59,9 +59,9 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                  |""".stripMargin )
             expressions.head match {
               case Left( expression ) ⇒
-                conditions.appendAll( translateMatchCondition( s"$matched.get()", tryType.valueType, expression, body, visitor, counter ) )
+                conditions.appendAll( translateMatchCondition( s"$matched.get()", tryType.parameterType, expression, body, visitor, counter ) )
               case Right( name ) ⇒
-                body.expressions.insert( 0, JavaLocalVarDef( name, tryType.valueType,
+                body.expressions.insert( 0, JavaLocalVarDef( name, tryType.parameterType,
                   Some( JavaVarCall( List( matched ), "get", Array( ) ) ) ) )
             }
           case FailureType ⇒
@@ -99,9 +99,9 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                  |""".stripMargin )
             expressions.head match {
               case Left( expression ) ⇒
-                conditions.appendAll( translateMatchCondition( s"${matched}.left()", eitherType.leftType, expression, body, visitor, counter ) )
+                conditions.appendAll( translateMatchCondition( s"${matched}.left()", eitherType.leftParameterType, expression, body, visitor, counter ) )
               case Right( name ) ⇒
-                body.expressions.insert( 0, JavaLocalVarDef( name, eitherType.leftType,
+                body.expressions.insert( 0, JavaLocalVarDef( name, eitherType.leftParameterType,
                   Some( JavaVarCall( List( matched ), "left", Array( ) ) ) ) )
             }
           case _: RightType ⇒
@@ -113,9 +113,9 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                  |""".stripMargin )
             expressions.head match {
               case Left( expression ) ⇒
-                conditions.appendAll( translateMatchCondition( s"${matched}.right()", eitherType.rightType, expression, body, visitor, counter ) )
+                conditions.appendAll( translateMatchCondition( s"${matched}.right()", eitherType.rightParameterType, expression, body, visitor, counter ) )
               case Right( name ) ⇒
-                body.expressions.insert( 0, JavaLocalVarDef( name, eitherType.rightType,
+                body.expressions.insert( 0, JavaLocalVarDef( name, eitherType.rightParameterType,
                   Some( JavaVarCall( List( matched ), "right", Array( ) ) ) ) )
             }
         }
@@ -247,8 +247,8 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                                            conditions: ArrayBuffer[String],
                                            visitor: ExpressionVisitor[String],
                                            counter: AtomicInteger): Unit = {
-    assert( matchedType.valueTypes.length == matchCondition.expressions.length )
-    matchCondition.expressions.zip( matchedType.valueTypes ).zipWithIndex.foreach {
+    assert( matchedType.parameterTypes.length == matchCondition.expressions.length )
+    matchCondition.expressions.zip( matchedType.parameterTypes ).zipWithIndex.foreach {
       case ((either, dslType), index) ⇒
         either match {
           case Left( expression ) ⇒
@@ -290,9 +290,9 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
         expr match {
           case Left( expression ) ⇒
             conditions.appendAll( translateMatchCondition( s"${matched}.get($index)",
-              listType.valueType, expression, body, visitor, counter ) )
+              listType.parameterType, expression, body, visitor, counter ) )
           case Right( name ) ⇒
-            body.expressions.insert( 0, JavaLocalVarDef( name, listType.valueType,
+            body.expressions.insert( 0, JavaLocalVarDef( name, listType.parameterType,
               Some( JavaVarCall( List( s"${matched}_$index" ), "get", Array( new IntLiteral( index ) ) ) ) ) )
         }
     }
@@ -309,7 +309,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                 val varName = s"__sys_var_${counter.incrementAndGet( )}"
                 conditions.append(
                   s"""
-                     |${core.toJavaType( listType )} $varName = ${visitor.visit( tailLiteral )}
+                     |${api.toJavaType( listType,javaTranslatorContext )} $varName = ${visitor.visit( tailLiteral )}
                      |""".stripMargin )
                 conditions.appendAll( translateMatchCondition( varName, listType, matchList, body, visitor, counter ) )
             }
@@ -340,9 +340,9 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                  |""".stripMargin )
             expressions.head match {
               case Left( expression ) ⇒
-                conditions.appendAll( translateMatchCondition( s"$matched.get()", optionType.valueType, expression, body, visitor, counter ) )
+                conditions.appendAll( translateMatchCondition( s"$matched.get()", optionType.parameterType, expression, body, visitor, counter ) )
               case Right( name ) ⇒
-                body.expressions.insert( 0, JavaLocalVarDef( name, optionType.valueType,
+                body.expressions.insert( 0, JavaLocalVarDef( name, optionType.parameterType,
                   Some( JavaVarCall( List( matched ), "get", Array( ) ) ) ) )
             }
           case NoneType ⇒
@@ -419,13 +419,13 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
       case matchType: MatchType ⇒
         translateMatchType( matched, matchType, body )
       case _ ⇒
-        val conditions = translateMatchCondition( matched.name.mkString( "." ), matched.dslType, matchCondition, body, visitor, new AtomicInteger( ) )
+        val conditions = translateMatchCondition( matched.name.mkString( "." ),matched.getDslType,  matchCondition, body, visitor, new AtomicInteger( ) )
         conditions.append( "return true" )
         val methodName = s" _sys_match_condition_${javaTranslatorContext.systemVarIndex.incrementAndGet( )}"
 
         val methodDef =
           s"""
-             |public boolean _$methodName(${core.toJavaType( matched.dslType )} param) throws Exception{
+             |public boolean _$methodName(${api.toJavaType( matched.getDslType,javaTranslatorContext )} param) throws Exception{
              |   ${conditions.mkString( ";" )}
 
              |""".stripMargin

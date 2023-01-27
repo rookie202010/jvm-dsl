@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
-import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, FuncCall, FuncCallChain, LiteralCall, LiteralCallChain, MethodCall, Part, StaticCall, VarCall, VarName}
+import com.dongjiaqiang.jvm.dsl.api.`type`.ClazzType
+import com.dongjiaqiang.jvm.dsl.api.expression.{BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, Expression, FloatLiteral, FuncCall, FuncCallChain, IntLiteral, ListLiteral, Literal, LiteralCall, LiteralCallChain, LongLiteral, MapLiteral, MethodCall, OptionLiteral, Part, SetLiteral, StaticCall, StringLiteral, TupleLiteral, VarCall, VarName, VarRef}
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
@@ -11,7 +12,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
 
   def partExpression(partContext: PartContext, expressionContext: ExprContext): Part = {
     if (partContext.variable( ) != null) {
-      new VarName( partContext.variable( ).IDENTIFIER( ).map( _.getText ).mkString( "." ) )
+      VarName( partContext.variable( ).IDENTIFIER( ).map( _.getText ).mkString( "." ) )
     } else {
       partContext.funcCall( ) match {
         case c: VarCallArgsContext ⇒
@@ -32,14 +33,19 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
 
   def generator(expressionContext: ExprContext,
                 funcName: String, variable: VariableContext, expressions: List[ExpressionContext]): FuncCall = {
-    Option.apply( variable )
-      .map( v ⇒ VarGenerator.generate( expressionContext, v ) )
-    match {
-      case Some( varRef ) ⇒
-        new VarCall( varRef, funcName,
-          expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ).toArray)
-      case _ ⇒
-          generateMethodCall(expressionContext,funcName,expressions)
+    Option.apply(variable) match {
+      case Some(v) ⇒
+        if (v.IDENTIFIER().length == 1 &&
+          expressionContext.getProgramScope.isClazzType(v.IDENTIFIER().head.getText)) {
+          StaticCall(ClazzType(v.IDENTIFIER().head.getText, Array()),
+            funcName,
+            expressions.map(e ⇒ ExpressionGenerator.generate(expressionContext, e)).toArray)
+        } else {
+          VarCall(VarGenerator.generate(expressionContext, v), funcName,
+            expressions.map(e ⇒ ExpressionGenerator.generate(expressionContext, e)).toArray)
+        }
+      case None ⇒
+        generateMethodCall(expressionContext, funcName, expressions)
     }
   }
 
@@ -50,7 +56,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
       .map( t ⇒ toDslType( t ) )
     match {
       case Some( t ) ⇒
-        new StaticCall( t, funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ).toArray )
+        StaticCall( t, funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ).toArray )
       case _ ⇒
         generateMethodCall(expressionContext,funcName,expressions)
     }
@@ -75,11 +81,46 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
       case c: LiteralExprContext ⇒
         LiteralGenerator.generate( exprContext, c.literal( ) )
       case c: LiteralCallChainExprContext ⇒
-        val clazzLiteral = ClassLiteralGenerator.generate( exprContext, c.literalCallChain( ).literal( ).classLiteral( ) )
-        val parts = c.literalCallChain( ).part( ).map( p ⇒ {
+
+       val expression = LiteralGenerator.generate(exprContext,c.literalCallChain().literal())
+       val parts = c.literalCallChain( ).part( ).map( p ⇒ {
           partExpression( p, exprContext )
-        } )
-        new LiteralCallChain( clazzLiteral, parts.toList )
+        } ).toList
+
+        expression match {
+          case intLiteral:IntLiteral⇒new LiteralCallChain(intLiteral,parts)
+          case longLiteral:LongLiteral⇒new LiteralCallChain(longLiteral,parts)
+          case floatLiteral:FloatLiteral⇒new LiteralCallChain(floatLiteral,parts)
+          case doubleLiteral:DoubleLiteral⇒new LiteralCallChain(doubleLiteral,parts)
+          case stringLiteral:StringLiteral⇒new LiteralCallChain(stringLiteral,parts)
+          case charLiteral:CharLiteral⇒new LiteralCallChain(charLiteral,parts)
+          case boolLiteral:BoolLiteral⇒new LiteralCallChain(boolLiteral,parts)
+
+          case clazzLiteral: ClazzLiteral⇒ new LiteralCallChain(clazzLiteral,parts)
+
+          case optional:OptionLiteral⇒new LiteralCallChain(optional,parts)
+          case setLiteral:SetLiteral⇒new LiteralCallChain(setLiteral,parts)
+          case tupleLiteral:TupleLiteral⇒new LiteralCallChain(tupleLiteral,parts)
+          case listLiteral:ListLiteral⇒new LiteralCallChain(listLiteral,parts)
+          case mapLiteral:MapLiteral⇒new LiteralCallChain(mapLiteral,parts)
+
+          case varRef:VarRef⇒
+            val index = parts.indexWhere(_.isInstanceOf[MethodCall])
+            if(index == -1){
+              VarRef(varRef.name++parts.map(_.asInstanceOf[VarName]).map(_.name),varRef.fieldScope)
+            }else{
+              val methodCall = parts(index).asInstanceOf[MethodCall]
+              val leftParts = parts.slice(index+1,parts.length)
+
+              val varCall = VarCall(VarRef(varRef.name++parts.slice(0,index).map(_.asInstanceOf[VarName]).map(_.name),varRef.fieldScope)
+                ,methodCall.name,methodCall.params)
+              if(leftParts.isEmpty){
+                  varCall
+              }else{
+                  FuncCallChain(varCall,leftParts)
+              }
+            }
+        }
       case c: FuncCallChainExprContext ⇒
         val funcCall = FuncCall.generate( exprContext, c.funcCallChain( ).funcCall( ) )
         val parts = c.funcCallChain( ).part( ).map( p ⇒ {

@@ -1,10 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParserException
 import com.dongjiaqiang.jvm.dsl.api.expression
 import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.scope._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
-import com.dongjiaqiang.jvm.dsl.core.exception.ExpressionParserException
 import com.dongjiaqiang.jvm.dsl.core.expression.generator._
 import com.dongjiaqiang.jvm.dsl.core.program.{Clazz, Method, Program}
 import com.dongjiaqiang.jvm.dsl.core.scope._
@@ -16,8 +16,10 @@ import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
 /**
  *
- * statement parser response for parse statement to expression
  * <pre><code>
+ *
+ * statement parser response for parse statement to expression
+ *
  * program{
  *     Int i = 100;
  *     Int j = 200;
@@ -106,18 +108,19 @@ class ParseContext {
 }
 
 trait ExprContext {
+
+  def getCurrentBlock:Block
+
   def getCurrentExpressionIndex: Int
 
   def getContextScope: BlockScope
 
   def getTopScope: Scope
 
-  def resolveMethod(name:String):MethodScope={
-      getTopScope.resolveMethod(name) match {
-        case Some(scope)⇒scope
-        case None⇒
-          throw ExpressionParserException(s"can not resolve $name in $getTopScope")
-      }
+  def getProgramScope:ProgramScope
+
+  def resolveMethod(name:String):Option[MethodScope]={
+      getTopScope.resolveMethod(name)
   }
 
   def pushBlock(lambdaBlock: Block): Unit
@@ -147,7 +150,12 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   var program: Program = _
   var currentClazz: Clazz = _
   var currentMethod: Method = _
+
   var currentBlock: Block = _
+
+
+  override def getCurrentBlock: Block = currentBlock
+
   var blockStack: Stack[Block] = new Stack[Block]( )
 
   var lambdaBlocks: java.util.List[(Scope, Block)] = new java.util.LinkedList[(Scope, Block)]( )
@@ -428,15 +436,15 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   }
 
 
-  /*
+  /**
+   *<pre><code>
    *program{
    *    def method(Int i)=Int{
    *        Int i = 10;
    *        Long j = 10L;
-   *
    *    }
    * }
-   *
+   *<pre><code>
    */
   override def enterVarDefExpr(ctx: VarDefExprContext): Unit = {
     updateExpression( VarDefGenerator.generate( this, ctx.varDef( ) ) )
@@ -469,13 +477,14 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
 
   /**
+   * <pre><code>
    * {
-   * while(i<100){
-   * i++;
-   * foo();
+   *    while(i<100){
+   *      i++;
+   *      foo();
+   *    }
    * }
-   * }
-   *
+   *<pre><code>
    * */
   override def enterWhileStatement(ctx: JvmDslParserParser.WhileStatementContext): Unit = {
     updateExpression( {
@@ -491,14 +500,14 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
 
   /**
+   * <pre><code>
    * {
-   *
-   * do{
-   * foo();
-   * i--;
-   * }while(i<100)
+   *    do{
+   *      foo();
+   *      i--;
+   *    }while(i<100)
    * }
-   *
+   *<pre><code>
    * */
   override def enterDoWhileStatement(ctx: JvmDslParserParser.DoWhileStatementContext): Unit = {
     parseContext.set(ContextType.DO_WHILE)
@@ -513,10 +522,14 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   }
 
   /**
-   * for(Int i=10;i<100;i++){}
-   * for(Int i:[1,2,3]){}
-   * for(Int k,Int v: {1:1,2:1} ){}
-   *
+   * <pre><code>
+   * for(Int i=10;i<100;i++){
+   * }
+   * for(Int i:[1,2,3]){
+   * }
+   * for(Int k,Int v: {1:1,2:1} ){
+   * }
+   *<pre><code>
    * */
   override def enterForExpr(ctx: JvmDslParserParser.ForExprContext): Unit = {
     parseContext.set(List(ctx.forStatement()))
@@ -532,11 +545,13 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   }
 
   /**
+   * <pre><code>
    * {
-   * synchronized(xx){
-   * foo()
+   *    synchronized(xx){
+   *        foo()
+   *    }
    * }
-   * }
+   * <pre><code>
    * */
   override def enterSyncExpr(ctx: JvmDslParserParser.SyncExprContext): Unit = {
     updateExpression( {
@@ -552,10 +567,11 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
 
   /**
+   * <pre><code>
    * throw e;
    * e();
    * return e;
-   *
+   *<pre><code>
    */
   override def enterThrowOrSideEffectExpr(ctx: JvmDslParserParser.ThrowOrSideEffectExprContext): Unit = {
     updateExpression( {
@@ -571,12 +587,14 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
 
   /**
+   * <pre><code>
    * if(i>10){
    *
    * }else if(i<10){
    *
    * }else{
    * }
+   * <pre><code>
    * */
   override def enterIfExpr(ctx: JvmDslParserParser.IfExprContext): Unit = {
     parseContext.set( ctx.ifStatement( ).conditionalOrExpression( ).toList )
@@ -593,17 +611,19 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   }
 
   /**
+   * <pre><code>
    * {
-   * try{
-   * foo();
-   * }catch(Exception e){
-   * return 1;
-   * }catch(Exception e1){
-   * return 2;
-   * }finally{
-   * return 3;
+   *    try{
+   *      foo();
+   *    }catch(Exception e){
+   *      return 1;
+   *    }catch(Exception e1){
+   *      return 2;
+   *    }finally{
+   *      return 3;
+   *    }
    * }
-   * }
+   * <pre><code>
    * */
   override def enterTryExpr(ctx: JvmDslParserParser.TryExprContext): Unit = {
     parseContext.set( ContextType.TRY )
@@ -629,6 +649,9 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   override def getContextScope: BlockScope = currentBlockScope
 
   override def getTopScope: Scope = Option.apply( currentClazzScope ).getOrElse( programScope )
+
+
+  override def getProgramScope: ProgramScope = programScope
 
   override def pushBlock(lambdaBlock: Block): Unit = {
     val currentScope = if (currentBlockScope != null) {

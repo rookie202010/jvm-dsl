@@ -111,9 +111,10 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
 
       //visit statement expression
       case v: Assign ⇒
-        v.varRef.dslType match {
+        v.varRef.getDslType match {
           case lambdaType: LambdaType ⇒
             currentLambdaScope = lambdaType
+          case _⇒   visit( v, this )
         }
         visit( v, this )
       case v: Break.type ⇒ visit( v, this )
@@ -136,6 +137,7 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
             if (v.assigned.isDefined) {
               currentLambdaScope = lambdaType
             }
+          case _ ⇒  visit( v, this )
         }
         visit( v, this )
       case v: VarRef ⇒ visit( v, this )
@@ -145,7 +147,6 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
         val t = visit( v, this )
         currentLambdaScope = null
         t
-
       case _ ⇒ defaultVisit( expression, this )
     }
   }
