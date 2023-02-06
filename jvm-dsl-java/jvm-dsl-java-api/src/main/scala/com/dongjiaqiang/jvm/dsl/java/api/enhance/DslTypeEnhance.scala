@@ -1,51 +1,222 @@
 package com.dongjiaqiang.jvm.dsl.java.api.enhance
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, IntType, ListType, LongType, StringType}
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, Lambda}
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{Map ⇒ MMap}
+
+
+object DslTypeEnhance {
+
+  val transformMethods: Set[String] = Set( "to", "until", "map", "flatMap", "filter", "filterNot", "flatten","zip","zipWithIndex" )
+
+  val actionMethods: Set[String] = Set("reduce","mkString","head","headOption","toList","toSet","toMap","distinct")
+
+  val toMethod: Method = Method( "to", (called, expressions, visitor) ⇒ {
+    expressions.length match {
+      case 1 ⇒
+        s"com.dongjiaqiang.jvm.dsl.java.api.util.to(${visitor.visit( called )},${visitor.visit( expressions.head )})"
+      case 2 ⇒
+        s"com.dongjiaqiang.jvm.dsl.java.api.util.to(${visitor.visit( called )},${visitor.visit( expressions.head )},${visitor.visit( expressions.last )})"
+    }
+  } )
+
+  val untilMethod: Method = Method( "until", (called, expressions, visitor) ⇒ {
+
+    expressions.length match {
+      case 1 ⇒
+        s"com.dongjiaqiang.jvm.dsl.java.api.util.until(${visitor.visit( called )},${visitor.visit( expressions.head )})"
+      case 2 ⇒
+        s"com.dongjiaqiang.jvm.dsl.java.api.util.until(${visitor.visit( called )},${visitor.visit( expressions.head )},${visitor.visit( expressions.last )})"
+    }
+  } )
+
+  val toStringMethod:Method=Method("toString",(called,_,visitor)⇒{
+    s"String.valueOf(${visitor.visit(called)})"
+  })
+}
+
+
 
 case class Method(name:String,
-                  inputParameters:Array[DslType],
-                  outputParameter:DslType,
-                  body:Option[()⇒String])
-trait DslTypeEnhance {
+                  body:(Expression,Array[Expression],ExpressionVisitor[String])⇒String)
+trait DslTypeEnhance{
 
-  val dslType:DslType
-  val sysMethods:Array[Method]
-  val extendMethods:ArrayBuffer[Method] = ArrayBuffer()
+  val methods:MMap[String,Method] = MMap()
 
-  def addMethod(method: Method):Unit = extendMethods.append(method)
+  def addMethod(method: Method):Unit = methods.put(method.name,method)
+
+  def findMethod(name:String):Method = methods(name)
 }
 
-class IntTypeEnhance extends DslTypeEnhance {
-  override val dslType: DslType = IntType
-  override val sysMethods: Array[Method] = Array(
-    Method("until",Array(IntType),ListType(IntType),None),
-    Method("until",Array(IntType,IntType),ListType(IntType),None),
-    Method("to",Array(IntType),ListType(IntType),None),
-    Method("to",Array(IntType,IntType),ListType(IntType),None),
+trait NumberDslTypeEnhance extends DslTypeEnhance{
+
+  override val methods: MMap[String,Method] = MMap[String,Method](
+    "toInt"→Method( "toInt", (called, _, visitor) ⇒ {
+      s"""
+         |((long)(${visitor.visit( called )}))
+         |""".stripMargin
+    } ),
+    "toLong"→Method( "toLong", (called, _, visitor) ⇒ {
+      s"""
+         |((long)(${visitor.visit( called )}))
+         |""".stripMargin
+    } ),
+    "toFloat"→Method( "toFloat", (called, _, visitor) ⇒ {
+      s"""
+         |((float)(${visitor.visit( called )}))
+         |""".stripMargin
+    } ),
+    "toDouble"→Method( "toDouble", (called, _, visitor) ⇒ {
+      s"""
+         |((double)(${visitor.visit( called )}))
+         |""".stripMargin
+    } )
   )
+
 }
 
-class LongTypeEnhance extends DslTypeEnhance {
-  override val dslType: DslType = LongType
-  override val sysMethods: Array[Method] = Array(
-    Method("until",Array(LongType),ListType(LongType),None),
-    Method("until",Array(LongType,LongType),ListType(LongType),None),
-    Method("to",Array(LongType),ListType(LongType),None),
-    Method("to",Array(LongType,LongType),ListType(LongType),None),
-  )
+
+object ListType extends DslTypeEnhance{
+
+
+
 }
 
-class StringTypeEnhance extends DslTypeEnhance{
+
+object IntTypeEnhance extends NumberDslTypeEnhance{
+
   {
-    com.dongjiaqiang.jvm.dsl.java.api.util.CodeUtils.mkString("xxss","##")
-    "".mkString(".")
-    "xsss".toLong
-    "{} {}".format("x","y")
+    methods.put( DslTypeEnhance.toMethod.name, DslTypeEnhance.toMethod )
+    methods.put( DslTypeEnhance.untilMethod.name, DslTypeEnhance.untilMethod )
+    methods.put( DslTypeEnhance.toStringMethod.name, DslTypeEnhance.toStringMethod )
   }
-  override val dslType: DslType = StringType
-  override val sysMethods: Array[Method] = Array(
-    Method("mkString",Array(StringType),StringType,None)
+
+}
+
+object LongTypeEnhance extends NumberDslTypeEnhance{
+
+  {
+    methods.put( DslTypeEnhance.toStringMethod.name, DslTypeEnhance.toStringMethod )
+    methods.put( DslTypeEnhance.toMethod.name, DslTypeEnhance.toMethod )
+    methods.put( DslTypeEnhance.untilMethod.name, DslTypeEnhance.untilMethod )
+  }
+}
+
+object FloatTypeEnhance extends NumberDslTypeEnhance{
+
+  {
+    methods.put(DslTypeEnhance.toStringMethod.name,DslTypeEnhance.toStringMethod)
+  }
+}
+
+object DoubleTypeEnhance extends NumberDslTypeEnhance{
+
+  {
+    methods.put(DslTypeEnhance.toStringMethod.name,DslTypeEnhance.toStringMethod)
+  }
+}
+
+object BoolTypeEnhance extends DslTypeEnhance{
+
+  {
+    methods.put(DslTypeEnhance.toStringMethod.name,DslTypeEnhance.toStringMethod)
+  }
+}
+
+
+object StringTypeEnhance extends DslTypeEnhance{
+
+  override val methods: MMap[String,Method] = MMap(
+    "toInt"→Method( "toInt", (called, _, visitor) ⇒ {
+      s"""
+         |Integer.parseInt(${visitor.visit( called )})
+         |""".stripMargin
+    } ),
+    "toLong"→Method( "toLong",  (called, _, visitor) ⇒ {
+      s"""
+         |Long.parseLong(${visitor.visit( called )})
+         |""".stripMargin
+    } ),
+    "toFloat"→Method( "toFloat", (called, _, visitor) ⇒ {
+      s"""
+         |Float.parseFloat(${visitor.visit( called )})
+         |""".stripMargin
+    } ),
+    "toDouble"→Method( "toDouble", (called, _, visitor) ⇒ {
+      s"""
+         |Double.parseDouble(${visitor.visit( called )})
+         |""".stripMargin
+    } ),
+    "mkString"→Method("mkString",(called,expressions,visitor)⇒{
+      s"""
+         |com.dongjiaqiang.jvm.dsl.java.api.util.mkString(${visitor.visit(called)},${visitor.visit(expressions.head)})
+         |""".stripMargin
+    }),
+    "head"→Method("head",(called,_,visitor)⇒{
+      s"""
+         |${visitor.visit(called)}.charAt(0)
+         |""".stripMargin
+    }),
+    "headOption"→Method("headOption",(called,_,visitor)⇒{
+      s"""
+         |com.dongjiaqiang.jvm.dsl.java.api.util.headOption(${visitor.visit(called)})
+         |""".stripMargin
+    }),
+    "last"→Method("last",(called,_,visitor)⇒{
+      s"""
+         |com.dongjiaqiang.jvm.dsl.java.api.util.last(${visitor.visit(called)})
+         |""".stripMargin
+    }),
+    "lastOption"→Method("lastOption",(called, _, visitor) ⇒ {
+      s"""
+         |com.dongjiaqiang.jvm.dsl.java.api.util.lastOption(${visitor.visit( called )})
+         |""".stripMargin
+    } ),
+    "nonEmpty"→Method("nonEmpty",(called,_,visitor)⇒{
+      s"""
+         |!${visitor.visit(called)}.isEmpty()
+         |""".stripMargin
+    }),
+    "tail"→Method("tail",(called,_,visitor)⇒{
+      s"""
+         |${visitor.visit(called)}.substring(1)
+         |""".stripMargin
+    }),
+    "take"→Method("take",(called,expressions,visitor)⇒{
+      s"""
+         |${visitor.visit(called)}.substring(0,${visitor.visit(expressions.head)})
+         |""".stripMargin
+    }),
+    "drop"→Method("drop",(called,expressions,visitor)⇒{
+      s"""
+         |${visitor.visit(called)}.substring(${visitor.visit(expressions.head)})
+         |""".stripMargin
+    }),
+    "size"→Method("size",(called,_,visitor)⇒{
+      s"""
+         |${visitor.visit(called)}.length
+         |""".stripMargin
+    }),
+    "dropWhile"→Method("dropWhile",(called, expressions, visitor) ⇒ {
+      val lambda = expressions.head.asInstanceOf[Lambda]
+      s"""
+         |com.dongjiaqiang.jvm.dsl.java.api.util.dropWhile(${visitor.visit( called )},new _1_Predicate<Character>() {
+         |            @Override
+         |            public boolean test(Character ${lambda.inputs.head}) throws Exception
+         |                ${visitor.visit(lambda)}
+         |        })
+         |""".stripMargin
+    } ),
+    "takeWhile"→Method( "takeWhile", (called, expressions, visitor) ⇒ {
+      val lambda = expressions.head.asInstanceOf[Lambda]
+      s"""
+         |com.dongjiaqiang.jvm.dsl.java.api.util.takeWhile(${visitor.visit( called )},new _1_Predicate<Character>() {
+         |            @Override
+         |            public boolean test(Character ${lambda.inputs.head}) throws Exception
+         |                ${visitor.visit( lambda )}
+         |        })
+         |""".stripMargin
+    } )
   )
 }

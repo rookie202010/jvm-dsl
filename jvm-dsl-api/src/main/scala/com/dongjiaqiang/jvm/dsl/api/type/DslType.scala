@@ -2,6 +2,14 @@ package com.dongjiaqiang.jvm.dsl.api.`type`
 
 trait DslType {
   val name: String
+
+  override def toString: String = name
+}
+
+trait MonadDslType extends DslType {
+    def carryDslType:DslType
+
+    def transform(carryDslType:DslType):MonadDslType
 }
 
 trait NumberDslType extends DslType
@@ -31,9 +39,12 @@ object DoubleType extends NumberDslType with BasicDslType {
 
 }
 
-object StringType extends DslType with BasicDslType {
+object StringType extends DslType with BasicDslType with MonadDslType {
   override val name: String = "String"
 
+  override def carryDslType: DslType = CharType
+
+  override def transform(carryDslType: DslType): MonadDslType = StringType
 }
 
 object CharType extends DslType with BasicDslType {
@@ -64,7 +75,7 @@ object UnitType extends DslType {
 
 //collection type
 
-case class ListType(parameterType: DslType) extends DslType {
+case class ListType(parameterType: DslType) extends MonadDslType {
   override val name: String = s"List[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -73,9 +84,13 @@ case class ListType(parameterType: DslType) extends DslType {
       case _ ⇒ false
 
     }
+
+  override def carryDslType: DslType = parameterType
+
+  override def transform(carryDslType: DslType): MonadDslType = ListType(carryDslType)
 }
 
-case class SetType(val parameterType:DslType) extends DslType {
+case class SetType(parameterType:DslType) extends MonadDslType {
   override val name: String = s"Set[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -83,9 +98,13 @@ case class SetType(val parameterType:DslType) extends DslType {
       case setType: SetType ⇒ parameterType == setType.parameterType
       case _ ⇒ false
     }
+
+  override def carryDslType: DslType = parameterType
+
+  override def transform(carryDslType: DslType): MonadDslType = SetType(carryDslType)
 }
 
-case class MapType(keyParameterType:DslType, valueParameterType:DslType) extends DslType {
+case class MapType(keyParameterType:DslType, valueParameterType:DslType) extends MonadDslType {
   override val name: String = s"Map[${keyParameterType.name},${valueParameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -93,9 +112,14 @@ case class MapType(keyParameterType:DslType, valueParameterType:DslType) extends
       case mapType: MapType ⇒ valueParameterType == mapType.valueParameterType && keyParameterType == mapType.keyParameterType
       case _ ⇒ false
     }
+
+  override def carryDslType: DslType = TupleType(Array(keyParameterType,valueParameterType))
+
+  override def transform(carryDslType: DslType): MonadDslType = MapType(carryDslType.asInstanceOf[TupleType].parameterTypes.head,
+    carryDslType.asInstanceOf[TupleType].parameterTypes.last)
 }
 
-case class OptionType(parameterType: DslType) extends DslType {
+case class OptionType(parameterType: DslType) extends MonadDslType {
   override val name: String = s"Option[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -103,9 +127,13 @@ case class OptionType(parameterType: DslType) extends DslType {
       case option: OptionType ⇒ parameterType == option.parameterType
       case _ ⇒ false
     }
+
+  override def carryDslType: DslType = parameterType
+
+  override def transform(carryDslType: DslType): MonadDslType = OptionType(carryDslType)
 }
 
-case class ArrayType(parameterType: DslType) extends DslType {
+case class ArrayType(parameterType: DslType) extends MonadDslType {
   override val name: String = s"Array[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -113,6 +141,10 @@ case class ArrayType(parameterType: DslType) extends DslType {
       case array: ArrayType ⇒ parameterType == array.parameterType
       case _ ⇒ false
     }
+
+  override def carryDslType: DslType = parameterType
+
+  override def transform(carryDslType: DslType): MonadDslType = ArrayType(carryDslType)
 }
 
 case class TupleType(parameterTypes: Array[DslType]) extends DslType {
@@ -126,7 +158,7 @@ case class TupleType(parameterTypes: Array[DslType]) extends DslType {
     }
 }
 
-case class FutureType(parameterType: DslType) extends DslType {
+case class FutureType(parameterType: DslType) extends MonadDslType {
   override val name: String = s"Future[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -135,18 +167,12 @@ case class FutureType(parameterType: DslType) extends DslType {
         parameterType == futureType.parameterType
       case _ ⇒ false
     }
+
+  override def carryDslType: DslType = parameterType
+
+  override def transform(carryDslType: DslType): MonadDslType = FutureType(carryDslType)
 }
 
-case class TryType(parameterType: DslType) extends DslType {
-  override val name: String = s"Try[${parameterType.name}]"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case tryType: TryType ⇒
-        parameterType == tryType.parameterType
-      case _ ⇒ false
-    }
-}
 
 case class LambdaType(mayInputType: Option[DslType], outputType: DslType) extends DslType {
   override val name: String = mayInputType match {
@@ -167,7 +193,7 @@ case class LambdaType(mayInputType: Option[DslType], outputType: DslType) extend
 }
 
 //clazzType
-case class ClazzType(clazzName:String,parameterTypes:Array[DslType]) extends DslType {
+case class ClazzType(clazzName:String,parameterTypes:Array[DslType] = Array()) extends DslType {
   override val name: String = if(parameterTypes.isEmpty) {
     s"$clazzName"
   }else{
@@ -184,7 +210,7 @@ case class ClazzType(clazzName:String,parameterTypes:Array[DslType]) extends Dsl
 
 //resolve in expression reviser
 
-class SomeType(val parameterType: DslType) extends DslType {
+case class SomeType(parameterType: DslType) extends DslType {
   override val name: String = s"Some[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -198,7 +224,7 @@ object NoneType extends DslType {
   override val name: String = "None"
 }
 
-case class EitherType(leftParameterType: DslType, rightParameterType: DslType) extends DslType {
+case class EitherType(leftParameterType: DslType, rightParameterType: DslType) extends MonadDslType {
   override val name: String = s"Either[${leftParameterType.name},${rightParameterType.name}]"
 
   override def equals(obj: Any): Boolean = {
@@ -208,9 +234,13 @@ case class EitherType(leftParameterType: DslType, rightParameterType: DslType) e
       case _ ⇒ false
     }
   }
+
+  override def carryDslType: DslType = rightParameterType
+
+  override def transform(carryDslType: DslType): MonadDslType = EitherType(leftParameterType,carryDslType)
 }
 
-class LeftType(val parameterType: DslType) extends DslType {
+case class LeftType(parameterType: DslType) extends DslType {
   override val name: String = s"Left[${parameterType.name}"
 
   override def equals(obj: Any): Boolean = {
@@ -222,7 +252,7 @@ class LeftType(val parameterType: DslType) extends DslType {
   }
 }
 
-class RightType(val parameterType: DslType) extends DslType {
+case class RightType(parameterType: DslType) extends DslType {
   override val name: String = s"Right[${parameterType.name}"
 
   override def equals(obj: Any): Boolean = {
@@ -234,7 +264,22 @@ class RightType(val parameterType: DslType) extends DslType {
   }
 }
 
-class SuccessType(val parameterType: DslType) extends DslType {
+case class TryType(parameterType: DslType) extends MonadDslType {
+  override val name: String = s"Try[${parameterType.name}]"
+
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case tryType: TryType ⇒
+        parameterType == tryType.parameterType
+      case _ ⇒ false
+    }
+
+  override def carryDslType: DslType = parameterType
+
+  override def transform(carryDslType: DslType): MonadDslType = TryType(carryDslType)
+}
+
+case class SuccessType(parameterType: DslType) extends DslType {
   override val name: String = s"Success[${parameterType.name}"
 
   override def equals(obj: Any): scala.Boolean =

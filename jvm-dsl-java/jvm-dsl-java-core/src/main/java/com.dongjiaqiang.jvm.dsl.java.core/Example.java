@@ -1,18 +1,12 @@
 package com.dongjiaqiang.jvm.dsl.java.core;
 
 
-import com.dongjiaqiang.jvm.dsl.java.api.extend.Try;
-import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._Runnable;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
-import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._1_Supplier;
-import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._LongSupplier;
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._1_Predicate;
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._2_Predicate;
 import com.dongjiaqiang.jvm.dsl.java.api.util.CodeUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 
 class A<T> {
@@ -58,7 +52,95 @@ class B<T> extends A<T> {
 
 public class Example {
 
+
     public static void main(String[] args) throws Exception {
+
+//        _LongConsumer longConsumer = new _LongConsumer(){
+//            @Override
+//            public void accept(long value) throws Exception {
+//                System.out.println(value);
+//            }
+//        };
+//        _IntFunction<Long> intFunction  = new _IntFunction<Long>(){
+//            @Override
+//            public Long apply(int value) throws Exception {
+//                return Long.valueOf(value);
+//            }
+//        };
+
+        /**
+         *
+         * a.map(i=>i+1).filter(i=>i!=1).map(i=>i.toString()).mkString(",")
+         *
+         *
+         */
+
+
+
+        System.out.println(CodeUtils.mkString(CodeUtils.ofList(1,2,3,4),"#",new _2_Predicate<Integer,StringBuilder>(){
+
+           @Override
+           public boolean test(Integer integer,StringBuilder stringBuilder) throws Exception {
+
+
+               _1_Function<Integer,Integer> function1 = new _1_Function<Integer, Integer>() {
+                   @Override
+                   public Integer apply(Integer integer) throws Exception {
+                       return integer+1;
+                   }
+               };
+
+
+               _1_Predicate<Integer> predicate = new _1_Predicate<Integer>(){
+                   @Override
+                   public boolean test(Integer integer) throws Exception {
+                       return integer!=2;
+                   }
+               };
+
+               _1_Function<Integer,String> function2 = new _1_Function<Integer, String>() {
+                   @Override
+                   public String apply(Integer integer) throws Exception {
+                       return String.valueOf(integer);
+                   }
+               };
+
+               Integer v1 = function1.apply(integer);
+               boolean v2 = predicate.test(v1);
+
+               if(v2){
+
+                   String v3 = function2.apply(v1);
+                   stringBuilder.append(v3);
+                   return true;
+               }else{
+                   return false;
+               }
+
+           }
+       }));
+
+
+//        CodeUtils.dropWhile("xx", new _1_Predicate<Character>() {
+//            @Override
+//            public boolean test(Character character) throws Exception {
+//                return false;
+//            }
+//        });
+//
+//        String.valueOf()
+//
+//
+//        String uu = "xxx";
+//
+//        Optional<Character> optionalCharacter = uu.isEmpty()?Optional.empty():Optional.of(uu.charAt(0));
+//
+//       longConsumer.accept( intFunction.apply(10));
+
+
+
+
+
        // System.out.println();
 //       // CodeUtils.ofList(xx.s)
 //        List<Integer> xx = new ArrayList<>();

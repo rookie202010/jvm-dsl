@@ -1,8 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.config
 
+import com.dongjiaqiang.jvm.dsl.core.config.SymbolParserConfig.SYMBOL_PARSER_COVER_PARENT_SCOPE_DEF
 import com.typesafe.config.Config
 
-object Configs {
+object SymbolParserConfig {
 
   /**
    * for example
@@ -18,10 +19,10 @@ object Configs {
 
 }
 
-class SymbolParserConfig(val config:Config){
+case class SymbolParserConfig(val config:Config){
     def coverParentScopeDef():Boolean={
-        if(config.hasPath(Configs.SYMBOL_PARSER_COVER_PARENT_SCOPE_DEF)){
-            config.getBoolean(Configs.SYMBOL_PARSER_COVER_PARENT_SCOPE_DEF)
+        if(config.hasPath(SYMBOL_PARSER_COVER_PARENT_SCOPE_DEF)){
+            config.getBoolean(SYMBOL_PARSER_COVER_PARENT_SCOPE_DEF)
         }else{
             false
         }

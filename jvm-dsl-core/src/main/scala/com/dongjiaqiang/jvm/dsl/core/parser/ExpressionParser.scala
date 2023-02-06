@@ -1,6 +1,5 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
-import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParserException
 import com.dongjiaqiang.jvm.dsl.api.expression
 import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.scope._
@@ -109,6 +108,8 @@ class ParseContext {
 
 trait ExprContext {
 
+  def ignoreLambdaBlock(ignore:Boolean):Unit
+
   def getCurrentBlock:Block
 
   def getCurrentExpressionIndex: Int
@@ -153,6 +154,10 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
   var currentBlock: Block = _
 
+  var ignoreLambdaBlock: Boolean = false
+
+
+  override def ignoreLambdaBlock(ignore: Boolean): Unit = ignoreLambdaBlock = ignore
 
   override def getCurrentBlock: Block = currentBlock
 
@@ -208,13 +213,13 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
     /*
      * create method body ( a block)
      */
-    currentMethod = Method( currentMethodScope, new Block( ) )
+    currentMethod = Method( currentMethodScope,  Block( ) )
 
-    if (currentClazz != null) {
+    (if (currentClazz != null) {
       currentClazz.methods
     } else {
       program.methods
-    }.put( currentMethodScope.name, currentMethod )
+    }).put( currentMethodScope.name, currentMethod )
 
   }
 
@@ -291,7 +296,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
       }
 
       currentBlock = parseContext.get() match {
-        case ContextType.BLOCK ⇒ new Block()
+        case ContextType.BLOCK ⇒ Block()
         case ContextType.WHILE ⇒ new WhileBlock()
         case ContextType.DO_WHILE ⇒ new DoWhileBlock()
         case ContextType.FOR_LOOP ⇒
@@ -348,6 +353,11 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   }
 
   override def enterLambdaBlock(ctx: LambdaBlockContext): Unit = {
+    if(ignoreLambdaBlock){
+      ignoreLambdaBlock( false )
+      return
+    }
+
     if (currentBlock != null) {
       blockStack.push( currentBlock )
       statementIndexStack.push( currentStatementIndex )
@@ -361,7 +371,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
     currentBlockScope = if (currentBlockScope != null) {
       currentBlockScope.lambdaScopes.remove( 0 )
     } else {
-      programScope.lambdaBlockScope.remove( 0 )
+      programScope.lambdaScopes.remove( 0 )
     }
   }
 
@@ -408,7 +418,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
         if (parseContext.get() == ContextType.IF && !parseContext.empty()) {
           val context = parseContext.getNextRule[ConditionalOrExpressionContext]
           updateExpression( {
-            new IfCondition( OrGenerator.generate( this, context ), false )
+            IfCondition( OrGenerator.generate( this, context ), first = false )
           } )
         }
 
@@ -416,7 +426,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
           parseContext.mayNextRule[ParameterContext]
             .foreach(p ⇒ {
               updateExpression(
-                new CatchParameter( p.localVariable( ).IDENTIFIER( ).getText,
+                CatchParameter( p.localVariable( ).IDENTIFIER( ).getText,
                   toDslType( p.`type`( ) ) )
               )
             } )
@@ -597,7 +607,8 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
    * <pre><code>
    * */
   override def enterIfExpr(ctx: JvmDslParserParser.IfExprContext): Unit = {
-    parseContext.set( ctx.ifStatement( ).conditionalOrExpression( ).toList )
+    val conditions = ctx.ifStatement().ifCondition().conditionalOrExpression()+:ctx.ifStatement().elseifCondition().map(_.conditionalOrExpression())
+    parseContext.set( conditions.toList )
     parseContext.set( ContextType.IF )
 
     val context = parseContext.getNextRule[ConditionalOrExpressionContext]
@@ -628,7 +639,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   override def enterTryExpr(ctx: JvmDslParserParser.TryExprContext): Unit = {
     parseContext.set( ContextType.TRY )
     val tryNode = List( "TRY" )
-    val parameters = ctx.tryStatement( ).catches( ).catcheClause( ).map( _.parameter( ) ).toList
+    val parameters = ctx.tryStatement( ).catches( ).catchClause( ).map( _.parameter( ) ).toList
     val finallyNode = Option.apply( ctx.tryStatement( ).FINALLY( ) ).map( _ ⇒ "FINALLY" ).toList
     parseContext.set( tryNode ++ parameters ++ finallyNode )
   }

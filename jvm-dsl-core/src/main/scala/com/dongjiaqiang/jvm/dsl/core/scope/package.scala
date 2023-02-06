@@ -18,30 +18,30 @@ package object scope {
       case _: CharTypeContext ⇒ CharType
       case _: BoolTypeContext ⇒ BoolType
       case context: ListTypeContext ⇒
-        new ListType( toDslType( context.`type`( ) ) )
+        ListType( toDslType( context.`type`( ) ) )
       case context: SetTypeContext ⇒
-        new SetType( toDslType( context.`type`( ) ) )
+        SetType( toDslType( context.`type`( ) ) )
       case context: MapTypeContext ⇒
-        new MapType( toDslType( context.`type`( 0 ) ), toDslType( context.`type`( 1 ) ) )
+        MapType( toDslType( context.`type`( 0 ) ), toDslType( context.`type`( 1 ) ) )
       case context: TupleTypeContext ⇒
-        new TupleType( context.`type`( ).map( `type` ⇒ toDslType( `type` ) ).toArray )
+        TupleType( context.`type`( ).map( `type` ⇒ toDslType( `type` ) ).toArray )
       case context: OptionTypeContext ⇒
-        new OptionType( toDslType( context.`type`( ) ) )
+        OptionType( toDslType( context.`type`( ) ) )
       case context: FutureTypeContext ⇒
-        new FutureType( toDslType( context.`type`( ) ) )
+        FutureType( toDslType( context.`type`( ) ) )
       case context: LambdaTypeContext ⇒
-        new LambdaType( Some( toDslType( context.`type`( ).head ) ), toDslType( context.`type`.last ) )
+        LambdaType( Some( toDslType( context.`type`( ).head ) ), toDslType( context.`type`.last ) )
       case context: SupplierTypeContext ⇒
-        new LambdaType( None, toDslType( context.`type`( ) ) )
+        LambdaType( None, toDslType( context.`type`( ) ) )
       case context: ParameterizedClassTypeContext ⇒
-        new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, context.`type`( ).map( toDslType ).toArray )
+        ClazzType( context.clazzType( ).getText, context.`type`( ).map( toDslType ).toArray )
       case context: ClassTypeContext ⇒
-        if (context.clazzType( ).IDENTIFIER( ).getText == "Unit") {
+        if (context.clazzType( ).getText == "Unit") {
           UnitType
-        } else if (context.clazzType( ).IDENTIFIER( ).getText == "Any") {
+        } else if (context.clazzType( ).getText == "Any") {
           AnyType
         } else {
-          new ClazzType( context.clazzType( ).IDENTIFIER( ).getText, Array( ) )
+          ClazzType( context.clazzType( ).getText, Array( ) )
         }
     }
   }

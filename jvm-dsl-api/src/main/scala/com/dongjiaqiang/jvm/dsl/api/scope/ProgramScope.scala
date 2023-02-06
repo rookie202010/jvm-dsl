@@ -7,22 +7,33 @@ import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 class ProgramScope(val fields: MutableMap[String, FieldScope],
                    val classes: MutableMap[String, ClazzScope],
                    val methods: MutableMap[String, MethodScope],
-                   val importClasses: ArrayBuffer[String] = ArrayBuffer( ),
-                   val importClassesFromPackage: MutableMap[String, String] = MutableMap( ),
-                   val importPackages: MutableMap[String, String] = MutableMap( ),
-                   val lambdaBlockScope: ArrayBuffer[BlockScope] = ArrayBuffer( )
+                   val importManager: ImportManager,
+                   val lambdaScopes: ArrayBuffer[BlockScope] = ArrayBuffer( )
                   ) extends Scope {
 
-  override def toString:String = "ProgramScope"
+  override def toString:String = {
+    val classStr =  if(classes.isEmpty) "" else "classes:\n  "+classes.toList.map(_._2.toString).mkString("\n")
+    val fieldStr = if(fields.isEmpty) "" else "fields:\n  "+fields.toList.map(_._2.toString).mkString("\n")
+    val methodStr = if(methods.isEmpty) "" else "methods:\n  "+methods.toList.map(_._2.toString).mkString("\n")
+    val lambdaBlockStr = if(lambdaScopes.isEmpty) "" else "lambdaBlocks:\n  "+lambdaScopes.mkString("\n")
+    s"""
+      ProgramScope:
+      statements $statements
+      $fieldStr
+      $classStr
+      $methodStr
+      $lambdaBlockStr
+      """
+  }
 
   override val outerScopeIndex: Int = 0
 
   def this() {
-    this( MutableMap( ), MutableMap( ), MutableMap( ) )
+    this( MutableMap( ), MutableMap( ), MutableMap( ),new ImportManager() )
   }
 
-  def isClazzType(name:String):Boolean={
-      importClasses.contains(name) || importClassesFromPackage.contains(name)
+  def isImportClazz(name:String):Boolean={
+      importManager.containClass(name)
   }
 
   override def addScope(symbolName: String, fieldScope: FieldScope): ProgramScope = {

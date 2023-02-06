@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.ClazzType
-import com.dongjiaqiang.jvm.dsl.api.expression.{BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, Expression, FloatLiteral, FuncCall, FuncCallChain, IntLiteral, ListLiteral, Literal, LiteralCall, LiteralCallChain, LongLiteral, MapLiteral, MethodCall, OptionLiteral, Part, SetLiteral, StaticCall, StringLiteral, TupleLiteral, VarCall, VarName, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.{BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, Expression, FloatLiteral, FuncCall, FuncCallChain, IntLiteral, ListLiteral, LiteralCall, LiteralCallChain, LongLiteral, MapLiteral, MethodCall, OptionLiteral, Part, SetLiteral, StaticCall, StringLiteral, TupleLiteral, VarCall, VarName, VarRef}
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
@@ -36,7 +36,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
     Option.apply(variable) match {
       case Some(v) ⇒
         if (v.IDENTIFIER().length == 1 &&
-          expressionContext.getProgramScope.isClazzType(v.IDENTIFIER().head.getText)) {
+          expressionContext.getProgramScope.isImportClazz(v.IDENTIFIER().head.getText)) {
           StaticCall(ClazzType(v.IDENTIFIER().head.getText, Array()),
             funcName,
             expressions.map(e ⇒ ExpressionGenerator.generate(expressionContext, e)).toArray)
@@ -126,7 +126,11 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
         val parts = c.funcCallChain( ).part( ).map( p ⇒ {
           partExpression( p, exprContext )
         } )
-        FuncCallChain( funcCall, parts.toList )
+        if(parts.isEmpty){
+          funcCall
+        }else {
+          FuncCallChain( funcCall, parts.toList )
+        }
     }
   }
 }
