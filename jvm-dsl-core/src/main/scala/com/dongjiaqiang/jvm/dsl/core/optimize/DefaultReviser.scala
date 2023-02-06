@@ -1,8 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
-import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
@@ -102,19 +102,24 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
 
   override def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[Expression]): Expression = {
     literal.dslType.clazzName match {
-      case "Array" ⇒ new ArrayLiteral( literal.literal, new ArrayType( literal.dslType.parameterTypes.headOption.getOrElse( UnResolvedType ) ) )
+      case "Array" ⇒ new ArrayLiteral( literal.literal, ArrayType( literal.dslType.parameterTypes.headOption.getOrElse( UnResolvedType ) ) )
       case "Left" ⇒
         val list = literal.literal
-        new EitherLiteral( Left( list.head ), new EitherType(
+        new EitherLiteral( Left( list.head ), EitherType(
           literal.dslType.parameterTypes.headOption.getOrElse( UnResolvedType ),
           literal.dslType.parameterTypes.lastOption.getOrElse( UnResolvedType )
         ) )
       case "Right" ⇒
         val list = literal.literal
-        new EitherLiteral( Right( list.head ), new EitherType(
+        new EitherLiteral( Right( list.head ), EitherType(
           literal.dslType.parameterTypes.headOption.getOrElse( UnResolvedType ),
           literal.dslType.parameterTypes.lastOption.getOrElse( UnResolvedType )
         ) )
+      case "Some"⇒
+        val list = literal.literal
+        new OptionLiteral(list.head,OptionType(UnResolvedType))
+      case "None"⇒
+        new OptionLiteral(Null,OptionType(UnResolvedType))
       case _ ⇒ literal
     }
   }

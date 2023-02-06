@@ -37,7 +37,18 @@ class MethodScope(val name: String,
                   val parentScope: Scope,
                   var blockScope: BlockScope) extends Scope {
 
-  override def toString: String = s"$parentScope:MethodScope($name)"
+  override def toString: String =
+     s"""
+        MethodScope:
+        statements $statements
+        outerScopeIndex = $outerScopeIndex
+        methodName =  $name
+        params:
+          ${params.toList.map(fieldScope⇒fieldScope._2).mkString("\n")}
+        returnType =  $returnType
+        throws= ${throws.mkString(",")}
+        body = $blockScope
+      """
 
   def this(name: String, outerScopeIndex: Int, parentScope: Scope, returnType: DslType) {
     this( name, outerScopeIndex, MutableMap( ), returnType, ArrayBuffer( ), parentScope, null )

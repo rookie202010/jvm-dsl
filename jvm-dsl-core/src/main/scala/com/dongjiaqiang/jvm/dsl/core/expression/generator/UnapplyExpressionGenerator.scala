@@ -21,7 +21,7 @@ object UnapplyExpressionGenerator extends IExpressionGenerator[UnapplyExpression
       case c: UnapplyVarExprContext ⇒
         Right( c.localVariable( ).IDENTIFIER( ).getText )
       case c: UnapplyClazzExprContext ⇒
-        Left( MatchClass( new ClazzType( c.clazzType( ).IDENTIFIER( ).getText, Array( ) ),
+        Left( MatchClass( ClazzType( c.clazzType( ).getText, Array( ) ),
           c.unapplyExpression( ).map( c ⇒ generateExpr( exprContext, c ) ).toArray ) )
       case c: UnapplyHeadExprContext ⇒
         val cs = c.unapplyExpression( )

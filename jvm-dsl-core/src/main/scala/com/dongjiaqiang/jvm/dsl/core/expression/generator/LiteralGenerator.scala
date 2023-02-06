@@ -58,7 +58,7 @@ object ClassLiteralGenerator extends IExpressionGenerator[ClassLiteralContext,Cl
                         ruleContext: ClassLiteralContext): ClazzLiteral = {
     val clazzName = ruleContext.clazzType( ).getText
     val valueTypes = ruleContext.`type`( ).map( toDslType ).toArray
-    val clazzType = new ClazzType( clazzName, valueTypes )
+    val clazzType = ClazzType( clazzName, valueTypes )
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
@@ -70,7 +70,7 @@ object OptionLiteralGenerator extends IExpressionGenerator[OptionalLiteralContex
   override def generate(exprContext: ExprContext, ruleContext: OptionalLiteralContext): OptionLiteral = {
     val expression = LiteralGenerator.expression( exprContext,
       ruleContext.literalAndCallChain( ) )
-    new OptionLiteral( expression, new OptionType( UnResolvedType ) )
+    new OptionLiteral( expression, OptionType( UnResolvedType ) )
   }
 }
 
@@ -80,7 +80,7 @@ object ListLiteralGenerator extends IExpressionGenerator[ListLiteralContext,List
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
-    new ListLiteral( expressions, new ListType( UnResolvedType ) )
+    new ListLiteral( expressions, ListType( UnResolvedType ) )
   }
 }
 
@@ -89,7 +89,7 @@ object SetLiteralGenerator extends IExpressionGenerator[SetLiteralContext,SetLit
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
-    new SetLiteral( expressions, new SetType( UnResolvedType ) )
+    new SetLiteral( expressions, SetType( UnResolvedType ) )
   }
 }
 
@@ -98,7 +98,7 @@ object TupleLiteralGenerator extends IExpressionGenerator[TupleLiteralContext,Tu
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
-    new TupleLiteral( expressions, new TupleType( expressions.indices.map( _ ⇒ UnResolvedType ).toArray ) )
+    new TupleLiteral( expressions, TupleType( expressions.indices.map( _ ⇒ UnResolvedType ).toArray ) )
   }
 }
 
@@ -108,7 +108,7 @@ object MapLiteralGenerator extends IExpressionGenerator[MapLiteralContext,MapLit
       (LiteralGenerator.expression( exprContext, kv.head ),
         LiteralGenerator.expression( exprContext, kv.last ))
     } ).toArray
-    new MapLiteral( expressions, new MapType( UnResolvedType, UnResolvedType ) )
+    new MapLiteral( expressions, MapType( UnResolvedType, UnResolvedType ) )
   }
 }
 
@@ -119,7 +119,14 @@ object BaseLiteralGenerator extends IExpressionGenerator[BaseLiteralContext,Expr
     } else if (ruleContext.BOOL_LITERAL( ) != null) {
       Literal.literal( ruleContext.BOOL_LITERAL( ).getText.toBoolean )
     } else if (ruleContext.CHAR_LITERAL( ) != null) {
-      Literal.literal( ruleContext.CHAR_LITERAL( ).getText.head )
+      Literal.literal( {
+        val charLiteral = ruleContext.CHAR_LITERAL( ).getText.drop(1).dropRight(1)
+        if(charLiteral.length==1){
+          charLiteral.head
+        }else{
+          charLiteral.last
+        }
+      })
     } else {
       Literal.literal( ruleContext.STRING_LITERAL( ).getText )
     }
@@ -131,11 +138,11 @@ object NumberLiteralGenerator extends IExpressionGenerator[NumberLiteralContext,
     if (ruleContext.INT_LITERAL( ) != null) {
       Literal.literal( ruleContext.INT_LITERAL( ).getText.toInt )
     } else if (ruleContext.LONG_LITERAL( ) != null) {
-      Literal.literal( ruleContext.LONG_LITERAL( ).getText.toLong )
+      Literal.literal( ruleContext.LONG_LITERAL( ).getText.dropRight(1).toLong )
     } else if (ruleContext.FLOAT_LITERAL( ) != null) {
-      Literal.literal( ruleContext.FLOAT_LITERAL( ).getText.toFloat )
+      Literal.literal( ruleContext.FLOAT_LITERAL( ).getText.dropRight(1).toFloat )
     } else {
-      Literal.literal( ruleContext.DOUBLE_LITERAL( ).getText.toDouble )
+      Literal.literal( ruleContext.DOUBLE_LITERAL( ).getText.dropRight(1).toDouble )
     }
   }
 

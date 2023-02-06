@@ -10,6 +10,20 @@ class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldS
                  val lambdaScopes: ArrayBuffer[BlockScope] = ArrayBuffer( ),
                  val childrenScopes: ArrayBuffer[BlockScope]) extends Scope {
 
+  override def toString: String = {
+    val fieldStr = if(fields.isEmpty) "" else "fields:\n  "+fields.toList.map(_._2.toString).mkString("\n")
+    val lambdaBlockStr = if(lambdaScopes.isEmpty) "" else "lambdaBlocks:\n  "+lambdaScopes.mkString("\n")
+    val childBlockStr = if(childrenScopes.isEmpty) "" else "childBlocks:\n  "+childrenScopes.mkString("\n")
+    s"""
+        BlockScope:
+        statements $statements
+        outerScopeIndex = $outerScopeIndex
+        $fieldStr
+        $lambdaBlockStr
+        $childBlockStr
+   """
+  }
+
   def this(outScopeIndex: Int, parentScope: Scope,topScope:Scope) {
     this( outScopeIndex, MutableMap( ), parentScope, topScope, childrenScopes = ArrayBuffer( ) )
   }
@@ -43,7 +57,7 @@ class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldS
     obj match {
       case blockScope: BlockScope ⇒
         fields.sameElements( blockScope.fields ) && childrenScopes.sameElements( blockScope.childrenScopes ) &&
-          outerScopeIndex == blockScope.outerScopeIndex &&
+          outerScopeIndex == blockScope.outerScopeIndex && lambdaScopes.sameElements(blockScope.lambdaScopes) &&
           statements == blockScope.statements
       case _ ⇒ false
     }

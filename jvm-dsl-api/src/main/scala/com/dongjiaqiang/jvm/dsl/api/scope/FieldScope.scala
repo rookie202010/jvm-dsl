@@ -39,6 +39,16 @@ class FieldScope(val outerScopeIndex:Int,
                  val programScope: ProgramScope,
                  val volatile:Boolean = false) extends Scope {
 
+  override def toString: String =
+    s"""
+        FieldScope:
+        statements $statements
+        outerScopeIndex = $outerScopeIndex
+        fieldName = $symbolName
+        fieldType = $dslType
+        volatile = $volatile
+      """
+
   override def getSymbolType(symbolName: String): scope.SymbolType.Value = {
     if (symbolName == this.symbolName) {
       SymbolType.FIELD

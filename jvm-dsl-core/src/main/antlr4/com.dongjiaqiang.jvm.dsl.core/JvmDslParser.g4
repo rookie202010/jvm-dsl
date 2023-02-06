@@ -53,10 +53,7 @@ statement   :   doWhileStatement # DoWhileExpr
 synchronizedStatement   :   SYNCHRONIZED    LPAREN  conditionalOrExpression  RPAREN  block
                         ;
 
-
-throwReturnOrSideEffectStatement  :   (THROW | RETURN)? expression  SEMI
-
-                ;
+throwReturnOrSideEffectStatement  :   (THROW | RETURN)? expression  SEMI;
 
 breakStatement  :   BREAK   SEMI;
 
@@ -73,8 +70,8 @@ tryStatement    :  TRY  block   catches
                 |  TRY  block   catches?    FINALLY block
                 ;
 
-catches :   catcheClause    catcheClause*   ;
-catcheClause :   CATCH   LPAREN  parameter   RPAREN block ;
+catches :   catchClause    catchClause*   ;
+catchClause :   CATCH   LPAREN  parameter   RPAREN block ;
 
 //while statement
 whileStatement   : WHILE LPAREN conditionalOrExpression RPAREN
@@ -90,10 +87,14 @@ forStatement :   FOR LPAREN  varDef   SEMI    conditionalOrExpression   SEMI   a
              |   FOR LPAREN  varDef   COMMA   varDef   COLON   literalAndCallChain RPAREN block # ForStatementThree
              ;
 
-ifStatement  :    IF LPAREN conditionalOrExpression RPAREN
+ifStatement  :    ifCondition
              block
-             (  ELSE   IF   LPAREN    conditionalOrExpression  RPAREN   block )*
-             (  ELSE    block   )   ?  ;
+             (    elseifCondition block )*
+             (    elseCondition    block   )   ?  ;
+
+ifCondition :     IF LPAREN conditionalOrExpression RPAREN   ;
+elseifCondition:    ELSE   IF   LPAREN    conditionalOrExpression  RPAREN   ;
+elseCondition: ELSE;
 
 expression  :   lambdaExpression
             |   matchCaseExpression
@@ -248,7 +249,7 @@ type    :   INT #   IntType
         |   CHAR    #   CharType
         |   VOID    #   VoidType
         |   LIST  LBRACK type    RBRACK #   ListType
-        |   SET   LBRACK type    RBRACE #   SetType
+        |   SET   LBRACK type    RBRACK #   SetType
         |   MAP   LBRACK type    COMMA  type  RBRACK    #   MapType
         |   LPAREN  type    (COMMA   type)+ RPAREN  #   TupleType
         |   OPTION    LBRACK type    RBRACK #   OptionType
@@ -259,7 +260,7 @@ type    :   INT #   IntType
         |   clazzType   #   ClassType
         ;
 
-clazzType   :   IDENTIFIER;
+clazzType   :   IDENTIFIER (DOT IDENTIFIER)*;
 
 varDef   :   parameter    (   ASSIGN expression  )?;
 

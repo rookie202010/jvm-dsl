@@ -13,10 +13,11 @@ object VarGenerator extends IExpressionGenerator[VariableContext, VarRef] {
   override def generate(exprContext: ExprContext, ruleContext: VariableContext): VarRef = {
     val variable = ruleContext.IDENTIFIER( ).map( _.getText ).toList
 
-    if(exprContext.getCurrentBlock.ignoreVarRefResolved){
+    if(exprContext.getCurrentBlock!=null && exprContext.getCurrentBlock.ignoreVarRefResolved){
         expression.VarRef(variable,None)
     }else {
-      exprContext.getContextScope.resolveVarRefs(exprContext.getCurrentExpressionIndex, variable) match {
+      (if(exprContext.getContextScope!=null) exprContext.getContextScope else exprContext.getProgramScope
+      ).resolveVarRefs(exprContext.getCurrentExpressionIndex, variable) match {
         case fieldScope: Some[FieldScope] ⇒ expression.VarRef(variable, fieldScope)
         case None ⇒
             throw ExpressionParserException(s"can't resolve ${variable.mkString(",")}")

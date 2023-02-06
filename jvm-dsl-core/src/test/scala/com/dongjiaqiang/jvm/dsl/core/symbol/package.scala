@@ -1,16 +1,16 @@
 package com.dongjiaqiang.jvm.dsl.core
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.DslType
-import com.dongjiaqiang.jvm.dsl.api.scope.{BlockScope, ClazzScope, FieldScope, MethodScope, ProgramScope, Scope}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DslType}
+import com.dongjiaqiang.jvm.dsl.api.scope._
 
 
 package object symbol {
 
     implicit class EnhanceProgramScope(programScope: ProgramScope){
 
-      def method(name:String, outerScopeIndex: Int, returnType: DslType, blockStatements:Int):MethodScope= {
+      def method(name:String, outerScopeIndex: Int, returnType: DslType, bodyStatements:Int):MethodScope= {
         val methodScope = new MethodScope(name, outerScopeIndex, programScope, returnType)
-        methodScope.addScope(new BlockScope(0, methodScope, methodScope.parentScope)).blockScope.incStatement(blockStatements)
+        methodScope.addScope(new BlockScope(0, methodScope, methodScope.parentScope)).blockScope.incStatement(bodyStatements)
         programScope.addScope(name, methodScope)
         methodScope
       }
@@ -25,25 +25,32 @@ package object symbol {
         clazzScope
       }
 
-      def statement(s:Int):ProgramScope={
+      def members(s:Int):ProgramScope={
         programScope.incStatement(s).asInstanceOf[ProgramScope]
+      }
+
+      def lambdaBlock(outerScopeIndex: Int, blockStatements: Int): BlockScope = {
+        val childBlockScope = new BlockScope( outerScopeIndex, programScope, programScope )
+        childBlockScope.incStatement( blockStatements )
+        programScope.lambdaScopes.append( childBlockScope )
+        childBlockScope
       }
     }
 
     implicit class EnhanceClazzScope(clazzScope: ClazzScope){
 
-      def statement(s:Int):ClazzScope={
+      def members(s:Int):ClazzScope={
         clazzScope.incStatement(s).asInstanceOf[ClazzScope]
       }
 
-      def method(name:String,outerScopeIndex: Int,returnType: DslType,blockStatements:Int):MethodScope={
+      def method(name:String, outerScopeIndex: Int, returnType: DslType, bodyStatements:Int):MethodScope={
         val methodScope = new MethodScope(name, outerScopeIndex, clazzScope, returnType)
-        methodScope.addScope(new BlockScope(0, methodScope, methodScope.parentScope)).blockScope.incStatement(blockStatements)
+        methodScope.addScope(new BlockScope(0, methodScope, methodScope.parentScope)).blockScope.incStatement(bodyStatements)
         clazzScope.addScope(name,methodScope)
         methodScope
       }
 
-      def field(name:String,outerScopeIndex: Int,dslType: DslType,programScope: ProgramScope):ClazzScope={
+      def field(name:String,outerScopeIndex: Int,dslType: DslType)(implicit programScope: ProgramScope):ClazzScope={
         clazzScope.addScope(name,new FieldScope(outerScopeIndex, name, dslType, clazzScope, programScope))
       }
     }
@@ -54,11 +61,16 @@ package object symbol {
         methodScope.blockScope
       }
 
-      def statement(s:Int):MethodScope={
+      def inputParams(s:Int):MethodScope={
         methodScope.incStatement(s).asInstanceOf[MethodScope]
       }
 
-      def field(name:String,outerScopeIndex: Int,dslType: DslType,programScope: ProgramScope): MethodScope = {
+      def throwEx(clazzTypes: ClazzType*):MethodScope={
+          methodScope.throws.appendAll(clazzTypes)
+          methodScope
+      }
+
+      def field(name:String,outerScopeIndex: Int,dslType: DslType)(implicit programScope: ProgramScope): MethodScope = {
         methodScope.addScope(name,new FieldScope(outerScopeIndex, name, dslType, methodScope, programScope))
       }
 
@@ -71,19 +83,45 @@ package object symbol {
       }
     }
 
+
+    implicit class EnhanceForBlockScope(blockScope: ForStatementBlockScope){
+
+      def iField(name:String,dslType: DslType)(implicit programScope: ProgramScope): ForStatementBlockScope={
+          blockScope.initFields.put(name,new FieldScope(0,name,dslType,blockScope,programScope))
+          blockScope
+      }
+    }
+
     implicit class EnhanceBlockScope(blockScope: BlockScope){
 
       def statement(s:Int):BlockScope={
         blockScope.incStatement(s).asInstanceOf[BlockScope]
       }
 
-      def field(name:String,outerScopeIndex: Int,dslType: DslType,programScope: ProgramScope): BlockScope = {
+      def field(name:String,outerScopeIndex: Int,dslType: DslType)(implicit programScope: ProgramScope): BlockScope = {
         blockScope.addScope(name,new FieldScope(outerScopeIndex, name, dslType, blockScope, programScope))
       }
 
-      def block(outerScopeIndex: Int,topScope:Scope):BlockScope={
-        val childBlockScope = new BlockScope(outerScopeIndex,blockScope,topScope)
+      def lambdaBlock(outerScopeIndex: Int,blockStatements:Int):BlockScope={
+        val childBlockScope = new BlockScope( outerScopeIndex, blockScope, blockScope.topScope )
+        childBlockScope.incStatement( blockStatements )
+        blockScope.lambdaScopes.append( childBlockScope )
+        childBlockScope
+      }
+
+      def block(outerScopeIndex: Int,blockStatements:Int):BlockScope={
+        val childBlockScope = new BlockScope(outerScopeIndex,blockScope,blockScope.topScope)
+        childBlockScope.incStatement(blockStatements)
         blockScope.addScope(childBlockScope)
+        childBlockScope
+      }
+
+      import scala.collection.mutable.{ListMap ⇒ MutableMap}
+
+      def forBlock(outerScopeIndex: Int,blockStatements:Int):ForStatementBlockScope={
+        val childBlockScope = new ForStatementBlockScope( outerScopeIndex,MutableMap(), blockScope, blockScope.topScope )
+        childBlockScope.incStatement( blockStatements )
+        blockScope.addScope( childBlockScope )
         childBlockScope
       }
 

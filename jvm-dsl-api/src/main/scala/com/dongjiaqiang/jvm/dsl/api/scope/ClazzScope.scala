@@ -7,6 +7,19 @@ import scala.collection.mutable.{ListMap ⇒ MutableMap}
 class ClazzScope(val outerScopeIndex: Int, val name: String,
                  val fields: MutableMap[String, FieldScope],
                  val methods: MutableMap[String, MethodScope]) extends Scope {
+
+  override def toString: String = {
+    val methodStr = if(methods.isEmpty) "" else "methods:\n  "+methods.toList.map(_._2.toString).mkString("\n")
+    val fieldStr = if(fields.isEmpty) "" else "fields:\n  "+fields.toList.map(_._2.toString).mkString("\n")
+    s"""
+        ClazzScope:
+        outerScopeIndex = $outerScopeIndex
+        clazzName = $name
+        $fieldStr
+        $methodStr
+    """
+  }
+
   def this(outScopeIndex: Int, name: String) {
     this( outScopeIndex, name, MutableMap( ), MutableMap( ) )
   }
@@ -71,5 +84,4 @@ class ClazzScope(val outerScopeIndex: Int, val name: String,
 
   override def resolveMethod(name: String): Option[MethodScope] = { methods.get(name)}
 
-  override def toString:String = s"ClazzScope($name)"
 }

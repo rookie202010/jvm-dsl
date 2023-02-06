@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
 import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaLocalVarDef, JavaTranslatorContext, JavaVarCall, JavaVarRef}
@@ -73,7 +73,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                  |""".stripMargin )
             expressions.head match {
               case Right( name ) ⇒
-                body.expressions.insert( 0, JavaLocalVarDef( name, new ClazzType( "Throwable", Array( ) ),
+                body.expressions.insert( 0, JavaLocalVarDef( name, ClazzType( "Throwable", Array( ) ),
                   Some( JavaVarCall( List( s"$matched" ), "getException", Array( ) ) ) ) )
             }
         }

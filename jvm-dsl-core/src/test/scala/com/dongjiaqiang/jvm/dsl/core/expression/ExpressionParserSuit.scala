@@ -47,7 +47,11 @@ class ExpressionParserSuit extends AnyFunSuite {
                   }
 
                   def foo2(String format,String str)=String{
-                            return format+","+str;
+                            try{
+                              return "1";
+                            }catch(Ex ex){
+                              return ex.a;
+                            }
                         }
 
                   def foo()=Int{
@@ -113,34 +117,45 @@ class ExpressionParserSuit extends AnyFunSuite {
 
 class A(Int a1,Int b1){}
 
-                  def xx()=Bool{
-                    return true;
+
+                  def xx(C c)=Bool{
+
+                    return ;
+
+                    return c.d.b.f.map(k=>{
+
+                    (Int,Long)=>Int lambda = (a,d)=>{ return k+d+a;};
+
+                    return lambda.apply(k,10L).toString();}).a.b.map(i=>{ return i+1;}).filter(j=>{ return j!=1;}).max()+10;
+
+
                   }
 
 
-                    def foo1(String=>String format,String str)=Any{
-
-                         Int x = str match{
-                          case ["dd",A(dd,[1,1,x])]=>{ return 1;}
-                          case Left(12)=>{ return 2;}
-                          case Array(1,2,None)=>{ return 3;}
-                          default => {
-
-                              Int d = 100;
-                              while(xx()){
-                                  d+=10;
-                              }
-
-                              str match {
-                                  case 10=>{ return 10;}
-                              }
-
-                              return d;
-                          }
-                        };
-
-
-                    }
+//                    def foo1(String=>String format,String str)=Any{
+//
+//                          C c;
+//                         Int x = str match{
+//                          case ["dd",A(dd,[1,1,x])]=>{ return 1;}
+//                          case Left(12)=>{ return 2;}
+//                          case Array(1,2,None)=>{ return 3;}
+//                          default => {
+//
+//                              Int d = 100;
+//                              while(xx(c)){
+//                                  d+=10;
+//                              }
+//
+//                              str match {
+//                                  case 10=>{ return 10;}
+//                              }
+//
+//                              return d;
+//                          }
+//                        };
+//
+//
+//                    }
 
                    }
           """
