@@ -2,13 +2,7 @@ package com.dongjiaqiang.jvm.dsl.core.symbol
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
-import com.dongjiaqiang.jvm.dsl.core.parser.SymbolDefParser
-import com.dongjiaqiang.jvm.dsl.core.{JvmDslLexer, JvmDslParserParser}
-import org.antlr.v4.runtime.tree.ParseTreeWalker
-import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import org.scalatest.funsuite.AnyFunSuite
-
-import java.io.StringReader
 
 
 class SymbolDefParserTestLambdaSuit extends AnyFunSuite{
@@ -31,10 +25,6 @@ class SymbolDefParserTestLambdaSuit extends AnyFunSuite{
 
           }
           """
-    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-    val symbolDefParser = new SymbolDefParser( )
-    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
     //define program
     implicit val programScope: ProgramScope = new ProgramScope( )
 
@@ -58,7 +48,7 @@ class SymbolDefParserTestLambdaSuit extends AnyFunSuite{
       "j",0,UnResolvedType
     )
 
-    assert(symbolDefParser.programScope == programScope)
+    assert(generateProgramScope(input) == programScope)
   }
 
   test("define two lambda field"){
@@ -85,10 +75,6 @@ class SymbolDefParserTestLambdaSuit extends AnyFunSuite{
                Int d = 100;
           }
           """
-    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-    val symbolDefParser = new SymbolDefParser( )
-    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
     //define program
     implicit val programScope: ProgramScope = new ProgramScope( )
 
@@ -124,7 +110,7 @@ class SymbolDefParserTestLambdaSuit extends AnyFunSuite{
       "d",3,IntType
     )
 
-    assert( symbolDefParser.programScope == programScope )
+    assert( generateProgramScope(input)== programScope )
 
   }
 
@@ -148,10 +134,6 @@ class SymbolDefParserTestLambdaSuit extends AnyFunSuite{
 
            }
            """
-    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-    val symbolDefParser = new SymbolDefParser( )
-    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
     //define program
     implicit val programScope: ProgramScope = new ProgramScope( )
 
@@ -169,7 +151,7 @@ class SymbolDefParserTestLambdaSuit extends AnyFunSuite{
       "applyLambda",3,StringType,1
     )
 
-    assert( symbolDefParser.programScope == programScope )
+    assert( generateProgramScope(input) == programScope )
   }
 
 }

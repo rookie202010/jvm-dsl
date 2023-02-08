@@ -283,7 +283,7 @@ funcCall   :        (variable DOT)? funcName LPAREN RPAREN #   VarCallNoArgs
                  ;
 
 
-funcDef :   DEF   funcName  parameters  ASSIGN type    throwDef?   block;
+funcDef :   SYNCHRONIZED? DEF   funcName  parameters  ASSIGN type    throwDef?   block;
 
 fieldDef    :   VOLATILE?   varDef ;
 
@@ -341,8 +341,8 @@ mapLiteral :   LBRACE (   literalAndCallChain    )    COLON    (   literalAndCal
 tupleLiteral   :   LPAREN literalAndCallChain  (COMMA    literalAndCallChain)+    RPAREN ;
 
 //class literal ex. new Foo(a,b)
-classLiteral    :  NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN literalAndCallChain   (COMMA    literalAndCallChain)*   RPAREN
-                |  NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN RPAREN
+classLiteral    : NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN RPAREN
+                | NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN literalAndCallChain   (COMMA    literalAndCallChain)*   RPAREN
                 ;
 
 //local variable ex. a, b,  c

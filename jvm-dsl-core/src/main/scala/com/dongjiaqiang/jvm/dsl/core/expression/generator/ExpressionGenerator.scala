@@ -4,9 +4,10 @@ import com.dongjiaqiang.jvm.dsl.api.expression.Expression
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.ExpressionContext
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
-object ExpressionGenerator extends IExpressionGenerator[ExpressionContext, Expression] {
+object ExpressionGenerator extends IExpressionGenerator[ExpressionContext, Expression,GeneratorContext] {
   override def generate(exprContext: ExprContext,
-                        ruleContext: ExpressionContext): Expression = {
+                        ruleContext: ExpressionContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     if (ruleContext.lambdaExpression( ) != null) {
       LambdaGenerator.generate( exprContext, ruleContext.lambdaExpression( ) )
     } else if (ruleContext.blockExpression( ) != null) {

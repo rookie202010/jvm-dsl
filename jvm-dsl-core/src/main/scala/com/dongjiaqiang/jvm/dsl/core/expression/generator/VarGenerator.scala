@@ -9,11 +9,12 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object VarGenerator extends IExpressionGenerator[VariableContext, VarRef] {
-  override def generate(exprContext: ExprContext, ruleContext: VariableContext): VarRef = {
+
+object VarGenerator extends IExpressionGenerator[VariableContext, VarRef,VarGeneratorContext] {
+  override def generate(exprContext: ExprContext, ruleContext: VariableContext,generatorContext: VarGeneratorContext = VarGeneratorContext(false)): VarRef = {
     val variable = ruleContext.IDENTIFIER( ).map( _.getText ).toList
 
-    if(exprContext.getCurrentBlock!=null && exprContext.getCurrentBlock.ignoreVarRefResolved){
+    if(generatorContext.ignoreVarRefResolved && exprContext.getCurrentBlock!=null && exprContext.getCurrentBlock.ignoreVarRefResolved){
         expression.VarRef(variable,None)
     }else {
       (if(exprContext.getContextScope!=null) exprContext.getContextScope else exprContext.getProgramScope

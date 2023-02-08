@@ -658,7 +658,7 @@ class MapLiteral(literal: Array[(Expression, Expression)],
     override def equals(obj: Any): Boolean = {
         obj match {
             case mapLiteral: MapLiteral ⇒
-                literal.sameElements( mapLiteral.literal ) && dslType == mapLiteral.dslType
+                literal.sameElements(mapLiteral.literal) && dslType == mapLiteral.dslType
             case _ ⇒ false
         }
     }

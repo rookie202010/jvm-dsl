@@ -129,7 +129,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
 
     val symbolName = ctx.funcName( ).getText
     currentScope.duplicateSymbol( symbolName )
-    val methodScope = new MethodScope( symbolName, currentScope.statements, currentScope, toDslType( ctx.`type`( ) ) )
+    val methodScope = new MethodScope( symbolName, currentScope.statements, currentScope, toDslType( ctx.`type`( ) ),ctx.SYNCHRONIZED()!=null )
     methodScope.addScope(new BlockScope( 0,methodScope,currentScope ))
 
     if(ctx.throwDef()!=null){
@@ -174,7 +174,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
 
-  private def enterContexts[T](contexts: List[T], producer: (T, Int, BlockScope) ⇒ FieldScope): Unit = {
+  private def enterContexts[T](contexts: List[T], producer: (T, Int, BlockScope) ⇒ FieldScope)(incStatement:Boolean = true): Unit = {
     val parent = if (stack.empty( )) {
       programScope
     } else {
@@ -189,7 +189,9 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
         blockScope.addScope( fieldScope.symbolName,
           fieldScope )
     }
-    blockScope.incStatement( contexts.size )
+    if(incStatement) {
+      blockScope.incStatement( contexts.size )
+    }
     stack.push( blockScope )
   }
 
@@ -197,7 +199,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   private def enterLambdaExpr(variableList: List[JvmDslParserParser.LocalVariableContext]): Unit = {
     enterContexts[JvmDslParserParser.LocalVariableContext]( variableList, (variable, _, blockScope) ⇒ {
       new FieldScope( 0, variable.IDENTIFIER( ).getText, UnResolvedType, blockScope, programScope, false )
-    } )
+    } )(incStatement = false)
   }
 
   override def enterParamsLambdaExpr(ctx: JvmDslParserParser.ParamsLambdaExprContext): Unit = {
@@ -239,7 +241,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   override def enterMatchCaseBlock(ctx: JvmDslParserParser.MatchCaseBlockContext): Unit = {
     val vars = matchCaseParser.poll( )
     enterContexts[(String, DslType)]( vars.toList, (v, _, blockScope) ⇒
-      new FieldScope( 0, v._1, v._2, blockScope, programScope, false ) )
+      new FieldScope( 0, v._1, v._2, blockScope, programScope, false ) )(incStatement = true)
   }
 
   override def exitMatchCaseBlock(ctx: JvmDslParserParser.MatchCaseBlockContext): Unit = {

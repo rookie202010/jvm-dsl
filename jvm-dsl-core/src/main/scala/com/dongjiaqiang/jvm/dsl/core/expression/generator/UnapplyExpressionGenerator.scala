@@ -8,9 +8,10 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object UnapplyExpressionGenerator extends IExpressionGenerator[UnapplyExpressionContext, Expression] {
+object UnapplyExpressionGenerator extends IExpressionGenerator[UnapplyExpressionContext, Expression,GeneratorContext] {
 
-  def generateExpr(exprContext: ExprContext, ruleContext: UnapplyExpressionContext): Either[Expression, String] = {
+  def generateExpr(exprContext: ExprContext,
+                   ruleContext: UnapplyExpressionContext): Either[Expression, String] = {
     ruleContext match {
       case c: UnapplyLiteralExprContext ⇒
         Left( BaseLiteralGenerator.generate( exprContext, c.baseLiteral( ) ) )
@@ -30,7 +31,9 @@ object UnapplyExpressionGenerator extends IExpressionGenerator[UnapplyExpression
     }
   }
 
-  override def generate(exprContext: ExprContext, ruleContext: UnapplyExpressionContext): Expression = {
+  override def generate(exprContext: ExprContext,
+                        ruleContext: UnapplyExpressionContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     generateExpr( exprContext, ruleContext ) match {
       case Left( expression ) ⇒ expression
       //todo

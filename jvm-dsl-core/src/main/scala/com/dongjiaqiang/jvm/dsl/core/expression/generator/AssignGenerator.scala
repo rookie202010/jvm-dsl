@@ -6,7 +6,7 @@ import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 
-object AssignGenerator extends IExpressionGenerator[AssignmentContext, Assign] {
+object AssignGenerator extends IExpressionGenerator[AssignmentContext, Assign,GeneratorContext] {
 
   def generate(varRef: VarRef,
                assignOperatorContext: AssignOperatorContext,
@@ -43,10 +43,12 @@ object AssignGenerator extends IExpressionGenerator[AssignmentContext, Assign] {
     }
   }
 
-  override def generate(exprContext: ExprContext, ruleContext: AssignmentContext): Assign = {
+  override def generate(exprContext: ExprContext,
+                        ruleContext: AssignmentContext,
+                        generatorContext: GeneratorContext=NoneGeneratorContext): Assign = {
     if (ruleContext.variable( ) != null) {
 
-      val variable = VarGenerator.generate( exprContext, ruleContext.variable( ) )
+      val variable = VarGenerator.generate( exprContext, ruleContext.variable( ),VarGeneratorContext(true) )
       generate( variable, ruleContext.assignOperator( ), exprContext, ruleContext )
 
     } else if (ruleContext.arrayVariable( ) != null) {

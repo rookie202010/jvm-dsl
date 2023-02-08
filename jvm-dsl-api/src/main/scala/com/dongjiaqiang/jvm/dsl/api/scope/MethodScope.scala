@@ -34,6 +34,7 @@ class MethodScope(val name: String,
                   val params: MutableMap[String, FieldScope],
                   val returnType: DslType,
                   val throws: ArrayBuffer[ClazzType],
+                  val sync:Boolean,
                   val parentScope: Scope,
                   var blockScope: BlockScope) extends Scope {
 
@@ -50,8 +51,8 @@ class MethodScope(val name: String,
         body = $blockScope
       """
 
-  def this(name: String, outerScopeIndex: Int, parentScope: Scope, returnType: DslType) {
-    this( name, outerScopeIndex, MutableMap( ), returnType, ArrayBuffer( ), parentScope, null )
+  def this(name: String, outerScopeIndex: Int, parentScope: Scope, returnType: DslType,sync:Boolean) {
+    this( name, outerScopeIndex, MutableMap( ), returnType, ArrayBuffer( ),sync, parentScope, null )
   }
 
   override def addScope(symbolName: String, fieldScope: FieldScope): MethodScope = {
@@ -90,6 +91,7 @@ class MethodScope(val name: String,
           blockScope == methodScope.blockScope &&
           outerScopeIndex == methodScope.outerScopeIndex &&
           statements == methodScope.statements
+          sync == methodScope.sync
       case _ ⇒ false
     }
 
