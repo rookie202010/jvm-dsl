@@ -2,13 +2,7 @@ package com.dongjiaqiang.jvm.dsl.core.symbol
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
-import com.dongjiaqiang.jvm.dsl.core.parser.SymbolDefParser
-import com.dongjiaqiang.jvm.dsl.core.{JvmDslLexer, JvmDslParserParser}
-import org.antlr.v4.runtime.tree.ParseTreeWalker
-import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import org.scalatest.funsuite.AnyFunSuite
-
-import java.io.StringReader
 
 
 class SymbolDefParserTestBlockExprSuit extends AnyFunSuite{
@@ -38,10 +32,6 @@ class SymbolDefParserTestBlockExprSuit extends AnyFunSuite{
         |                 };
         |          }
         |       }""".stripMargin
-    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-    val symbolDefParser = new SymbolDefParser( )
-    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
     //define program
     implicit val programScope: ProgramScope = new ProgramScope( )
 
@@ -75,7 +65,7 @@ class SymbolDefParserTestBlockExprSuit extends AnyFunSuite{
       2,1
     )
 
-    assert(programScope==symbolDefParser.programScope)
+    assert(programScope==generateProgramScope(input))
   }
 
   test("define async block"){
@@ -105,11 +95,6 @@ class SymbolDefParserTestBlockExprSuit extends AnyFunSuite{
           |          }
           |       }
           """.stripMargin
-
-    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-    val symbolDefParser = new SymbolDefParser( )
-    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
     //define program
     implicit val programScope: ProgramScope = new ProgramScope( )
 
@@ -138,12 +123,12 @@ class SymbolDefParserTestBlockExprSuit extends AnyFunSuite{
     ) field(
       "lambda",0,LambdaType(Some(IntType),IntType)
     ) lambdaBlock(
-      0,2
+      0,1
     ) field(
       "i",0,UnResolvedType
     )
 
-    assert(programScope==symbolDefParser.programScope)
+    assert(programScope==generateProgramScope(input))
   }
 
   test( "define custom block" ) {
@@ -164,13 +149,8 @@ class SymbolDefParserTestBlockExprSuit extends AnyFunSuite{
         |
         |}
         |""".stripMargin
-    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
-    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
-    val symbolDefParser = new SymbolDefParser( )
-    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
     //define program
     implicit val programScope: ProgramScope = new ProgramScope( )
-
 
     programScope members 1 method(
       "json",0,ClazzType("Json"),2
@@ -180,7 +160,7 @@ class SymbolDefParserTestBlockExprSuit extends AnyFunSuite{
       0,2
     )
 
-    assert( symbolDefParser.programScope == programScope )
+    assert( generateProgramScope(input) == programScope )
   }
 
 }

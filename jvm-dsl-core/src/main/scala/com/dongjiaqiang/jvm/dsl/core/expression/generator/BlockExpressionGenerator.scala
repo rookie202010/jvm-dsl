@@ -8,9 +8,11 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionContext, Expression] {
+object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionContext, Expression,GeneratorContext] {
 
-  override def generate(exprContext: ExprContext, ruleContext: BlockExpressionContext): Expression = {
+  override def generate(exprContext: ExprContext,
+                        ruleContext: BlockExpressionContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     if (ruleContext.IDENTIFIER( ) == null) {
       return UnitLiteral
     }

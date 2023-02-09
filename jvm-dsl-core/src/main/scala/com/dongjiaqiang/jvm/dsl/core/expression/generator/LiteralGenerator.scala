@@ -10,7 +10,7 @@ import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 import scala.collection.convert.ImplicitConversionsToScala._
 
 
-object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression] {
+object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression,GeneratorContext] {
 
   def expression(exprContext: ExprContext,
                  r: LiteralAndCallChainContext): Expression = {
@@ -22,7 +22,9 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression]
     }
   }
 
-  override def generate(exprContext: ExprContext, ruleContext: LiteralContext): Expression = {
+  override def generate(exprContext: ExprContext,
+                        ruleContext: LiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     if (ruleContext.baseLiteral( ) != null) {
       BaseLiteralGenerator.generate( exprContext, ruleContext.baseLiteral( ) )
     } else if (ruleContext.classLiteral( ) != null) {
@@ -53,9 +55,10 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression]
   }
 }
 
-object ClassLiteralGenerator extends IExpressionGenerator[ClassLiteralContext,ClazzLiteral]{
+object ClassLiteralGenerator extends IExpressionGenerator[ClassLiteralContext,ClazzLiteral,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: ClassLiteralContext): ClazzLiteral = {
+                        ruleContext: ClassLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): ClazzLiteral = {
     val clazzName = ruleContext.clazzType( ).getText
     val valueTypes = ruleContext.`type`( ).map( toDslType ).toArray
     val clazzType = ClazzType( clazzName, valueTypes )
@@ -66,17 +69,20 @@ object ClassLiteralGenerator extends IExpressionGenerator[ClassLiteralContext,Cl
   }
 }
 
-object OptionLiteralGenerator extends IExpressionGenerator[OptionalLiteralContext,OptionLiteral] {
-  override def generate(exprContext: ExprContext, ruleContext: OptionalLiteralContext): OptionLiteral = {
+object OptionLiteralGenerator extends IExpressionGenerator[OptionalLiteralContext,OptionLiteral,GeneratorContext] {
+  override def generate(exprContext: ExprContext,
+                        ruleContext: OptionalLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): OptionLiteral = {
     val expression = LiteralGenerator.expression( exprContext,
       ruleContext.literalAndCallChain( ) )
     new OptionLiteral( expression, OptionType( UnResolvedType ) )
   }
 }
 
-object ListLiteralGenerator extends IExpressionGenerator[ListLiteralContext,ListLiteral]{
+object ListLiteralGenerator extends IExpressionGenerator[ListLiteralContext,ListLiteral,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: ListLiteralContext): ListLiteral = {
+                        ruleContext: ListLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): ListLiteral = {
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
@@ -84,8 +90,10 @@ object ListLiteralGenerator extends IExpressionGenerator[ListLiteralContext,List
   }
 }
 
-object SetLiteralGenerator extends IExpressionGenerator[SetLiteralContext,SetLiteral]{
-  override def generate(exprContext: ExprContext, ruleContext: SetLiteralContext): SetLiteral = {
+object SetLiteralGenerator extends IExpressionGenerator[SetLiteralContext,SetLiteral,GeneratorContext]{
+  override def generate(exprContext: ExprContext,
+                        ruleContext: SetLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): SetLiteral = {
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
@@ -93,8 +101,10 @@ object SetLiteralGenerator extends IExpressionGenerator[SetLiteralContext,SetLit
   }
 }
 
-object TupleLiteralGenerator extends IExpressionGenerator[TupleLiteralContext,TupleLiteral]{
-  override def generate(exprContext: ExprContext, ruleContext: TupleLiteralContext): TupleLiteral = {
+object TupleLiteralGenerator extends IExpressionGenerator[TupleLiteralContext,TupleLiteral,GeneratorContext]{
+  override def generate(exprContext: ExprContext,
+                        ruleContext: TupleLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): TupleLiteral = {
     val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
@@ -102,8 +112,10 @@ object TupleLiteralGenerator extends IExpressionGenerator[TupleLiteralContext,Tu
   }
 }
 
-object MapLiteralGenerator extends IExpressionGenerator[MapLiteralContext,MapLiteral]{
-  override def generate(exprContext: ExprContext, ruleContext: MapLiteralContext): MapLiteral = {
+object MapLiteralGenerator extends IExpressionGenerator[MapLiteralContext,MapLiteral,GeneratorContext]{
+  override def generate(exprContext: ExprContext,
+                        ruleContext: MapLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): MapLiteral = {
     val expressions = ruleContext.literalAndCallChain( ).grouped( 2 ).map( kv ⇒ {
       (LiteralGenerator.expression( exprContext, kv.head ),
         LiteralGenerator.expression( exprContext, kv.last ))
@@ -112,8 +124,10 @@ object MapLiteralGenerator extends IExpressionGenerator[MapLiteralContext,MapLit
   }
 }
 
-object BaseLiteralGenerator extends IExpressionGenerator[BaseLiteralContext,Expression] {
-  override def generate(exprContext: ExprContext, ruleContext: BaseLiteralContext): Expression = {
+object BaseLiteralGenerator extends IExpressionGenerator[BaseLiteralContext,Expression,GeneratorContext] {
+  override def generate(exprContext: ExprContext,
+                        ruleContext: BaseLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     if (ruleContext.numberLiteral( ) != null) {
       NumberLiteralGenerator.generate( exprContext, ruleContext.numberLiteral( ) )
     } else if (ruleContext.BOOL_LITERAL( ) != null) {
@@ -133,8 +147,10 @@ object BaseLiteralGenerator extends IExpressionGenerator[BaseLiteralContext,Expr
   }
 }
 
-object NumberLiteralGenerator extends IExpressionGenerator[NumberLiteralContext,Expression]{
-  override def generate(exprContext: ExprContext, ruleContext: NumberLiteralContext): Expression = {
+object NumberLiteralGenerator extends IExpressionGenerator[NumberLiteralContext,Expression,GeneratorContext]{
+  override def generate(exprContext: ExprContext,
+                        ruleContext: NumberLiteralContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     if (ruleContext.INT_LITERAL( ) != null) {
       Literal.literal( ruleContext.INT_LITERAL( ).getText.toInt )
     } else if (ruleContext.LONG_LITERAL( ) != null) {

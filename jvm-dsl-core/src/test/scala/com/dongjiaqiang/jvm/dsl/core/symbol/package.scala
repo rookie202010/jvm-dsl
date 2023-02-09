@@ -2,14 +2,30 @@ package com.dongjiaqiang.jvm.dsl.core
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DslType}
 import com.dongjiaqiang.jvm.dsl.api.scope._
+import com.dongjiaqiang.jvm.dsl.core.parser.SymbolDefParser
+import org.antlr.v4.runtime.tree.ParseTreeWalker
+import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
+
+import java.io.StringReader
 
 
 package object symbol {
 
+
+    def generateProgramScope(input:String):ProgramScope={
+
+      val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
+      val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
+      val symbolDefParser = new SymbolDefParser( )
+      ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
+      symbolDefParser.programScope
+
+    }
+
     implicit class EnhanceProgramScope(programScope: ProgramScope){
 
-      def method(name:String, outerScopeIndex: Int, returnType: DslType, bodyStatements:Int):MethodScope= {
-        val methodScope = new MethodScope(name, outerScopeIndex, programScope, returnType)
+      def method(name:String, outerScopeIndex: Int, returnType: DslType, bodyStatements:Int,sync:Boolean=false):MethodScope= {
+        val methodScope = new MethodScope(name, outerScopeIndex,programScope, returnType,sync)
         methodScope.addScope(new BlockScope(0, methodScope, methodScope.parentScope)).blockScope.incStatement(bodyStatements)
         programScope.addScope(name, methodScope)
         methodScope
@@ -43,8 +59,8 @@ package object symbol {
         clazzScope.incStatement(s).asInstanceOf[ClazzScope]
       }
 
-      def method(name:String, outerScopeIndex: Int, returnType: DslType, bodyStatements:Int):MethodScope={
-        val methodScope = new MethodScope(name, outerScopeIndex, clazzScope, returnType)
+      def method(name:String, outerScopeIndex: Int, returnType: DslType, bodyStatements:Int,sync:Boolean=false):MethodScope={
+        val methodScope = new MethodScope(name, outerScopeIndex, clazzScope, returnType,sync)
         methodScope.addScope(new BlockScope(0, methodScope, methodScope.parentScope)).blockScope.incStatement(bodyStatements)
         clazzScope.addScope(name,methodScope)
         methodScope

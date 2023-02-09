@@ -7,9 +7,11 @@ import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpressionContext, Expression] {
+object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpressionContext, Expression,GeneratorContext] {
 
-  override def generate(exprContext: ExprContext, ruleContext: MatchCaseExpressionContext): Expression = {
+  override def generate(exprContext: ExprContext,
+                        ruleContext: MatchCaseExpressionContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     val fieldScope = exprContext.getContextScope.resolveVarRefs( exprContext.getCurrentExpressionIndex,
       List( ruleContext.localVariable( ).IDENTIFIER( ).getText ) )
 

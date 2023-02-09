@@ -6,10 +6,11 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object LambdaGenerator extends IExpressionGenerator[LambdaExpressionContext, Expression] {
+object LambdaGenerator extends IExpressionGenerator[LambdaExpressionContext, Expression,GeneratorContext] {
 
   override def generate(exprContext: ExprContext,
-                        ruleContext: LambdaExpressionContext): Expression = {
+                        ruleContext: LambdaExpressionContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     ruleContext match {
       case c: NoParamLambdaExprContext ⇒
         Lambda( Array( ), LambdaBlockGenerator.generate( exprContext, c.lambdaBlock( ) ) )

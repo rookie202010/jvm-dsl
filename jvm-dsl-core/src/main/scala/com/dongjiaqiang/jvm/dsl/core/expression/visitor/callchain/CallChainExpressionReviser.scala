@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain
 
 import com.dongjiaqiang.jvm.dsl.api.expression
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.callchain.CallChainExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 
@@ -56,7 +56,7 @@ trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression] 
           }
         case staticCall: StaticCall⇒
           if(reviseTails.isDefined || params.isDefined) {
-            expression.FuncCallChain( new StaticCall( staticCall.`type`, staticCall.name,
+            expression.FuncCallChain( StaticCall( staticCall.`type`, staticCall.name,
               params.getOrElse( staticCall.params ) ), reviseTails.getOrElse( funcCallChain.tails ) )
           }else{
             funcCallChain

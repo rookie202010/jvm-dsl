@@ -8,9 +8,11 @@ import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContext, Expression] {
+object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContext, Expression,GeneratorContext] {
 
-  def partExpression(partContext: PartContext, expressionContext: ExprContext): Part = {
+  def partExpression(partContext: PartContext,
+                     expressionContext: ExprContext,
+                     generatorContext: GeneratorContext = NoneGeneratorContext): Part = {
     if (partContext.variable( ) != null) {
       VarName( partContext.variable( ).IDENTIFIER( ).map( _.getText ).mkString( "." ) )
     } else {
@@ -76,7 +78,8 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
 
 
   override def generate(exprContext: ExprContext,
-                        ruleContext: LiteralAndCallChainContext): Expression = {
+                        ruleContext: LiteralAndCallChainContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     ruleContext match {
       case c: LiteralExprContext ⇒
         LiteralGenerator.generate( exprContext, c.literal( ) )
@@ -136,9 +139,10 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
 }
 
 
-object FuncCall extends IExpressionGenerator[FuncCallContext,FuncCall]{
+object FuncCall extends IExpressionGenerator[FuncCallContext,FuncCall,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: FuncCallContext): FuncCall = {
+                        ruleContext: FuncCallContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): FuncCall = {
     ruleContext match {
       case c: VarCallNoArgsContext ⇒
         VarCallNoArgs.generate( exprContext, c )
@@ -156,18 +160,20 @@ object FuncCall extends IExpressionGenerator[FuncCallContext,FuncCall]{
   }
 }
 
-object VarCallNoArgs extends IExpressionGenerator[VarCallNoArgsContext,FuncCall]{
+object VarCallNoArgs extends IExpressionGenerator[VarCallNoArgsContext,FuncCall,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: VarCallNoArgsContext): FuncCall = {
+                        ruleContext: VarCallNoArgsContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): FuncCall = {
     CallChainGenerator
       .generator( exprContext,
         ruleContext.funcName( ).IDENTIFIER( ).getText, ruleContext.variable( ), List( ) )
   }
 }
 
-object VarCallArgs extends IExpressionGenerator[VarCallArgsContext,FuncCall]{
+object VarCallArgs extends IExpressionGenerator[VarCallArgsContext,FuncCall,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: VarCallArgsContext): FuncCall = {
+                        ruleContext: VarCallArgsContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): FuncCall = {
     CallChainGenerator
       .generator( exprContext,
         ruleContext.funcName( ).IDENTIFIER( ).getText, ruleContext.variable( ),
@@ -175,33 +181,37 @@ object VarCallArgs extends IExpressionGenerator[VarCallArgsContext,FuncCall]{
   }
 }
 
-object TypeCallNoArgs extends IExpressionGenerator[TypeCallNoArgsContext,FuncCall]{
+object TypeCallNoArgs extends IExpressionGenerator[TypeCallNoArgsContext,FuncCall,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: TypeCallNoArgsContext): FuncCall = {
+                        ruleContext: TypeCallNoArgsContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): FuncCall = {
     CallChainGenerator.generator( exprContext, ruleContext.funcName( ).IDENTIFIER( ).getText,
       ruleContext.`type`( ), List( ) )
   }
 }
 
-object TypeCallArgs extends IExpressionGenerator[TypeCallArgsContext,FuncCall] {
+object TypeCallArgs extends IExpressionGenerator[TypeCallArgsContext,FuncCall,GeneratorContext] {
   override def generate(exprContext: ExprContext,
-                        ruleContext: TypeCallArgsContext): FuncCall = {
+                        ruleContext: TypeCallArgsContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): FuncCall = {
     CallChainGenerator.generator( exprContext, ruleContext.funcName( ).IDENTIFIER( ).getText,
       ruleContext.`type`( ), ruleContext.expression( ).toList )
   }
 }
 
-object LiteralCallNoArgs extends IExpressionGenerator[LiteralCallNoArgsContext,FuncCall]{
+object LiteralCallNoArgs extends IExpressionGenerator[LiteralCallNoArgsContext,FuncCall,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: LiteralCallNoArgsContext): FuncCall = {
+                        ruleContext: LiteralCallNoArgsContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): FuncCall = {
     CallChainGenerator.generator( exprContext, ruleContext.funcName( ).IDENTIFIER( ).getText,
       ruleContext.literal( ), List( ) )
   }
 }
 
-object LiteralCallArgs extends IExpressionGenerator[LiteralCallArgsContext,FuncCall]{
+object LiteralCallArgs extends IExpressionGenerator[LiteralCallArgsContext,FuncCall,GeneratorContext]{
   override def generate(exprContext: ExprContext,
-                        ruleContext: LiteralCallArgsContext): FuncCall = {
+                        ruleContext: LiteralCallArgsContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): FuncCall = {
     CallChainGenerator.generator( exprContext, ruleContext.funcName( ).IDENTIFIER( ).getText,
       ruleContext.literal( ), ruleContext.expression( ).toList )
   }

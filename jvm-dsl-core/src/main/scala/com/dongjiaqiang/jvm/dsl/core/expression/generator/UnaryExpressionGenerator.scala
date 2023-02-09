@@ -5,10 +5,11 @@ import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
-object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionContext,Expression]{
+object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionContext,Expression,GeneratorContext]{
 
   override def generate(exprContext: ExprContext,
-                        ruleContext: UnaryExpressionContext): Expression = {
+                        ruleContext: UnaryExpressionContext,
+                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     ruleContext match {
       case c: CastExprContext ⇒
         val dslType = toDslType( c.`type`( ) )
