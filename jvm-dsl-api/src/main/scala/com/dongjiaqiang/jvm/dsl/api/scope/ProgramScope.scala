@@ -79,8 +79,8 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
   /**
    * resolve var refs in program (defined fields)
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
-    scope.resolveVarRefs(index,refs,this, fields,skipCurrentScope = false,backRef = true,None)
+  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope] = {
+    scope.resolveVarRefs(index,refs,arrayRefsIndex,this, fields,skipCurrentScope = false,backRef = true,None)
   }
 
   /**

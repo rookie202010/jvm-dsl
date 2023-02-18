@@ -1,9 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.block
 
 import com.dongjiaqiang.jvm.dsl.api.expression
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
@@ -11,7 +11,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
                      visitor: ExpressionVisitor[Expression]): Block = {
     val expressions = ExpressionReviser.revise[Expression, Expression]( block.expressions.toArray, visitor )
     if (expressions.isDefined) {
-      val newBlock = new Block( )
+      val newBlock = Block( )
       expressions.get.foreach( e ⇒ newBlock.expressions.append( e ) )
       newBlock
     } else {

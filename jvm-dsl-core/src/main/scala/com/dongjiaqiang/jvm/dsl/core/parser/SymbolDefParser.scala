@@ -343,7 +343,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
 
-  override def enterThrowReturnOrSideEffectStatement(ctx: JvmDslParserParser.ThrowReturnOrSideEffectStatementContext): Unit = {
+  override def enterThrowOrReturnSideEffectExpr(ctx: JvmDslParserParser.ThrowOrReturnSideEffectExprContext): Unit = {
     stack.incStatement()
   }
 

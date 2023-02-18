@@ -1,8 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
 
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.statement.StatementExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression._
 
 
 trait StatementExpressionReviser extends StatementExpressionVisitor[Expression] {
@@ -34,7 +34,7 @@ trait StatementExpressionReviser extends StatementExpressionVisitor[Expression] 
   }
 
   override def visit(returnExpr: Return, visitor: ExpressionVisitor[Expression]): Expression={
-    val newExpr = visitor.visit(returnExpr.expression)
+    val newExpr = returnExpr.expression.map(visitor.visit)
     if(newExpr!=returnExpr.expression){
         Return(newExpr)
     }else{

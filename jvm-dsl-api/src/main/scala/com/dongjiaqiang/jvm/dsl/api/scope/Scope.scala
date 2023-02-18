@@ -23,9 +23,10 @@ trait Scope {
    * resolve ref in current or outer scope
    *
    * @param index ref index
+   * @param arrayRefsIndex array refs index
    * @param refs  ref names
    */
-  def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope]
+  def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope]
 
   /**
    * resolve method in current scope

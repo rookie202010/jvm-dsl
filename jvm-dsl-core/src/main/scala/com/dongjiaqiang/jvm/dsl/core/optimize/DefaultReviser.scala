@@ -10,6 +10,13 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks
 
 class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
+
+  def revise(oldExpressions:ArrayBuffer[Expression]):ArrayBuffer[Expression]={
+    val newExpression = ArrayBuffer[Expression]( )
+    revise(oldExpressions.clone(), newExpression )
+    newExpression
+  }
+
   def revise(oldExpressions: ArrayBuffer[Expression], newExpressions: ArrayBuffer[Expression]): Unit = {
     if (oldExpressions.isEmpty) {
       return
@@ -18,40 +25,50 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
     expression match {
       case whileCondition: WhileCondition ⇒
         val block = oldExpressions.remove( 0 ).asInstanceOf[WhileBlock]
-        newExpressions.append( While( whileCondition.expression, new Block( block.expressions ) ) )
+        newExpressions.append( While( whileCondition.expression, Block( revise(block.expressions) ) ) )
       case doWhileBlock: DoWhileBlock ⇒
         val condition = oldExpressions.remove( 0 ).asInstanceOf[DoWhileCondition]
-        newExpressions.append( DoWhile( condition.expression, new Block( doWhileBlock.expressions ) ) )
+        newExpressions.append( DoWhile( condition.expression, Block( revise(doWhileBlock.expressions) ) ) )
       case forLoop: ForLoop ⇒
         newExpressions.append( For( forLoop.loopVarDef, forLoop.loopVarCondition,
-          forLoop.loopVarUpdate, new Block( forLoop.expressions ) ) )
+          forLoop.loopVarUpdate, Block( revise(forLoop.expressions) ) ) )
       case forLoopCollection: ForLoopCollection ⇒
         newExpressions.append( ForCollection( forLoopCollection.localVarDef,
-          forLoopCollection.looped, new Block( forLoopCollection.expressions ) ) )
+          forLoopCollection.looped, Block( revise(forLoopCollection.expressions) ) ) )
       case forLoopMap: ForLoopMap ⇒
-        newExpressions.append( ForMap( forLoopMap.loopKeyDef, forLoopMap.loopValueDef, forLoopMap.looped, new Block( forLoopMap.expressions ) ) )
+        newExpressions.append( ForMap( forLoopMap.loopKeyDef, forLoopMap.loopValueDef, forLoopMap.looped,
+          Block( revise(forLoopMap.expressions) ) ) )
       case syncCondition: SyncCondition ⇒
         val block = oldExpressions.remove( 0 ).asInstanceOf[SyncBlock]
-        newExpressions.append( Sync( syncCondition.expression, new Block( block.expressions ) ) )
+        newExpressions.append( Sync( syncCondition.expression, Block( revise(block.expressions) ) ) )
       case ifCondition: IfCondition ⇒
         val cases = ArrayBuffer[(Expression, Block)]( )
-        cases.append( (ifCondition.expression, new Block( oldExpressions.remove( 0 ).asInstanceOf[IfBlock].expressions )) )
+        cases.append( (ifCondition.expression, Block( revise(oldExpressions.remove( 0 ).asInstanceOf[IfBlock].expressions) )) )
 
-        Breaks.breakable {
-          while (oldExpressions.nonEmpty) {
-            val nextExpression = oldExpressions( 0 )
-            nextExpression match {
-              case ifBlock: IfBlock ⇒
-                newExpressions.append( If( cases.toArray, Some( new Block( ifBlock.expressions ) ) ) )
-                oldExpressions.remove( 0 )
-                Breaks.break( )
-              case ifCondition: IfCondition ⇒
-                val block = oldExpressions( 1 ).asInstanceOf[IfBlock]
-                cases.append( (ifCondition.expression, new Block( block.expressions )) )
-                oldExpressions.remove( 0, 2 )
-              case _ ⇒
-                newExpressions.append( If( cases.toArray, None ) )
-                Breaks.break( )
+        if(oldExpressions.isEmpty){
+          newExpressions.append( If( cases.toArray, None ) )
+        }else {
+          Breaks.breakable {
+            while (oldExpressions.nonEmpty) {
+              val nextExpression = oldExpressions( 0 )
+              nextExpression match {
+                case ifBlock: IfBlock ⇒
+                  newExpressions.append( If( cases.toArray, Some( Block( revise( ifBlock.expressions ) ) ) ) )
+                  oldExpressions.remove( 0 )
+                  Breaks.break( )
+                case ifCondition: IfCondition ⇒
+                  val block = oldExpressions( 1 ).asInstanceOf[IfBlock]
+                  cases.append( (ifCondition.expression, Block( revise( block.expressions ) )) )
+                  oldExpressions.remove( 0, 2 )
+
+                  if (oldExpressions.isEmpty) {
+                    newExpressions.append( If( cases.toArray, None ) )
+                  }
+
+                case _ ⇒
+                  newExpressions.append( If( cases.toArray, None ) )
+                  Breaks.break( )
+              }
             }
           }
         }
@@ -63,15 +80,18 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
             val nextExpression = oldExpressions( 0 )
             nextExpression match {
               case finallyBlock: FinallyBlock ⇒
-                newExpressions.append( TryCatch( new Block( tryBlock.expressions ), catches.toArray, Some( new Block( finallyBlock.expressions ) ) ) )
+                newExpressions.append( TryCatch( Block( revise(tryBlock.expressions) ), catches.toArray, Some( Block( revise(finallyBlock.expressions ) ) ) ))
                 oldExpressions.remove( 0 )
                 Breaks.break( )
               case catchParameter: CatchParameter ⇒
                 val block = oldExpressions( 1 ).asInstanceOf[CatchBlock]
-                catches.append( ((catchParameter.name, catchParameter.dslType), new Block( block.expressions )) )
+                catches.append( ((catchParameter.name, catchParameter.dslType), Block( revise(block.expressions) )) )
                 oldExpressions.remove( 0, 2 )
+                if(oldExpressions.isEmpty){
+                  newExpressions.append( TryCatch( Block( revise(tryBlock.expressions) ), catches.toArray, None ) )
+                }
               case _ ⇒
-                newExpressions.append( TryCatch( new Block( tryBlock.expressions ), catches.toArray, None ) )
+                newExpressions.append( TryCatch( Block( revise(tryBlock.expressions) ), catches.toArray, None ) )
                 Breaks.break( )
             }
           }
@@ -92,9 +112,7 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
         expr.isInstanceOf[IfCondition] ||
         expr.isInstanceOf[TryBlock]
     } )) {
-      val newExpression = ArrayBuffer[Expression]( )
-      revise( block.expressions.clone( ), newExpression )
-      super.visit( new Block( newExpression ), visitor )
+      super.visit( Block( revise(block.expressions.clone()) ), visitor )
     } else {
       super.visit( block, visitor )
     }
@@ -130,19 +148,19 @@ class DefaultReviser(val programScope: ProgramScope) extends ExpressionReviser {
         clazzType.clazzName match {
           //EitherType
           case "Left" ⇒
-            new LeftType( UnResolvedType )
+            LeftType( UnResolvedType )
           case "Right" ⇒
-            new RightType( UnResolvedType )
+            RightType( UnResolvedType )
 
           //TryType
           case "Success" ⇒
-            new SuccessType( UnResolvedType )
+            SuccessType( UnResolvedType )
           case "Failure" ⇒
             FailureType
 
           //OptionType
           case "Some" ⇒
-            new SomeType( UnResolvedType )
+            SomeType( UnResolvedType )
 
           case _ ⇒
             clazzType

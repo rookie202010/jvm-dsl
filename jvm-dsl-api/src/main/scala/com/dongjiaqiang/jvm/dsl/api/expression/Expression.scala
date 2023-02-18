@@ -6,9 +6,8 @@ import com.dongjiaqiang.jvm.dsl.api.expression.expression.getString
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.scope.{FieldScope, MethodScope, ProgramScope, ResolveField}
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 import scala.language.{existentials, postfixOps}
-
 
 trait Expression {
     def visit[T](expressionVisitor: ExpressionVisitor[T]): T = {
@@ -72,15 +71,41 @@ case class LocalVarDef(fieldScope: FieldScope, dslType: DslType, assigned: Optio
  *      }
  * }<pre><code>
  */
-case class VarRef(name: List[String], fieldScope: Option[FieldScope]) extends Expression {
-    override def toString: String = s"${name.mkString( "." )}"
+
+
+case class VarRef(refs: List[String], arrayRefIndexExpressions:MutableMap[Int,List[Expression]], fieldScope: Option[FieldScope]) extends Expression  with Part {
+    override def toString: String = refs.zipWithIndex.map{
+            case (n,index)⇒
+                if(arrayRefIndexExpressions.contains(index)){
+                    arrayRefIndexExpressions(index).map(expr⇒s"[${expr}]").mkString(s"$n","","")
+                }else{
+                    n
+                }
+        }.mkString(".")
 
     override def equals(obj: Any): Boolean = {
         obj match {
             case varRef: VarRef ⇒
-                varRef.name == name && varRef.fieldScope == fieldScope
+                varRef.refs == refs &&
+                  varRef.fieldScope == fieldScope &&
+                  varRef.arrayRefIndexExpressions == arrayRefIndexExpressions
             case _ ⇒ false
         }
+    }
+
+    def merge(varRefs:List[VarRef]):VarRef={
+        val mergeRefs = ArrayBuffer[String](refs:_*)
+        val mergeArrayRefIndexExpressions = MutableMap[Int,List[Expression]](arrayRefIndexExpressions.toArray:_*)
+
+        varRefs.zipWithIndex.foreach{
+            case (varRef,_)⇒
+                varRef.arrayRefIndexExpressions.foreach{
+                    case (arrayIndex,expression)⇒
+                            mergeArrayRefIndexExpressions.put(arrayIndex+mergeRefs.size,expression)
+                }
+                mergeRefs.appendAll(varRef.refs)
+        }
+        VarRef(mergeRefs.toList,mergeArrayRefIndexExpressions,fieldScope)
     }
 
     def getDslType(refs:List[String],clazzType: ClazzType,programScope:ProgramScope):DslType={
@@ -101,7 +126,7 @@ case class VarRef(name: List[String], fieldScope: Option[FieldScope]) extends Ex
                                     case clazzType: ClazzType ⇒
                                         getDslType(tail, clazzType, programScope)
                                     case _ ⇒
-                                        throw ExpressionParserException(s"dot separator work for clazzType ${fieldScope.dslType.name} refs: ${name.mkString(".")}")
+                                        throw ExpressionParserException(s"dot separator work for clazzType ${fieldScope.dslType.name} refs: ${refs.mkString(".")}")
                                 }
                             case None⇒
                                 throw ExpressionParserException(s"${clazzScope.name} can't find field $ref")
@@ -127,7 +152,7 @@ case class VarRef(name: List[String], fieldScope: Option[FieldScope]) extends Ex
                                         case clazzType: ClazzType⇒
                                             getDslType(tail, clazzType, programScope)
                                         case _⇒
-                                            throw ExpressionParserException( s"dot separator work for clazzType ${fieldScope.map(_.dslType.name).getOrElse(UnResolvedType.name)} refs: ${name.mkString( "." )}" )
+                                            throw ExpressionParserException( s"dot separator work for clazzType ${fieldScope.map(_.dslType.name).getOrElse(UnResolvedType.name)} refs: ${refs.mkString( "." )}" )
 
                                     }
                                 case None⇒
@@ -145,96 +170,19 @@ case class VarRef(name: List[String], fieldScope: Option[FieldScope]) extends Ex
         fieldScope match {
             case None⇒UnResolvedType
             case Some(scope)⇒
-                if(name.length==1){
+                if(refs.length==1){
                     scope.dslType
                 }else{
                     scope.dslType match {
                         case clazzType: ClazzType⇒
-                            getDslType(name,clazzType,scope.programScope)
+                            getDslType(refs,clazzType,scope.programScope)
                         case _⇒
-                            throw ExpressionParserException(s"dot separator work for clazzType ${scope.dslType.name} refs: ${name.mkString(".")}")
+                            throw ExpressionParserException(s"dot separator work for clazzType ${scope.dslType.name} refs: ${refs.mkString(".")}")
                     }
                 }
         }
     }
 }
-
-
-/**
- * <pre><code>
- *program{
- *      Array[Foo] fooArray = Array(new Foo(2,3),new Foo(1,2));
- *
- *      def method()=Unit{
- *          Int i =0;
- *          Foo b = fooArray[i];  // fooArray[i] => ArrayVarRef
- *      }
- * }<pre><code>
- */
-class ArrayVarRef(val indexExpression: Expression,
-                  override val name: List[String],
-                  override val fieldScope: Option[FieldScope]) extends VarRef( name,  fieldScope ) {
-    override def toString: String = s"${name.mkString( "." )}[$indexExpression]"
-
-    override def equals(obj: Any): Boolean = {
-        obj match {
-            case arrayVarRef: ArrayVarRef ⇒
-                arrayVarRef.indexExpression == indexExpression &&
-                  arrayVarRef.name == name &&
-                  arrayVarRef.fieldScope == fieldScope
-            case _ ⇒ false
-        }
-    }
-
-    override def getDslType: DslType = {
-        val dslType = super.getDslType
-        dslType match {
-            case arrayType: ArrayType⇒ arrayType.parameterType
-            case UnResolvedType⇒UnResolvedType
-            case _⇒
-                throw ExpressionParserException(s"var ref must be array type but is ${dslType.name}")
-        }
-    }
-
-}
-
-/**
- * <pre><code>
- * program{
- *      Map[Int,Foo] fooMap = {0:new Foo(2,3),1:new Foo(1,2)};
- *
- *      def method()=Unit{
- *          Int i =0;
- *          Foo b = fooMap(i);  // fooMap(i) => MapVarRef
- *      }
- * }<pre><code>
- */
-class MapVarRef(val keyExpression: Expression,
-                override val name: List[String],
-                override val fieldScope: Option[FieldScope]) extends VarRef( name,  fieldScope ) {
-    override def toString: String = s"${name.mkString( "." )}($keyExpression)"
-
-    override def equals(obj: Any): Boolean = {
-        obj match {
-            case mapVarRef: MapVarRef ⇒
-                mapVarRef.keyExpression == keyExpression &&
-                  mapVarRef.name == name &&
-                  mapVarRef.fieldScope == fieldScope
-            case _ ⇒ false
-        }
-    }
-
-    override def getDslType: DslType = {
-        val dslType = super.getDslType
-        dslType match {
-            case mapType: MapType ⇒ mapType.valueParameterType
-            case UnResolvedType ⇒ UnResolvedType
-            case _ ⇒
-                throw ExpressionParserException( s"var ref must be map type but is ${dslType.name}" )
-        }
-    }
-}
-
 
 trait BaseLiteral
 //literal expression
@@ -263,15 +211,6 @@ object Literal {
     def literal(literal: Char): CharLiteral = new CharLiteral( literal )
 }
 
-//todo
-object UnitLiteral extends Literal[Unit, UnitType.type] with BaseLiteral {
-    override val dslType: UnitType.type = UnitType
-
-    override def equals(obj: Any): Boolean = {
-        obj.isInstanceOf[UnitLiteral.type]
-    }
-}
-
 class IntLiteral(literal: Int) extends Literal[Int, IntType.type]( literal ) with BaseLiteral {
     override val dslType: IntType.type = IntType
 
@@ -288,7 +227,7 @@ class IntLiteral(literal: Int) extends Literal[Int, IntType.type]( literal ) wit
 class LongLiteral(literal: Long) extends Literal[Long, LongType.type]( literal ) with BaseLiteral {
     override val dslType: LongType.type = LongType
 
-    override def toString: String = literal.toString
+    override def toString: String = s"${literal.toString}l"
 
     override def equals(obj: Any): Boolean = {
         obj match {
@@ -301,7 +240,7 @@ class LongLiteral(literal: Long) extends Literal[Long, LongType.type]( literal )
 class FloatLiteral(literal: Float) extends Literal[Float, FloatType.type]( literal ) with BaseLiteral {
     override val dslType: FloatType.type = FloatType
 
-    override def toString: String = literal.toString
+    override def toString: String = s"${literal.toString}f"
 
     override def equals(obj: Any): Boolean = {
         obj match {
@@ -314,7 +253,7 @@ class FloatLiteral(literal: Float) extends Literal[Float, FloatType.type]( liter
 class DoubleLiteral(literal: Double) extends Literal[Double, DoubleType.type]( literal ) with BaseLiteral {
     override val dslType: DoubleType.type = DoubleType
 
-    override def toString: String = literal.toString
+    override def toString: String = s"${literal.toString}d"
 
     override def equals(obj: Any): Boolean = {
         obj match {
@@ -399,6 +338,20 @@ class ClazzLiteral(literal: Array[Expression],
         obj match {
             case clazzLiteral: ClazzLiteral =>
                 clazzLiteral.literal.sameElements( literal ) && clazzLiteral.dslType == dslType
+            case _ ⇒ false
+        }
+    }
+}
+
+class ObjectLiteral(override val dslType: DslType) extends Literal[Array[Expression], DslType]( Array() ){
+
+    override def toString: String = s"${dslType.name}"
+
+
+    override def equals(obj: Any): Boolean = {
+        obj match {
+            case objectLiteral: ObjectLiteral =>
+                objectLiteral.dslType == dslType
             case _ ⇒ false
         }
     }
@@ -1527,18 +1480,7 @@ class MapLiteralCallChain(override val head: MapLiteral, override val tails: Lis
     }
 }
 
-trait Part{
-    val name:String
-}
-
-case class VarName(override val name:String) extends Part {
-    override def toString: String = name
-
-    override def equals(obj: Any): Boolean = obj match {
-        case varName: VarName ⇒ varName.name == name
-        case _ ⇒ false
-    }
-}
+trait Part
 
 
 //method call expression
@@ -1984,7 +1926,7 @@ case class Throw(expression: Expression) extends Expression {
  * <pre><code>
  */
 
-case class Return(expression: Expression) extends Expression {
+case class Return(expression: Option[Expression]) extends Expression {
     override def toString: String = s"return $expression"
 
     override def equals(obj: Any): Boolean = obj match {
@@ -2116,6 +2058,18 @@ class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) 
 }
 
 case class If(cases:Array[(Expression,Block)], default:Option[Block]) extends Expression {
+
+    override def toString:String = {
+        cases.map {
+            case (condition, block) ⇒
+                s"""
+                   |if($condition)
+                   |    $block
+                   |""".stripMargin
+
+        }.mkString( "\n" ) + default.map( _.toString ).getOrElse( "" )
+    }
+
     override def equals(obj: Any): Boolean = obj match {
         case `if`: If ⇒
             `if`.cases.sameElements( cases ) && default == `if`.default

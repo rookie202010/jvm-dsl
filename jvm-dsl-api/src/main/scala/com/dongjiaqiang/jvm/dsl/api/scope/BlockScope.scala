@@ -108,10 +108,10 @@ class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldS
    * @param index ref index
    * @param refs  ref names
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
+  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope] = {
         refs match {
-          case "this"::childRef ⇒ scope.resolveVarRefs(index,childRef,this,fields,skipCurrentScope = true,backRef = true,Some(topScope))
-          case _ ⇒  scope.resolveVarRefs(index,refs,this,fields,skipCurrentScope = false,backRef = false,Some(parentScope))
+          case "this"::childRef ⇒ scope.resolveVarRefs(index,childRef,arrayRefsIndex,this,fields,skipCurrentScope = true,backRef = true,Some(topScope))
+          case _ ⇒  scope.resolveVarRefs(index,refs,arrayRefsIndex,this,fields,skipCurrentScope = false,backRef = false,Some(parentScope))
         }
   }
 }

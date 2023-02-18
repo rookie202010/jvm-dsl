@@ -13,19 +13,30 @@ object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionCont
   override def generate(exprContext: ExprContext,
                         ruleContext: BlockExpressionContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
-    if (ruleContext.IDENTIFIER( ) == null) {
-      return UnitLiteral
-    }
     val blockType = ruleContext.IDENTIFIER( ).getText
-    val fieldScope = Option.apply( ruleContext.variable( ) ).map( v ⇒ v.IDENTIFIER( ).map( _.getText ).toList )
-      .flatMap( v ⇒ exprContext.getContextScope.resolveVarRefs( exprContext.getCurrentExpressionIndex, v ) )
+    val fieldScope = Option.apply( ruleContext.variable( ) ).map( v ⇒ {
+
+      val arrayVarRefs = scala.collection.mutable.Set[Int]( )
+      val varRefs = v.localVarOrArrayVar( ).zipWithIndex.map {
+        case (context, index) ⇒
+          if (context.localVariable( ) != null) {
+            context.localVariable( ).IDENTIFIER( ).getText
+          } else {
+            arrayVarRefs.add( index )
+            context.localArrayVariable( ).localVariable( ).getText
+          }
+      }.toList
+
+      (varRefs, arrayVarRefs)
+    } )
+      .flatMap( v ⇒ exprContext.getContextScope.resolveVarRefs( exprContext.getCurrentExpressionIndex, v._1, v._2.toSet ) )
     val block = LambdaBlockGenerator.generate( exprContext, ruleContext.lambdaBlock( ) )
     blockType match {
       case "Try" ⇒
         if (ruleContext.variable( ) != null) {
           throw ExpressionParserException( "Try block must not define variable" )
         } else {
-          Try( block,TryType( UnResolvedType ) )
+          Try( block, TryType( UnResolvedType ) )
         }
       case "Async" ⇒
         Async( block, fieldScope, FutureType( UnResolvedType ) )

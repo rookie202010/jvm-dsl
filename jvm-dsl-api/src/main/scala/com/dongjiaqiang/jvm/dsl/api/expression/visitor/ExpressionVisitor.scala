@@ -49,7 +49,6 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
       case v: OptionLiteral ⇒ visit( v, this )
       case v: ArrayLiteral ⇒ visit( v, this )
       case v: EitherLiteral ⇒ visit( v, this )
-      case UnitLiteral ⇒ visit( UnitLiteral, this )
       case Null ⇒ visit( Null, this )
 
       //visit binary expression
@@ -141,8 +140,6 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
         }
         visit( v, this )
       case v: VarRef ⇒ visit( v, this )
-      case v: ArrayVarRef ⇒ visit( v, this )
-      case v: MapVarRef ⇒ visit( v, this )
       case v: Lambda ⇒
         val t = visit( v, this )
         currentLambdaScope = null

@@ -1,8 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 
@@ -107,10 +107,6 @@ trait LiteralExpressionReviser extends LiteralExpressionVisitor[Expression] {
     } else {
       literal
     }
-  }
-
-  override def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[Expression]): Expression = {
-    literal
   }
 
   override def visit(literal: Null.type, visitor: ExpressionVisitor[Expression]): Expression = {

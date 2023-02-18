@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.visitor.`var`
 
-import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 
 
 trait VarExpressionVisitor[T] {
@@ -11,14 +11,6 @@ trait VarExpressionVisitor[T] {
   }
 
   def visit(varRef: VarRef, visitor: ExpressionVisitor[T]): T = {
-    throw new UnsupportedOperationException( "not supported" )
-  }
-
-  def visit(arrayVarRef: ArrayVarRef, visitor: ExpressionVisitor[T]): T = {
-    throw new UnsupportedOperationException( "not supported" )
-  }
-
-  def visit(mapVarRef: MapVarRef, visitor: ExpressionVisitor[T]): T = {
     throw new UnsupportedOperationException( "not supported" )
   }
 

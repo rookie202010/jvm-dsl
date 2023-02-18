@@ -1,7 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.expression
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, IntType, StringType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, IntType, ListType, StringType}
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.core.optimize.DefaultReviser
 import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
@@ -16,7 +17,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     val input =
       """
         |program{
-        |   def method()=Int{
+        |def method()=Int{
         |       Int j = 0;
         |       for(Int i=0;i<100;i=i+1){
         |           j = j+i;
@@ -41,10 +42,25 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
         |       }
         |       return sb.toString();
         |   }
+        |
+        |   def method3(List[List[Int]] list)=Int{
+        |       Int sum = 0;
+        |       for(List[Int] i:list){
+        |           for(Int j:i){
+        |               sum = sum+j;
+        |           }
+        |       }
+        |       return sum;
+        |   }
+        |
+        |
         |}
         |""".stripMargin
 
     val program = Program( generateProgramScope( input ), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
+    val programOptimize = Program( generateProgramScope( input ), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
+
+
     program method (
       "method"
       ) bodyBlock() updateVarDef("j", IntType, Some( 0 int )) forLoopBlock(
@@ -54,8 +70,29 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     ) expression(blockScope⇒{
         Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),blockScope.varRef("i")))
     }) belongBlock() expression(blockScope⇒{
-        Return(blockScope.varRef("j"))
+        Return(Some(blockScope.varRef("j")))
     })
+
+
+    programOptimize method(
+      "method"
+    ) bodyBlock() updateVarDef("j", IntType, Some( 0 int )) expression(blockScope⇒{
+
+      val scope = blockScope statementBlock(false)
+
+      val loopVarDef = scope.varDef("i",IntType,Some(0 int))
+      val loopVarCondition = Lt(scope.varRef("i"),100 int)
+      val loopVarUpdate = Assign(scope.varRef("i"),Add(scope.varRef("i"),1 int))
+
+      val body = scope expression(blockScope⇒{
+        Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),blockScope.varRef("i")))
+      })
+
+      For(loopVarDef,loopVarCondition,loopVarUpdate,body.block)
+    }) expression(scope⇒{
+      Return(Some(scope.varRef("j")))
+    })
+
     program method(
       "method1"
     ) bodyBlock() updateVarDef("j", IntType, Some( 0 int )) forCollectionBlock(
@@ -64,7 +101,25 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     ) expression(blockScope⇒{
       Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),blockScope.varRef("i")))
     }) belongBlock() expression (blockScope ⇒ {
-      Return( blockScope.varRef( "j" ) )
+      Return( Some(blockScope.varRef( "j" ) ))
+    })
+
+    programOptimize method (
+      "method1"
+      ) bodyBlock() updateVarDef("j", IntType, Some( 0 int )) expression (blockScope ⇒ {
+
+      val scope = blockScope statementBlock(false)
+
+      val loopVarDef = scope.varDef( "i", IntType, None )
+      val looped = scope.varRef("list")
+
+      val body = scope expression (blockScope ⇒ {
+        Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), blockScope.varRef( "i" ) ) )
+      })
+
+      ForCollection( loopVarDef, looped, body.block )
+    }) expression (scope ⇒ {
+      Return( Some(scope.varRef( "j" ) ))
     })
 
     program method(
@@ -75,15 +130,84 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
         scope⇒scope.varRef("map")) expression(blockScope⇒{
         VarCall(blockScope.varRef("sb"),"append",Array(blockScope.varRef("key")))
     }) expression (blockScope ⇒ {
-      VarCall( blockScope.varRef( "sb" ), "append", Array(  '.' char) )
+      VarCall( blockScope.varRef( "sb" ), "append", Array(  ',' char) )
     }) expression (blockScope ⇒ {
       VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "value" ) ) )
     }) belongBlock() expression(blockScope⇒{
-        Return(VarCall(blockScope.varRef("sb"),"toString",Array()))
+        Return(Some(VarCall(blockScope.varRef("sb"),"toString",Array())))
     })
-    val i =generateProgram( input )
 
-    assert( generateProgram( input ) == program )
+    programOptimize method (
+      "method2"
+      ) bodyBlock() updateVarDef("sb", ClazzType("StringBuilder"),
+      Some( new ClazzLiteral(Array(),ClazzType("StringBuilder")) ))  expression (blockScope ⇒ {
+
+      val scope = blockScope statementBlock(false)
+
+      val loopKeyDef = scope.varDef("key",StringType,None)
+      val loopValueDef = scope.varDef("value",StringType,None)
+      val looped = scope.varRef("map")
+
+      val body = scope expression (blockScope ⇒ {
+        VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "key" ) ) )
+      }) expression (blockScope ⇒ {
+        VarCall( blockScope.varRef( "sb" ), "append", Array( ',' char ) )
+      }) expression (blockScope ⇒ {
+        VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "value" ) ) )
+      })
+
+      ForMap( loopKeyDef,loopValueDef,looped,body.block )
+    }) expression (blockScope ⇒ {
+      Return( Some(VarCall( blockScope.varRef( "sb" ), "toString", Array( ) ) ))
+    })
+
+
+    program method (
+      "method3"
+      ) bodyBlock() updateVarDef("sum", IntType, Some( 0 int )) forCollectionBlock(
+      scope ⇒ {
+        scope.varDef( "i", ListType( IntType ), None )
+      },
+      scope ⇒ {
+        scope.varRef( "list" )
+      }) forCollectionBlock(
+      scope ⇒ scope.varDef( "j", IntType, None ),
+      scope ⇒ scope.varRef( "i" )
+    ) expression (blockScope ⇒ {
+      Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
+    }) belongBlock() belongBlock() expression (blockScope ⇒ {
+      Return( Some(blockScope.varRef( "sum" ) ))
+    })
+
+    programOptimize method (
+      "method3"
+      ) bodyBlock() updateVarDef("sum", IntType, Some( 0 int ))  expression (blockScope⇒ {
+
+      val scope = blockScope statementBlock(false)
+
+      val localVarDef = scope.varDef( "i", ListType( IntType ), None )
+      val looped = scope.varRef( "list" )
+
+      val body = scope expression(blockScope⇒{
+
+        val scope = blockScope statementBlock(false)
+
+        val localVarDef = scope.varDef( "j", IntType, None )
+        val looped = scope.varRef( "i" )
+        val body = scope expression(scope⇒{
+          Assign( scope.varRef( "sum" ), Add( scope.varRef( "sum" ), scope.varRef( "j" ) ) )
+        })
+        ForCollection(localVarDef,looped,body.block)
+      })
+
+      ForCollection(localVarDef,looped,body.block)
+    }) expression (blockScope ⇒ {
+      Return( Some(blockScope.varRef( "sum" ) ))
+    })
+
+    val generateP = generateProgram( input )
+    assert( generateP == program )
+    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
 
   }
 
@@ -91,17 +215,91 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     val input =
       """
         |program{
-        |   def method()=Int{
+
+        | def method()=Int{
         |       Int i=100;
         |       while(i>0){
         |         i = i%10;
         |       }
         |       return i;
         |   }
+        |
+        |   def method1()=Int{
+        |       Int j = 100;
+        |       while(j<100){
+        |           if(j>=10){
+        |               continue;
+        |           }
+        |           j = j-1;
+        |       }
+        |       return j;
+        |   }
+        |
+        |   def method2()=Int{
+        |       Int j = 0;
+        |       Int i = 0;
+        |       Int sum = 0;
+        |       while(j<100){
+        |           while(i<100){
+        |               sum = sum+i;
+        |               i = i + 1;
+        |           }
+        |           sum = sum + j;
+        |           j = j + 1;
+        |       }
+        |   }
         |}
         |""".stripMargin
 
     val program = Program( generateProgramScope( input ), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
+    val programOptimize = Program( generateProgramScope( input ), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
+
+    program method(
+      "method2"
+    ) bodyBlock() updateVarDef ("j",IntType,Some(0 int)) updateVarDef ("i",IntType,Some(0 int)) updateVarDef ("sum",IntType,Some((0 int))) expression (blockScope⇒{
+        WhileCondition(Lt(blockScope.varRef("j"),100 int))
+    }) whileBlock() expression (blockScope⇒{
+        WhileCondition(Lt(blockScope.varRef("i"),100 int))
+    }) whileBlock() expression (blockScope⇒{
+        Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("i")))
+    }) expression (blockScope⇒{
+      Assign(blockScope.varRef("i"),Add(blockScope.varRef("i"),1 int))
+    }) belongBlock() expression(blockScope⇒{
+      Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("j")))
+    }) expression(blockScope ⇒ {
+      Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), 1 int ) )
+    })
+
+    programOptimize method(
+      "method2"
+    ) bodyBlock() updateVarDef (
+      "j",IntType,Some(0 int)) updateVarDef (
+      "i",IntType,Some(0 int)) updateVarDef (
+      "sum",IntType,Some((0 int))) expression(blockScope⇒{
+
+      val condition1 = Lt(blockScope.varRef("j"),100 int)
+      val childScope = blockScope statementBlock(false)
+      val childScope1 = childScope statementBlock(false)
+
+      val condition2 = Lt(childScope.varRef("i"),100 int)
+      val body2 = childScope1 expression(blockScope⇒{
+        Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("i")))
+      }) expression (blockScope ⇒ {
+        Assign( blockScope.varRef( "i" ), Add( blockScope.varRef( "i" ), 1 int ) )
+      })
+
+
+      val body1 = childScope expression (_⇒ {
+        While(condition2,body2.block)
+      })expression (blockScope ⇒ {
+          Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
+        }) expression (blockScope ⇒ {
+          Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), 1 int ) )
+        })
+
+      While(condition1,body1.block)
+    })
+
     program method (
       "method"
       ) bodyBlock() updateVarDef("i", IntType, Some( 100 int )) expression(blockScope⇒{
@@ -109,26 +307,153 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     }) whileBlock() expression(blockScope⇒{
         Assign(blockScope.varRef("i"),Mod(blockScope.varRef("i"),10 int))
     }) belongBlock() expression(blockScope⇒{
-        Return(blockScope.varRef("i"))
+        Return(Some(blockScope.varRef("i")))
     })
 
-    assert( generateProgram( input ) == program )
+    programOptimize method(
+      "method"
+    ) bodyBlock() updateVarDef("i", IntType, Some( 100 int )) expression(blockScope⇒{
+        val condition = Gt(blockScope.varRef("i"),0 int)
+        val childScope = blockScope statementBlock(false)
+        val body = childScope expression (blockScope ⇒ {
+          Assign( blockScope.varRef( "i" ), Mod( blockScope.varRef( "i" ), 10 int ) )
+        })
+      While(condition,body.block)
+    }) expression (blockScope ⇒ {
+      Return( Some(blockScope.varRef( "i" ) ))
+    })
+
+    program method(
+      "method1"
+    ) bodyBlock() updateVarDef("j", IntType, Some( 100 int )) expression(blockScope⇒{
+      WhileCondition(Lt(blockScope.varRef("j"),100 int))
+    }) whileBlock() expression(blockScope⇒{
+        IfCondition(Ge(blockScope.varRef("j"),10 int),first = true)
+    }) ifBlock() expression(_⇒Continue) belongBlock() expression(blockScope⇒{
+        Assign(blockScope.varRef("j"),Sub(blockScope.varRef("j"),1 int))
+    }) belongBlock() expression(blockScope⇒Return(Some(blockScope.varRef("j"))))
+
+    programOptimize method(
+      "method1"
+    ) bodyBlock() updateVarDef("j", IntType, Some( 100 int )) expression(blockScope⇒{
+
+      val whileCondition = Lt(blockScope.varRef("j"),100 int)
+      val childScope = blockScope statementBlock(false)
+      val childScope1 = childScope statementBlock(false)
+
+      val ifCondition = Ge(childScope.varRef("j"),10 int)
+      val ifBlock = childScope1 expression(_⇒Continue)
+
+      val whileBody = childScope expression(_⇒{
+        If(Array((ifCondition,ifBlock.block)),None)
+      }) expression (blockScope ⇒ {
+        Assign( blockScope.varRef( "j" ), Sub( blockScope.varRef( "j" ), 1 int ) )
+      })
+
+      While(whileCondition,whileBody.block)
+    }) expression(blockScope⇒Return(Some(blockScope.varRef("j"))))
+
+    val generateP = generateProgram( input )
+    assert( generateP == program )
+    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+
   }
 
   test("define do while"){
       val input =
         """
           |program{
-          |   def method()=Int{
+
+          |def method()=Int{
           |       Int i=0;
           |       do{
           |         i=i+1;
           |       }while(i<100)
           |       return i;
           |   }
+          |
+          |   def method1()=Int{
+          |       Int i=0;
+          |       do{
+          |         i=i+1;
+          |         if(i==30){
+          |           break;
+          |         }
+          |       }while(i<100)
+          |       return i;
+          |   }
+          |
+          |def method2()=Int{
+          |      Int i=0;
+          |      Int j=0;
+          |      Int sum = 0;
+          |      do{
+          |         do{
+          |           sum=sum+j;
+          |           j = j+1;
+          |         }while(j<100)
+          |
+          |         sum=sum+i;
+          |         i = i+1;
+          |
+          |      }while(i<100)
+          |   }
+          |
           |}
           |""".stripMargin
     val program = Program( generateProgramScope( input ), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
+    val programOptimize = Program( generateProgramScope( input ), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
+
+
+    program method (
+      "method2"
+    ) bodyBlock() updateVarDef("i", IntType, Some( 0 int )) updateVarDef("j", IntType, Some( 0 int )) updateVarDef("sum", IntType, Some( (0 int) )) doWhileBlock(
+
+    ) doWhileBlock(
+
+    ) expression(blockScope⇒{
+        Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("j")))
+    }) expression(blockScope⇒{
+        Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),1 int))
+    }) belongBlock() expression(blockScope⇒{
+        DoWhileCondition(Lt(blockScope.varRef("j"),100 int))
+    }) expression(blockScope⇒{
+      Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("i")))
+    }) expression (blockScope ⇒ {
+      Assign( blockScope.varRef( "i" ), Add( blockScope.varRef( "i" ), 1 int ) )
+    }) belongBlock() expression (blockScope ⇒ {
+      DoWhileCondition( Lt( blockScope.varRef( "i" ), 100 int ) )
+    })
+
+    programOptimize method(
+      "method2"
+    ) bodyBlock() updateVarDef("i", IntType, Some( 0 int )) updateVarDef("j", IntType, Some( 0 int )) updateVarDef("sum", IntType, Some( (0 int) )) expression(blockScope⇒{
+
+      val doWhileBlockScope1 = blockScope statementBlock(false)
+
+      val doWhileBlockScope2 = doWhileBlockScope1 statementBlock(false)
+
+      val doWhileBody2 = doWhileBlockScope2 expression (blockScope ⇒ {
+        Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
+      }) expression (blockScope ⇒ {
+        Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), 1 int ) )
+      })
+
+      val doWhileCondition2 = Lt(doWhileBlockScope1.varRef("j"),100 int)
+
+      val doWhile2 = DoWhile(doWhileCondition2,doWhileBody2.block)
+
+      val doWhileBody1 = doWhileBlockScope1 expression(_⇒doWhile2) expression (blockScope ⇒ {
+        Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "i" ) ) )
+      }) expression (blockScope ⇒ {
+        Assign( blockScope.varRef( "i" ), Add( blockScope.varRef( "i" ), 1 int ) )
+      })
+
+      val doWhileCondition1 = Lt( blockScope.varRef( "i" ), 100 int )
+
+      DoWhile(doWhileCondition1,doWhileBody1.block)
+    })
+
     program method(
       "method"
     ) bodyBlock() updateVarDef("i",IntType,Some(0 int)) doWhileBlock() expression(blockScope⇒{
@@ -137,9 +462,66 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     }) belongBlock() expression(blockScope⇒{
         DoWhileCondition(Lt(blockScope.varRef("i"),100 int))
     }) expression(blockScope⇒{
-        Return(blockScope.varRef("i"))
+        Return(Some(blockScope.varRef("i")))
     })
 
-    assert( generateProgram(input) == program )
+    programOptimize method(
+      "method"
+    ) bodyBlock() updateVarDef("i",IntType,Some(0 int)) expression(blockScope⇒{
+
+      val childScope = blockScope statementBlock(false)
+      val doWhileCondition = Lt(blockScope.varRef("i"),100 int)
+
+      val doWhileBody = childScope expression (blockScope ⇒ {
+        val i = blockScope.varRef( "i" )
+        Assign( i, Add( i, 1 int ) )
+      })
+
+      DoWhile(doWhileCondition,doWhileBody.block)
+    }) expression (blockScope ⇒ {
+      Return( Some(blockScope.varRef( "i" ) ))
+    })
+
+
+    program method (
+      "method1"
+      ) bodyBlock() updateVarDef("i", IntType, Some( 0 int )) doWhileBlock() expression (blockScope ⇒ {
+      val i = blockScope.varRef( "i" )
+      Assign( i, Add( i, 1 int ) )
+    }) expression (blockScope⇒IfCondition(Eq(blockScope.varRef("i"),30 int),first = true)) ifBlock() expression (_⇒
+      Break) belongBlock() belongBlock() expression (blockScope ⇒ {
+      DoWhileCondition( Lt( blockScope.varRef( "i" ), 100 int ) )
+    }) expression (blockScope ⇒ {
+      Return( Some(blockScope.varRef( "i" ) ))
+    })
+
+    programOptimize method(
+      "method1"
+    ) bodyBlock() updateVarDef("i", IntType, Some( 0 int )) expression(blockScope⇒{
+
+      val doWhileCondition = Lt( blockScope.varRef( "i" ), 100 int )
+
+      val doWhileBlockScope = blockScope statementBlock(false)
+      val ifBlockScope = doWhileBlockScope statementBlock(false)
+
+      val ifCondition = Eq(doWhileBlockScope.varRef("i"),30 int)
+      val ifBody = ifBlockScope expression (_ ⇒ Break)
+
+      val doWhileBody = doWhileBlockScope expression (blockScope ⇒ {
+        val i = blockScope.varRef( "i" )
+        Assign( i, Add( i, 1 int ) )
+      }) expression(_⇒If(Array((ifCondition,ifBody.block)),None))
+
+      DoWhile(doWhileCondition,doWhileBody.block)
+
+    }) expression (blockScope ⇒ {
+      Return( Some(blockScope.varRef( "i" ) ))
+    })
+
+
+    val generateP = generateProgram( input )
+    assert( generateP == program )
+    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+
   }
 }

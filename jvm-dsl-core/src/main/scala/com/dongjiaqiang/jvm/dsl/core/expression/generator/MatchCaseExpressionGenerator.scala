@@ -6,6 +6,7 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
+import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
 object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpressionContext, Expression,GeneratorContext] {
 
@@ -13,23 +14,23 @@ object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpres
                         ruleContext: MatchCaseExpressionContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     val fieldScope = exprContext.getContextScope.resolveVarRefs( exprContext.getCurrentExpressionIndex,
-      List( ruleContext.localVariable( ).IDENTIFIER( ).getText ) )
+      List( ruleContext.localVariable( ).IDENTIFIER( ).getText ),Set() )
 
     //todo
-    val matched = VarRef( List( ruleContext.localVariable( ).IDENTIFIER( ).getText ),fieldScope)
+    val matched = VarRef( List( ruleContext.localVariable( ).IDENTIFIER( ).getText ),MutableMap(),fieldScope)
 
     val cases = ruleContext.caseExpression( ).map( ctx ⇒ {
       if (ctx.typeMatchExpression( ) != null) {
         val matchVar = MatchType( ctx.typeMatchExpression( ).localVariable( ).IDENTIFIER( ).getText,
           toDslType( ctx.typeMatchExpression( ).`type`( ) ) )
 
-        val block = new Block( )
+        val block = Block( )
         exprContext.pushBlock( block )
 
         (matchVar, block)
       } else {
 
-        val block = new Block( )
+        val block = Block( )
         exprContext.pushBlock( block )
 
         (UnapplyExpressionGenerator.generate( exprContext, ctx.unapplyExpression( ) ), block)
@@ -37,7 +38,7 @@ object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpres
     } )
 
     val default = if (ruleContext.DEFAULT( ) != null) {
-      val block = new Block( )
+      val block = Block( )
       exprContext.pushBlock( block )
       Some( block )
     } else {

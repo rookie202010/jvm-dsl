@@ -99,24 +99,33 @@ class FieldScope(val outerScopeIndex:Int,
    * resolve localRefs in fieldScope
    *
    * @param index localRefs index in blockScope
+   * @param arrayRefsIndex array refs index
    * @param refs  localRefs names
    * @return
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
-    refs match {
-      case ref :: Nil ⇒
+  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope] = {
+    refs.zipWithIndex match {
+      case (ref,_) :: Nil ⇒
         if (ref == symbolName) {
           Some(this)
         } else {
           None
         }
-      case ref :: childRef ⇒
+      case (ref,index) :: childRef ⇒
         if(ref != symbolName){
             None
         }else {
           dslType match {
             case clazzType: ClazzType ⇒
-              resolve( childRef, clazzType )
+              if(arrayRefsIndex.contains(index) && clazzType.clazzName=="Array"){
+                val parameterType = clazzType.parameterTypes.head
+                parameterType match {
+                  case clazzType: ClazzType⇒ resolve(childRef,arrayRefsIndex,clazzType)
+                  case _⇒None
+                }
+              }else {
+                resolve( childRef,arrayRefsIndex, clazzType )
+              }
             case UnResolvedType | AnyType ⇒ Some( this )
             case _ ⇒ None
           }
@@ -124,21 +133,30 @@ class FieldScope(val outerScopeIndex:Int,
     }
   }
 
-  def resolve(childRef: List[String], dslType: ClazzType): Option[FieldScope] = {
+  def resolve(childRefWithIndex: List[(String,Int)], arrayRefsIndex:Set[Int], dslType: ClazzType): Option[FieldScope] = {
+    val (childRef,index) = childRefWithIndex.head
+
     programScope.classes.get( dslType.clazzName ) match {
       case Some( clazzScope ) ⇒
         val fields = clazzScope.fields
-        if (childRef.size == 1) {
-          fields.get( childRef.head ) match {
+        if (childRefWithIndex.size == 1) {
+          fields.get( childRef ) match {
             case Some( fieldScope ) ⇒ Some(fieldScope)
             case None ⇒ None
           }
         } else {
-          fields.get( childRef.head ) match {
+          fields.get( childRef ) match {
             case Some( fieldScope ) ⇒
               fieldScope.dslType match {
                 case childDslType: ClazzType ⇒
-                  resolve( childRef.tail, childDslType )
+                  if(arrayRefsIndex.contains(index) && childDslType.clazzName=="Array"){
+                    childDslType.parameterTypes.head match {
+                      case clazzType: ClazzType ⇒ resolve( childRefWithIndex, arrayRefsIndex, clazzType )
+                      case _ ⇒ None
+                    }
+                  }else {
+                    resolve( childRefWithIndex.tail, arrayRefsIndex, childDslType )
+                  }
                 case _ ⇒ None
               }
             case None ⇒ None

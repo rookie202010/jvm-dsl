@@ -11,10 +11,12 @@ trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression] 
   def revise(tails: List[Part], visitor: ExpressionVisitor[Expression]): Option[List[Part]] = {
 
     val reviseTails = tails.map {
-      case varName: VarName ⇒
-        varName
+      case varRef: VarRef ⇒
+        VarRef(varRef.refs,varRef.arrayRefIndexExpressions.map{
+          case (index,expression)⇒ (index,expression.map(visitor.visit))
+        },varRef.fieldScope)
       case methodCall: MethodCall ⇒
-        new MethodCall( methodCall.methodScope, methodCall.name, methodCall.params.map( visitor.visit ) )
+        MethodCall( methodCall.methodScope, methodCall.name, methodCall.params.map( visitor.visit ) )
     }
 
     val success = reviseTails.zip(tails)
@@ -48,7 +50,7 @@ trait CallChainExpressionReviser extends CallChainExpressionVisitor[Expression] 
       funcCallChain.head match {
         case methodCall: MethodCall⇒
           if(reviseTails.isDefined || params.isDefined) {
-            expression.FuncCallChain( new MethodCall( methodCall.methodScope,
+            expression.FuncCallChain( MethodCall( methodCall.methodScope,
               methodCall.name, params.getOrElse( methodCall.params ) ),
               reviseTails.getOrElse( funcCallChain.tails ) )
           }else{

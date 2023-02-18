@@ -12,8 +12,8 @@ import scala.collection.convert.ImplicitConversionsToScala._
 
 object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression,GeneratorContext] {
 
-  def expression(exprContext: ExprContext,
-                 r: LiteralAndCallChainContext): Expression = {
+  private def expressionLiteralAndCallChain(exprContext: ExprContext,
+                                            r: LiteralAndCallChainContext): Expression = {
     r match {
       case c: LiteralExprContext ⇒
         LiteralGenerator.generate( exprContext, c.literal( ) )
@@ -21,6 +21,17 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression,
         CallChainGenerator.generate( exprContext, r )
     }
   }
+
+  def expression(exprContext: ExprContext,
+                 r: LiteralAndCallChainAndExpressionContext): Expression = {
+    r match {
+      case c: LiteralAndCallChainExprContext ⇒
+        expressionLiteralAndCallChain(exprContext,c.literalAndCallChain())
+      case e: ExpressionExprContext ⇒
+        ExpressionGenerator.generate( exprContext, e.expression() )
+    }
+  }
+
 
   override def generate(exprContext: ExprContext,
                         ruleContext: LiteralContext,
@@ -30,13 +41,7 @@ object LiteralGenerator extends IExpressionGenerator[LiteralContext, Expression,
     } else if (ruleContext.classLiteral( ) != null) {
       ClassLiteralGenerator.generate( exprContext, ruleContext.classLiteral( ) )
     } else if (ruleContext.variable( ) != null) {
-      VarGenerator.generate( exprContext, ruleContext.variable( ) )
-    } else if (ruleContext.arrayVariable( ) != null) {
-
-      val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
-      val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
-      new ArrayVarRef( indexExpr, variable.name, variable.fieldScope )
-
+      VarRefGenerator.generate( exprContext, ruleContext.variable( ) )
     } else if (ruleContext.optionalLiteral( ) != null) {
       OptionLiteralGenerator.generate( exprContext, ruleContext.optionalLiteral( ) )
     } else if (ruleContext.listLiteral( ) != null) {
@@ -62,7 +67,7 @@ object ClassLiteralGenerator extends IExpressionGenerator[ClassLiteralContext,Cl
     val clazzName = ruleContext.clazzType( ).getText
     val valueTypes = ruleContext.`type`( ).map( toDslType ).toArray
     val clazzType = ClazzType( clazzName, valueTypes )
-    val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
+    val expressions = ruleContext.literalAndCallChainAndExpression( ).map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
     new ClazzLiteral( expressions, clazzType )
@@ -74,7 +79,7 @@ object OptionLiteralGenerator extends IExpressionGenerator[OptionalLiteralContex
                         ruleContext: OptionalLiteralContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): OptionLiteral = {
     val expression = LiteralGenerator.expression( exprContext,
-      ruleContext.literalAndCallChain( ) )
+      ruleContext.literalAndCallChainAndExpression())
     new OptionLiteral( expression, OptionType( UnResolvedType ) )
   }
 }
@@ -83,7 +88,7 @@ object ListLiteralGenerator extends IExpressionGenerator[ListLiteralContext,List
   override def generate(exprContext: ExprContext,
                         ruleContext: ListLiteralContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): ListLiteral = {
-    val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
+    val expressions = ruleContext.literalAndCallChainAndExpression().map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
     new ListLiteral( expressions, ListType( UnResolvedType ) )
@@ -94,7 +99,7 @@ object SetLiteralGenerator extends IExpressionGenerator[SetLiteralContext,SetLit
   override def generate(exprContext: ExprContext,
                         ruleContext: SetLiteralContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): SetLiteral = {
-    val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
+    val expressions = ruleContext.literalAndCallChainAndExpression().map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
     new SetLiteral( expressions, SetType( UnResolvedType ) )
@@ -105,7 +110,7 @@ object TupleLiteralGenerator extends IExpressionGenerator[TupleLiteralContext,Tu
   override def generate(exprContext: ExprContext,
                         ruleContext: TupleLiteralContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): TupleLiteral = {
-    val expressions = ruleContext.literalAndCallChain( ).map( r ⇒ {
+    val expressions = ruleContext.literalAndCallChainAndExpression().map( r ⇒ {
       LiteralGenerator.expression( exprContext, r )
     } ).toArray
     new TupleLiteral( expressions, TupleType( expressions.indices.map( _ ⇒ UnResolvedType ).toArray ) )
@@ -116,7 +121,7 @@ object MapLiteralGenerator extends IExpressionGenerator[MapLiteralContext,MapLit
   override def generate(exprContext: ExprContext,
                         ruleContext: MapLiteralContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): MapLiteral = {
-    val expressions = ruleContext.literalAndCallChain( ).grouped( 2 ).map( kv ⇒ {
+    val expressions = ruleContext.literalAndCallChainAndExpression().grouped( 2 ).map( kv ⇒ {
       (LiteralGenerator.expression( exprContext, kv.head ),
         LiteralGenerator.expression( exprContext, kv.last ))
     } ).toArray

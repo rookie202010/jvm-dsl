@@ -46,25 +46,8 @@ object AssignGenerator extends IExpressionGenerator[AssignmentContext, Assign,Ge
   override def generate(exprContext: ExprContext,
                         ruleContext: AssignmentContext,
                         generatorContext: GeneratorContext=NoneGeneratorContext): Assign = {
-    if (ruleContext.variable( ) != null) {
-
-      val variable = VarGenerator.generate( exprContext, ruleContext.variable( ),VarGeneratorContext(true) )
+      val variable = VarRefGenerator.generate( exprContext, ruleContext.variable( ),VarGeneratorContext(true) )
       generate( variable, ruleContext.assignOperator( ), exprContext, ruleContext )
-
-    } else if (ruleContext.arrayVariable( ) != null) {
-      val variable = VarGenerator.generate( exprContext, ruleContext.arrayVariable( ).variable( ) )
-      val indexExpr = OrGenerator.generate( exprContext, ruleContext.arrayVariable( ).conditionalOrExpression( ) )
-
-      generate( new ArrayVarRef( indexExpr, variable.name,  variable.fieldScope ),
-        ruleContext.assignOperator( ), exprContext, ruleContext )
-
-    } else {
-      val variable = VarGenerator.generate( exprContext, ruleContext.mapVariable( ).variable( ) )
-      val indexExpr = OrGenerator.generate( exprContext, ruleContext.mapVariable( ).conditionalOrExpression( ) )
-
-      generate( new MapVarRef( indexExpr, variable.name,  variable.fieldScope ), ruleContext.assignOperator( ),
-        exprContext, ruleContext )
-    }
   }
 }
 

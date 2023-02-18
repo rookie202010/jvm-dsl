@@ -152,9 +152,10 @@ package object expression {
       blockWithScope
     }
 
-    def statementBlock(): BlockWithScope = {
-      block( _ ⇒ Block( ) )
+    def statementBlock(updateExpression:Boolean=true): BlockWithScope = {
+      block( _ ⇒ Block( ),updateExpression )
     }
+
 
     def ifBlock(): BlockWithScope = {
       block( _ ⇒ new IfBlock( ) )
@@ -203,11 +204,13 @@ package object expression {
       block(blockScope⇒new ForLoopMap(loopKeyDef.apply(blockScope),loopVarDef.apply(blockScope),looped.apply(blockScope)))
     }
 
-    def block(block: BlockScope ⇒ Block): BlockWithScope = {
+    def block(block: BlockScope ⇒ Block,updateExpression:Boolean=true): BlockWithScope = {
       val childBlockScope = blockWithScope.blockScope.childrenScopes( blockWithScope.childBlockIndex )
       val childBlock = block.apply( childBlockScope )
       blockWithScope.childBlockIndex = blockWithScope.childBlockIndex + 1
-      blockWithScope.block.expressions.append( childBlock )
+      if(updateExpression) {
+        blockWithScope.block.expressions.append( childBlock )
+      }
       val childBlockWithScope = BlockWithScope( childBlock, childBlockScope, blockWithScope.belongMethod )
       childBlockWithScope.parent = blockWithScope
       childBlockWithScope
@@ -236,18 +239,29 @@ package object expression {
     }
 
     def varDef(name: String, dslType: DslType, assign: Option[Expression] = None): LocalVarDef = {
-      LocalVarDef( blockWithScope.blockScope.fields( name ), dslType, assign )
+      blockWithScope.blockScope match {
+        case forStatementBlockScope: ForStatementBlockScope⇒
+          forStatementBlockScope.initFields.get(name) match {
+            case Some(fieldScope)⇒
+              LocalVarDef( fieldScope, dslType, assign )
+            case None⇒
+              LocalVarDef( forStatementBlockScope.fields( name ), dslType, assign )
+          }
+        case _⇒
+          LocalVarDef( blockWithScope.blockScope.fields( name ), dslType, assign )
+      }
+
     }
 
-    def varRef(name: String*): VarRef = {
+    def resolveVarRef(arrayIndexExpressions:MutableMap[Int,List[Expression]],name:String*):VarRef={
       blockWithScope.blockScope.fields.get( name.head ) match {
-        case Some( fieldScope ) ⇒ VarRef( name.toList, Some( fieldScope ) )
+        case Some( fieldScope ) ⇒ VarRef( name.toList, arrayIndexExpressions, Some( fieldScope ) )
         case None ⇒
 
           blockWithScope.blockScope match {
             case forStatementBlockScope: ForStatementBlockScope ⇒
               if (forStatementBlockScope.initFields.contains( name.head )) {
-                return VarRef( name.toList, Some( forStatementBlockScope.initFields( name.head ) ) )
+                return VarRef( name.toList, arrayIndexExpressions, Some( forStatementBlockScope.initFields( name.head ) ) )
               }
             case _ ⇒
           }
@@ -258,19 +272,22 @@ package object expression {
             blockWithScope.blockScope.parentScope match {
               case methodScope: MethodScope ⇒
                 methodScope.params.get( name.head ) match {
-                  case Some( fieldScope ) ⇒ VarRef( name.toList, Some( fieldScope ) )
+                  case Some( fieldScope ) ⇒ VarRef( name.toList, arrayIndexExpressions, Some( fieldScope ) )
                   case None ⇒ blockWithScope.blockScope.topScope match {
                     case clazzScope: ClazzScope ⇒
-                      VarRef( name.toList, clazzScope.fields.get( name.head ) )
+                      VarRef( name.toList, arrayIndexExpressions, clazzScope.fields.get( name.head ) )
                     case programScope: ProgramScope ⇒
-                      VarRef( name.toList, programScope.fields.get( name.head ) )
+                      VarRef( name.toList, arrayIndexExpressions, programScope.fields.get( name.head ) )
                   }
                 }
               case programScope: ProgramScope ⇒
-                VarRef( name.toList, programScope.fields.get( name.head ) )
+                VarRef( name.toList, arrayIndexExpressions, programScope.fields.get( name.head ) )
             }
           }
       }
+    }
+    def varRef(name: String*): VarRef = {
+      resolveVarRef(MutableMap(),name:_*)
     }
   }
 
@@ -290,38 +307,39 @@ package object expression {
       LocalVarDef(fieldScope,dslType,assign)
     }
 
-    def varRef(name: String*): VarRef = {
-
-
+    def resolveVarRef(arrayIndexExpressions:MutableMap[Int,List[Expression]],name:String*):VarRef={
       blockScope.fields.get( name.head ) match {
-        case Some( fieldScope ) ⇒ VarRef( name.toList, Some( fieldScope ) )
+        case Some( fieldScope ) ⇒ VarRef( name.toList, arrayIndexExpressions, Some( fieldScope ) )
         case None ⇒
 
-            blockScope match {
-              case forStatementBlockScope: ForStatementBlockScope ⇒
-                if (forStatementBlockScope.initFields.contains( name.head )) {
-                  return VarRef( name.toList, Some( forStatementBlockScope.initFields( name.head ) ) )
-                }
-              case _ ⇒
-            }
-
-            blockScope.parentScope match {
-              case methodScope: MethodScope ⇒
-                methodScope.params.get( name.head ) match {
-                  case Some( fieldScope ) ⇒ VarRef( name.toList, Some( fieldScope ) )
-                  case None ⇒ blockScope.topScope match {
-                    case clazzScope: ClazzScope ⇒
-                      VarRef( name.toList, clazzScope.fields.get( name.head ) )
-                    case programScope: ProgramScope ⇒
-                      VarRef( name.toList, programScope.fields.get( name.head ) )
-                  }
-                }
-              case blockScope: BlockScope⇒
-                  blockScope.varRef(name:_*)
-              case programScope: ProgramScope ⇒
-                VarRef( name.toList, programScope.fields.get( name.head ) )
-            }
+          blockScope match {
+            case forStatementBlockScope: ForStatementBlockScope ⇒
+              if (forStatementBlockScope.initFields.contains( name.head )) {
+                return VarRef( name.toList, arrayIndexExpressions, Some( forStatementBlockScope.initFields( name.head ) ) )
+              }
+            case _ ⇒
           }
+
+          blockScope.parentScope match {
+            case methodScope: MethodScope ⇒
+              methodScope.params.get( name.head ) match {
+                case Some( fieldScope ) ⇒ VarRef( name.toList, MutableMap( ), Some( fieldScope ) )
+                case None ⇒ blockScope.topScope match {
+                  case clazzScope: ClazzScope ⇒
+                    VarRef( name.toList, arrayIndexExpressions, clazzScope.fields.get( name.head ) )
+                  case programScope: ProgramScope ⇒
+                    VarRef( name.toList, arrayIndexExpressions, programScope.fields.get( name.head ) )
+                }
+              }
+            case blockScope: BlockScope ⇒
+              blockScope.varRef( name: _* )
+            case programScope: ProgramScope ⇒
+              VarRef( name.toList, arrayIndexExpressions, programScope.fields.get( name.head ) )
+          }
+      }
+    }
+    def varRef(name: String*): VarRef = {
+        resolveVarRef(MutableMap(),name:_*)
       }
     }
 
@@ -338,7 +356,7 @@ package object expression {
     }
 
     def varRef(name:String*):VarRef={
-        VarRef(name.toList,program.programScope.fields.get(name.head))
+        VarRef(name.toList,MutableMap(),program.programScope.fields.get(name.head))
     }
 
     def method(name:String,ignoreVarRefResolved:Boolean = false):ProgramMethod={
