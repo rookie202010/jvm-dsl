@@ -6,52 +6,77 @@ import com.dongjiaqiang.jvm.dsl.java.api.extend.Try;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._1_Consumer;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function.*;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._1_Predicate;
-import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2;
-import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple3;
-import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple4;
-import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple5;
+import com.dongjiaqiang.jvm.dsl.java.api.tuple.*;
 
 import java.util.*;
 
 public class ListMethodUtils {
 
     //map
-    public static <V,K> List<? extends K> map(List<V> list, _1_Function<? super V,? extends K> mapper) throws Exception {
+    public static <V,K> List<K> map(List<V> list,
+                                              _1_Function<? super V,? extends K> mapper) throws Exception {
             List<K> newList = new ArrayList<>();
             for(V v:list){
                 newList.add(mapper.apply(v));
             }
             return newList;
     }
-    public static <V1,V2,K>  List<? extends K> map(List<Tuple2<V1,V2>> list, _2_Function<? super V1,? super V2,? extends K> mapper) throws Exception {
+    public static <V1,V2,K>  List<K> map(List<Tuple2<V1,V2>> list,
+                                                   _2_Function<? super V1,? super V2,? extends K> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Tuple2<V1,V2> tuple2:list){
             newList.add(mapper.apply(tuple2._1,tuple2._2));
         }
         return newList;
     }
-    public static <V1,V2,V3,K>  List<? extends K> map(List<Tuple3<V1,V2,V3>> list, _3_Function<? super V1, ? super V2, ? super V3, ? extends K> mapper) throws Exception {
+    public static <V1,V2,V3,K>  List<K> map(List<Tuple3<V1,V2,V3>> list,
+                                                      _3_Function<? super V1, ? super V2, ? super V3, ? extends K> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Tuple3<V1,V2,V3> tuple3:list){
             newList.add(mapper.apply(tuple3._1,tuple3._2,tuple3._3));
         }
         return newList;
     }
-    public static <V1,V2,V3,V4,K>  List<? extends K> map(List<Tuple4<V1,V2,V3,V4>> list, _4_Function<? super V1, ? super V2, ? super V3,? super V4, ? extends K> mapper) throws Exception {
+    public static <V1,V2,V3,V4,K>  List<K> map(List<Tuple4<V1,V2,V3,V4>> list,
+                                                         _4_Function<? super V1, ? super V2, ? super V3,? super V4, ? extends K> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Tuple4<V1,V2,V3,V4> tuple4:list){
             newList.add(mapper.apply(tuple4._1,tuple4._2,tuple4._3,tuple4._4));
         }
         return newList;
     }
-    public static <V1,V2,V3,V4,V5,K>  List<? extends K> map(List<Tuple5<V1,V2,V3,V4,V5>> list, _5_Function<? super V1, ? super V2, ? super V3,? super V4, ? super V5,? extends K> mapper) throws Exception {
+    public static <V1,V2,V3,V4,V5,K>  List<K> map(List<Tuple5<V1,V2,V3,V4,V5>> list,
+                                                            _5_Function<? super V1, ? super V2, ? super V3,? super V4, ? super V5,? extends K> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Tuple5<V1,V2,V3,V4,V5> tuple5:list){
             newList.add(mapper.apply(tuple5._1,tuple5._2,tuple5._3,tuple5._4,tuple5._5));
         }
         return newList;
     }
-
+    public static <V1,V2,V3,V4,V5,V6,K>  List<? extends K> map(List<Tuple6<V1,V2,V3,V4,V5,V6>> list,
+                                                               _6_Function<? super V1, ? super V2, ? super V3,? super V4, ? super V5,? super V6,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Tuple6<V1,V2,V3,V4,V5,V6> tuple6:list){
+            newList.add(mapper.apply(tuple6._1,tuple6._2,tuple6._3,tuple6._4,tuple6._5,tuple6._6));
+        }
+        return newList;
+    }
+    public static <V1,V2,V3,V4,V5,V6,V7,K>  List<? extends K> map(List<Tuple7<V1,V2,V3,V4,V5,V6,V7>> list,
+                                                                  _7_Function<? super V1, ? super V2, ? super V3,? super V4, ? super V5,? super V6,? super V7,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Tuple7<V1,V2,V3,V4,V5,V6,V7> tuple7:list){
+            newList.add(mapper.apply(tuple7._1,tuple7._2,tuple7._3,tuple7._4,tuple7._5,tuple7._6,tuple7._7));
+        }
+        return newList;
+    }
+    public static <V1,V2,V3,V4,V5,V6,V7,V8,K>  List<? extends K> map(List<Tuple8<V1,V2,V3,V4,V5,V6,V7,V8>> list,
+                                                                     _8_Function<? super V1, ? super V2, ? super V3,? super V4, ? super V5,? super V6,? super V7,? super V8,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Tuple8<V1,V2,V3,V4,V5,V6,V7,V8> tuple8:list){
+            newList.add(mapper.apply(tuple8._1,tuple8._2,tuple8._3,tuple8._4,tuple8._5,tuple8._6,tuple8._7,tuple8._8));
+        }
+        return newList;
+    }
 
     //flatten
     public static <V> List<V> flatten(List<Collection<V>> list){
@@ -108,6 +133,57 @@ public class ListMethodUtils {
         }
         return newList;
     }
+    public static <V1,V2,K> List<? extends K> flatMap(List<Collection<Tuple2<V1,V2>>> list,
+                                                      _2_Function<? super V1,? super V2,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Collection<Tuple2<V1,V2>> vs:list){
+            for(Tuple2<V1,V2> v:vs){
+                newList.add(mapper.apply(v._1,v._2));
+            }
+        }
+        return newList;
+    }
+    public static <V1,V2,V3,K> List<? extends K> flatMap(List<Collection<Tuple3<V1,V2,V3>>> list,
+                                                      _3_Function<? super V1,? super V2,? super V3,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Collection<Tuple3<V1,V2,V3>> vs:list){
+            for(Tuple3<V1,V2,V3> v:vs){
+                newList.add(mapper.apply(v._1,v._2,v._3));
+            }
+        }
+        return newList;
+    }
+    public static <V1,V2,V3,V4,K> List<? extends K> flatMap(List<Collection<Tuple4<V1,V2,V3,V4>>> list,
+                                                         _4_Function<? super V1,? super V2,? super V3,? super V4,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Collection<Tuple4<V1,V2,V3,V4>> vs:list){
+            for(Tuple4<V1,V2,V3,V4> v:vs){
+                newList.add(mapper.apply(v._1,v._2,v._3,v._4));
+            }
+        }
+        return newList;
+    }
+    public static <V1,V2,V3,V4,V5,K> List<? extends K> flatMap(List<Collection<Tuple5<V1,V2,V3,V4,V5>>> list,
+                                                            _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Collection<Tuple5<V1,V2,V3,V4,V5>> vs:list){
+            for(Tuple5<V1,V2,V3,V4,V5> v:vs){
+                newList.add(mapper.apply(v._1,v._2,v._3,v._4,v._5));
+            }
+        }
+        return newList;
+    }
+    public static <V1,V2,V3,V4,V5,V6,K> List<? extends K> flatMap(List<Collection<Tuple6<V1,V2,V3,V4,V5,V6>>> list,
+                                                               _6_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? super V6,? extends K> mapper) throws Exception {
+        List<K> newList = new ArrayList<>();
+        for(Collection<Tuple6<V1,V2,V3,V4,V5,V6>> vs:list){
+            for(Tuple6<V1,V2,V3,V4,V5,V6> v:vs){
+                newList.add(mapper.apply(v._1,v._2,v._3,v._4,v._5,v._6));
+            }
+        }
+        return newList;
+    }
+
     public static <V,K> List<K> flatMapArray(List<V[]> list, _1_Function<? super V,? extends K> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(V[] vs:list){
@@ -215,9 +291,17 @@ public class ListMethodUtils {
 
     //reduce
     public static <V> V reduce(List<V> list, _2_Function<? super V,? super V,? extends V> reducer) throws Exception {
-        V v = list.get(0);
-        for(int i=1;i<list.size();i++){
-            v = reducer.apply(v,list.get(i));
+        Iterator<V> iterator = list.iterator();
+        V v = iterator.next();
+        while (iterator.hasNext()){
+            v = reducer.apply(v,iterator.next());
+        }
+        return v;
+    }
+    public static <V> V reduce(List<V> list, _2_Function<? super V,? super V,? extends V> reducer,V init) throws Exception {
+        V v = init;
+        for (V value : list) {
+            v = reducer.apply(v, value);
         }
         return v;
     }
