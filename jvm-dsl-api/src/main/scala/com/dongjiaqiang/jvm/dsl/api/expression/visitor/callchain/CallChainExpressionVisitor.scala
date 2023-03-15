@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.visitor.callchain
 
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.call._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 
 trait CallChainExpressionVisitor[T] {

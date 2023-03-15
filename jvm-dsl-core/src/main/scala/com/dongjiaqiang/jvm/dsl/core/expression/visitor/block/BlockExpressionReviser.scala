@@ -1,9 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.block
 
-import com.dongjiaqiang.jvm.dsl.api.expression
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.LocalVarDef
+import com.dongjiaqiang.jvm.dsl.api.expression.block._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.ExpressionReviser
 
 trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
@@ -28,7 +29,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     if (newLoopVarDef != forExpr.loopVarDef ||
       newLoopVarCondition != forExpr.loopVarCondition ||
       newLoopVarUpdate != forExpr.loopVarUpdate) {
-      For( newLoopVarDef, newLoopVarCondition, newLoopVarUpdate, newBody )
+      For( newLoopVarDef, newLoopVarCondition.asInstanceOf[ValueExpression], newLoopVarUpdate, newBody )
     } else {
       forExpr
     }
@@ -42,7 +43,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     if(newLocalVarDef!=forCollection.localVarDef ||
        newLooped!=forCollection.looped ||
        newBody!=forCollection.body){
-       ForCollection(newLocalVarDef,newLooped,newBody)
+       ForCollection(newLocalVarDef,newLooped.asInstanceOf[ValueExpression],newBody)
     }else{
       forCollection
     }
@@ -58,7 +59,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
        newLoopValueDef!=forMap.loopValueDef ||
        newLooped!=forMap.looped ||
        newBody!=forMap.body){
-        ForMap(newLoopKeyDef,newLoopValueDef,newLooped,newBody)
+        ForMap(newLoopKeyDef,newLoopValueDef,newLooped.asInstanceOf[ValueExpression],newBody)
     }else{
         forMap
     }
@@ -69,7 +70,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     val newCondition = visitor.visit(whileExpr.condition)
     val newBody = visit(whileExpr.body,visitor)
     if(newCondition!=whileExpr.condition || newBody!=whileExpr.body){
-        While(newCondition,newBody)
+        While(newCondition.asInstanceOf[ValueExpression],newBody)
     }else{
         whileExpr
     }
@@ -80,7 +81,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     val newCondition = visitor.visit(doWhile.condition)
     val newBody = visit(doWhile.body,visitor)
     if(newCondition!=doWhile.condition || newBody!=doWhile.body){
-      DoWhile(newCondition,newBody)
+      DoWhile(newCondition.asInstanceOf[ValueExpression],newBody)
     }else{
       doWhile
     }
@@ -101,7 +102,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
                      visitor: ExpressionVisitor[Expression]): Expression = {
 
       val reviseDefault = ExpressionReviser.revise[Expression,Block](ifExpr.default,visitor)
-      val reviseCases = ExpressionReviser.revise[Expression,Block,Expression,Block](ifExpr.cases,visitor,visitor)
+      val reviseCases = ExpressionReviser.revise[ValueExpression,Block,ValueExpression,Block](ifExpr.cases,visitor,visitor)
       if(reviseCases.isEmpty && reviseDefault.isEmpty ){
           ifExpr
       }else{
@@ -161,7 +162,7 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
     val reviseCases = ExpressionReviser.revise[Expression, Block, Expression, Block]( matchCase.cases, visitor, visitor )
     val reviseDefault = ExpressionReviser.revise[Expression, Block]( matchCase.default, visitor )
     if (reviseCases.isDefined || reviseDefault.isDefined) {
-      expression.MatchCase( matchCase.matched, reviseCases.getOrElse( matchCase.cases ),
+      MatchCase( matchCase.matched, reviseCases.getOrElse( matchCase.cases ),
         if (reviseDefault.isEmpty) matchCase.default else reviseDefault.flatten )
     } else {
       matchCase
@@ -191,14 +192,14 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
   }
 
   override def visit(matchList: MatchList, visitor: ExpressionVisitor[Expression]): Expression = {
-    MatchList( revise( matchList.expressions, visitor ) )
+    block.MatchList( revise( matchList.expressions, visitor ) )
   }
 
   override def visit(matchTuple: MatchTuple, visitor: ExpressionVisitor[Expression]): Expression = {
-    MatchTuple( revise( matchTuple.expressions, visitor ) )
+    block.MatchTuple( revise( matchTuple.expressions, visitor ) )
   }
 
   override def visit(matchClass: MatchClass, visitor: ExpressionVisitor[Expression]): Expression = {
-    MatchClass( matchClass.dslType, revise( matchClass.expressions, visitor ) )
+    block.MatchClass( matchClass.dslType, revise( matchClass.expressions, visitor ) )
   }
 }

@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.visitor.unary.expression
 
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.unary._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 
 trait UnaryExpressionVisitor[T] {

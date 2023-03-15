@@ -2,9 +2,17 @@ package com.dongjiaqiang.jvm.dsl.api.expression.visitor
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.LambdaType
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{Assign, LocalVarDef, Null, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.binary._
+import com.dongjiaqiang.jvm.dsl.api.expression.block._
+import com.dongjiaqiang.jvm.dsl.api.expression.call._
+import com.dongjiaqiang.jvm.dsl.api.expression.literal._
+import com.dongjiaqiang.jvm.dsl.api.expression.statement._
+import com.dongjiaqiang.jvm.dsl.api.expression.unary._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.`var`.VarExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.binary.expression.BinaryExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.api.expression.visitor.call.CallExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.callchain.CallChainExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.statement.StatementExpressionVisitor
@@ -15,6 +23,7 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
   with UnaryExpressionVisitor[T]
   with BinaryExpressionVisitor[T]
   with CallChainExpressionVisitor[T]
+  with CallExpressionVisitor[T]
   with BlockExpressionVisitor[T]
   with StatementExpressionVisitor[T]
   with VarExpressionVisitor[T] {
@@ -29,6 +38,10 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
 
   def defaultVisit(expression: Expression, visitor: ExpressionVisitor[T]): T = {
     throw new UnsupportedOperationException( "not supported" )
+  }
+
+  def setCurrentMethodScope(currentMethodScope:MethodScope): Unit = {
+      this.currentMethodScope = currentMethodScope
   }
 
   def visit(expression: Expression): T = {
@@ -108,9 +121,15 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
       case v: ClazzLiteralCallChain ⇒ visit( v, this )
       case v: OptionLiteralCallChain ⇒ visit( v, this )
 
+      //visit call expression
+      case v:StaticCall ⇒ visit(v,this)
+      case v:MethodCall ⇒ visit(v,this)
+      case v:VarCall ⇒ visit(v,this)
+      case v:LiteralCall⇒ visit(v,this)
+
       //visit statement expression
       case v: Assign ⇒
-        v.varRef.getDslType match {
+        v.varRef.getValueType(programScope) match {
           case lambdaType: LambdaType ⇒
             currentLambdaScope = lambdaType
           case _⇒   visit( v, this )

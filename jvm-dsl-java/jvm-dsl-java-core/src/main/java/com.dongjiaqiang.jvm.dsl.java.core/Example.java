@@ -1,12 +1,17 @@
 package com.dongjiaqiang.jvm.dsl.java.core;
 
 
+import com.dongjiaqiang.jvm.dsl.java.api.extend.*;
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._1_Consumer;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._1_Predicate;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._2_Predicate;
+import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2;
 import com.dongjiaqiang.jvm.dsl.java.api.util.CodeUtils;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 class A<T> {
@@ -50,10 +55,126 @@ class B<T> extends A<T> {
     }
 }
 
+class XX{
+    private int i = 0;
+
+    private _1_Function<Integer,Integer> function = new _1_Function<Integer, Integer>() {
+        @Override
+        public Integer apply(Integer integer) throws Exception {
+            if(i>10){
+                i++;
+            }
+            return i;
+        }
+    };
+}
+
+class Super{
+
+}
+class Super1 extends Super{}
+
+class Supper2 extends Super1{}
+
+interface FF{}
+interface SS{}
+
+class AA implements FF,SS{}
+
 public class Example {
 
 
+
+
+
+
+    public synchronized boolean match(int i){
+            return true;
+    }
+
     public static void main(String[] args) throws Exception {
+
+
+        Success<Long> success = null;
+        Success<Integer> success1 = null;
+        final Success<? extends Number>[] successes = CodeUtils.ofArray(success1, success);
+
+        Consumer<String> consumer = null;
+
+        Consumer<? extends CharSequence> consumer1 = consumer;
+        consumer1.accept("xx");
+
+        Function<CharSequence,String> function = null;
+
+        Function<? super String,? extends CharSequence> function1 = function;
+        function1.apply("x");
+
+
+       List<Function<? super CharSequence,? extends Object>> list =  CodeUtils.ofList(function1,function);
+
+       list.get(0).apply()
+
+        _1_Consumer<FF> consumer = null;
+        _1_Consumer<SS> consumer1 = null;
+
+        _1_Consumer<? super AA> consumer2 = consumer;
+
+        consumer2.accept(new AA());
+
+        final List<_1_Consumer<? super AA>> consumers = CodeUtils.ofList(consumer1, consumer);
+
+        consumers.get(0).accept(new AA());
+
+        int x = 'x';
+
+
+        List<Success<? extends Object>> ofList= CodeUtils.ofList(x,y);
+
+
+        Either<Integer,? extends CharSequence > either = new Left<Integer,String>(10);
+        Either<Integer,? extends CharSequence> either1 = new Right<>("x");
+
+     //   Either<? extends CharSequence,? extends CharSequence> either2 = either1;
+
+        List<Either<Integer,? extends CharSequence>> list = CodeUtils.ofList(either1,either);
+
+
+
+        Tuple2<String ,Integer> xx = new Tuple2<String,Integer>("x",1);
+        Tuple2<Integer,String > xx1 = new Tuple2<>(1,"x");
+
+        List<Tuple2<? extends Object,? extends Object>> list1 = CodeUtils.ofList(xx,xx1);
+
+       Try<Try<Integer>> tryTry = new Success<>(new Success<>(10));
+
+
+       Try<? extends Try<? extends Object>> tryTry1 = tryTry;
+
+        _1_Function<String,CharSequence> function = new _1_Function<String, CharSequence>() {
+            @Override
+            public CharSequence apply(String s) throws Exception {
+                return "x";
+            }
+        };
+
+        _1_Function<? extends CharSequence,? super CharSequence> function1 = function;
+
+
+        class B {
+
+        }
+
+        class C extends B{
+
+        }
+
+        class D extends C{
+
+        }
+
+        B[] bs = CodeUtils.ofArray(new B(),new B());
+
+        final B[][] bs1 = CodeUtils.ofArray(CodeUtils.ofArray(new D(), new C()),CodeUtils.ofArray(new D(), new B()));
 
 //        _LongConsumer longConsumer = new _LongConsumer(){
 //            @Override
@@ -75,6 +196,26 @@ public class Example {
          *
          */
 
+        _1_Function<_1_Function<String,Long>,String> function2 = null;
+
+        _1_Function<String,String> function4 = new _1_Function<String, String>() {
+            @Override
+            public String apply(String str) throws Exception {
+                return null;
+            }
+        };
+
+        _1_Function<? super String ,? extends String> function11 =function4;
+
+
+
+      function11.apply("xx");
+
+        function4.apply(new StringBuilder().toString());
+
+        _1_Function<_1_Function<StringBuilder,Long>,String> function3 = null;
+
+       List< _1_Function<? extends _1_Function<? extends CharSequence,Long>,? extends CharSequence>> list2 =  CodeUtils.ofList(function3,function2);
 
 
         System.out.println(CodeUtils.mkString(CodeUtils.ofList(1,2,3,4),"#",new _2_Predicate<Integer,StringBuilder>(){
@@ -324,5 +465,20 @@ public class Example {
 //
 //        List xsff = (List)dddd;
 //        xsff.size()
+        List<CharSequence> charSequences = CodeUtils.ofList("xx",new StringBuilder());
+
+        char x = 'x';
+        x= (byte)10;
+        x =1;
+
+        List<Integer> objects  =  CodeUtils.ofList(1,2,3);
+
+        Integer[] objects1 = CodeUtils.ofArray(1,2,3);
+        Object[] xxx = objects1;
+        xxx[0]= 1f;
+
+
+
+        List<List<Object>> xx = CodeUtils.ofList(CodeUtils.ofList(1,2),CodeUtils.ofList());
     }
 }

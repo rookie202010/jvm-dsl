@@ -1,18 +1,19 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.{FutureType, TryType, UnResolvedType}
-import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParserException
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.block.{Async, CustomBlockExpression, Try}
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.BlockExpressionContext
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionContext, Expression,GeneratorContext] {
+object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionContext, ValueExpression,GeneratorContext] {
 
   override def generate(exprContext: ExprContext,
                         ruleContext: BlockExpressionContext,
-                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
+                        generatorContext: GeneratorContext = NoneGeneratorContext): ValueExpression = {
     val blockType = ruleContext.IDENTIFIER( ).getText
     val fieldScope = Option.apply( ruleContext.variable( ) ).map( v ⇒ {
 
@@ -34,7 +35,7 @@ object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionCont
     blockType match {
       case "Try" ⇒
         if (ruleContext.variable( ) != null) {
-          throw ExpressionParserException( "Try block must not define variable" )
+          throw ExpressionParseException( "Try block must not define variable" )
         } else {
           Try( block, TryType( UnResolvedType ) )
         }

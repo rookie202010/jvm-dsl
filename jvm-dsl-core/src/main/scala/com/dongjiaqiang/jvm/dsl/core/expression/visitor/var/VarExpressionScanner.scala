@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.`var`
 
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{LocalVarDef, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.`var`.VarExpressionVisitor
 

@@ -1,8 +1,15 @@
 package com.dongjiaqiang.jvm.dsl.core.expression
 
+import com.dongjiaqiang.jvm.dsl.api
 import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.expression._
-import com.dongjiaqiang.jvm.dsl.core.optimize.DefaultReviser
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{Assign, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.binary._
+import com.dongjiaqiang.jvm.dsl.api.expression.block.{Async, CustomBlockExpression, Lambda, Try}
+import com.dongjiaqiang.jvm.dsl.api.expression.call.{MethodCall, VarCall}
+import com.dongjiaqiang.jvm.dsl.api.expression.literal.{ClazzLiteral, ListLiteral, MapLiteral}
+import com.dongjiaqiang.jvm.dsl.api.expression.statement.{Return, Throw}
+import com.dongjiaqiang.jvm.dsl.core.optimize.OptimizeExpression
 import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
@@ -98,17 +105,17 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
 
       val ifBlock1 = blockScope statementBlock(false) expression (blockScope ⇒ {
         blockScope.varDef( "plus", LambdaType( Some( DoubleType ), DoubleType ), Some( Lambda( Array( "i" ), (blockScope lambdaBlock() expression (scope ⇒ {
-          Return( Some(Add( scope.varRef( "i" ), 1 int ) ))
+          Return( Some(binary.Add( scope.varRef( "i" ), 1 int ) ))
         })).block ) ) )
       }) expression(blockScope⇒{
-        Return( Some(VarCall( blockScope.varRef( "plus" ), "apply", Array( blockScope.varRef( "a" ) ) ) ))
+        Return( Some(call.VarCall( blockScope.varRef( "plus" ), "apply", Array( blockScope.varRef( "a" ) ) ) ))
       })
 
       val ifBlock2 = blockScope statementBlock (false) expression (_ ⇒ {
-        Throw( new ClazzLiteral( Array( "\"xx\"" str ), ClazzType( "RuntimeException" ) ) )
+        statement.Throw( new ClazzLiteral( Array( "\"xx\"" str ), ClazzType( "RuntimeException" ) ) )
         })
 
-      If(Array((Ge( blockScope.varRef( "a" ), blockScope.varRef( "b" )),ifBlock1.block)),Some(ifBlock2.block))
+      If(Array((binary.Ge( blockScope.varRef( "a" ), blockScope.varRef( "b" )),ifBlock1.block)),Some(ifBlock2.block))
 
       })
 
@@ -221,7 +228,7 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == programOptimize )
   }
 
   test("define synchronized"){
@@ -306,7 +313,7 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == programOptimize )
   }
 
 
@@ -375,12 +382,12 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
       "method1"
     ) bodyBlock() expression(blockScope⇒{
 
-      val firstCondition = Lt(blockScope.varRef("a"),blockScope.varRef("b"))
+      val firstCondition = binary.Lt(blockScope.varRef("a"),blockScope.varRef("b"))
       val firstBlock = blockScope statementBlock(false) expression(scope⇒{
         Return(Some(scope.varRef("str1")))
       })
 
-      val secondCondition = Eq(blockScope.varRef("a"),blockScope.varRef("b"))
+      val secondCondition = binary.Eq(blockScope.varRef("a"),blockScope.varRef("b"))
       val secondBlock = blockScope statementBlock(false) expression(scope⇒{
         Return(Some(scope.varRef("str2")))
       })
@@ -394,11 +401,11 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
     program.method(
       "method2"
     ) bodyBlock() expression(blockScope⇒{
-      IfCondition(Lt(blockScope.varRef("a"),blockScope.varRef("b")),first = true)
+      IfCondition(binary.Lt(blockScope.varRef("a"),blockScope.varRef("b")),first = true)
     }) expression(blockScope⇒{
       new IfBlock(ArrayBuffer(Return(Some(blockScope.varRef("a")))))
     }) expression(blockScope⇒{
-      IfCondition(Eq(blockScope.varRef("a"),blockScope.varRef("b")),first = false)
+      IfCondition(binary.Eq(blockScope.varRef("a"),blockScope.varRef("b")),first = false)
     }) expression(blockScope⇒{
       new IfBlock(ArrayBuffer(Return(Some(blockScope.varRef("b")))))
     }) expression(_⇒{
@@ -409,12 +416,12 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
       "method2"
       ) bodyBlock() expression (blockScope ⇒ {
 
-      val firstCondition = Lt( blockScope.varRef( "a" ), blockScope.varRef( "b" ) )
+      val firstCondition = binary.Lt( blockScope.varRef( "a" ), blockScope.varRef( "b" ) )
       val firstBlock = blockScope statementBlock (false) expression (scope ⇒ {
         Return(Some(scope.varRef("a")))
       })
 
-      val secondCondition = Eq(blockScope.varRef("a"),blockScope.varRef("b"))
+      val secondCondition = binary.Eq(blockScope.varRef("a"),blockScope.varRef("b"))
       val secondBlock = blockScope statementBlock (false) expression (scope ⇒ {
         Return(Some(scope.varRef("b")))
       })
@@ -432,7 +439,7 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
       "method3"
       ) bodyBlock() expression (blockScope ⇒ {
 
-      val firstCondition = Gt(blockScope.varRef("a"),blockScope.varRef("b"))
+      val firstCondition = binary.Gt(blockScope.varRef("a"),blockScope.varRef("b"))
       val firstBlock = blockScope statementBlock (false) expression (_⇒ {
         Return(Some(false bool))
       })
@@ -445,14 +452,14 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
     program.method(
       "method4"
     ) bodyBlock() expression (blockScope ⇒ {
-      IfCondition( Gt( blockScope.varRef( "a" ), blockScope.varRef( "b" ) ), first = true )
+      IfCondition( binary.Gt( blockScope.varRef( "a" ), blockScope.varRef( "b" ) ), first = true )
     }) ifBlock() expression (_ ⇒ Return( Some(false bool ))) belongBlock() ifBlock() expression (_ ⇒ Return( Some(true bool )))
 
     programOptimize method (
       "method4"
       ) bodyBlock() expression (blockScope ⇒ {
 
-      val firstCondition = Gt( blockScope.varRef( "a" ), blockScope.varRef( "b" ) )
+      val firstCondition = binary.Gt( blockScope.varRef( "a" ), blockScope.varRef( "b" ) )
       val firstBlock = blockScope statementBlock (false) expression (_ ⇒ {
         Return( Some(false bool ))
       })
@@ -467,7 +474,7 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == programOptimize )
 
   }
 
@@ -500,18 +507,18 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
       val block = blockScope lambdaBlock() expression (scope ⇒ {
         val a = scope.varRef( "a" )
         val b = scope.varRef( "b" )
-        IfCondition( Gt( a, b ), first = true )
+        IfCondition( binary.Gt( a, b ), first = true )
       }) expression (scope ⇒ {
         val a = scope.varRef( "a" )
         new IfBlock( ArrayBuffer( Return( Some(a ) ) ))
       }) expression (_ ⇒ {
-        new IfBlock( ArrayBuffer( Throw( new ClazzLiteral( Array( "\"error happen\"" str ), ClazzType( "RuntimeException" ) ) ) ) )
+        new IfBlock( ArrayBuffer( statement.Throw( new ClazzLiteral( Array( "\"error happen\"" str ), ClazzType( "RuntimeException" ) ) ) ) )
       })
 
       blockScope.varDef( "result", ClazzType( "Try", Array( IntType ) ), Some( Try( block.block, TryType( UnResolvedType ) ) ) )
     }) expression (blockScope ⇒ {
       val result = blockScope.varRef( "result" )
-      Return( Some(VarCall( result, "get", Array( ) ) ))
+      Return( Some(call.VarCall( result, "get", Array( ) ) ))
     })
 
     programOptimize.method(
@@ -528,22 +535,22 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
         })
 
         val ifBlock2 = scope statementBlock (false) expression (scope ⇒ {
-          Throw( new ClazzLiteral( Array( "\"error happen\"" str ), ClazzType( "RuntimeException" ) ) )
+          statement.Throw( new ClazzLiteral( Array( "\"error happen\"" str ), ClazzType( "RuntimeException" ) ) )
         })
 
-        If( Array( (Gt( a, b ), ifBlock1.block) ), Some( ifBlock2.block ) )
+        If( Array( (binary.Gt( a, b ), ifBlock1.block) ), Some( ifBlock2.block ) )
       })
 
         blockScope.varDef( "result", ClazzType( "Try", Array( IntType ) ), Some( Try( block.block, TryType( UnResolvedType ) ) ) )
 
       }) expression (blockScope ⇒ {
       val result = blockScope.varRef( "result" )
-      Return( Some(VarCall( result, "get", Array( ) ) ))
+      Return( Some(call.VarCall( result, "get", Array( ) ) ))
     })
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == programOptimize )
 
   }
 
@@ -573,18 +580,18 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
       val block = blockScope lambdaBlock() expression (scope ⇒ {
         val a = scope.varRef( "a" )
         val b = scope.varRef( "b" )
-        Return( Some(Add( a, b ) ))
+        Return( Some(binary.Add( a, b ) ))
       })
 
       blockScope.varDef( "future", FutureType( IntType ), Some( Async( block.block, es.fieldScope, FutureType( UnResolvedType ) ) ) )
     }) expression (blockScope ⇒ {
       val result = blockScope.varRef( "future" )
-      Return( Some(VarCall( result, "get", Array( ) ) ))
+      Return( Some(call.VarCall( result, "get", Array( ) ) ))
     })
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == program )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == program )
   }
 
   test( "define custom block" ) {
@@ -639,15 +646,15 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
       val block = blockScope lambdaBlock(true) expression (scope ⇒ {
         Assign( VarRef( List( "a" ),MutableMap(), None ), Mul(scope.varRef( "a" ),MethodCall(program.programScope.methods.get("method2"),"method2",Array(scope.varRef("b"))) ))
       }) expression (scope ⇒ {
-        Assign( VarRef( List( "b" ),MutableMap(),  None ), scope.varRef( "b" ) )
+        api.expression.`var`.Assign( api.expression.`var`.VarRef( List( "b" ),MutableMap(),  None ), scope.varRef( "b" ) )
       }) expression (scope ⇒ {
-        Assign( VarRef( List( "c" ),MutableMap(),  None ), scope.varRef( "json2" ) )
+        api.expression.`var`.Assign( api.expression.`var`.VarRef( List( "c" ),MutableMap(),  None ), scope.varRef( "json2" ) )
       })
 
       blockScope.varDef( "json3", ClazzType( "Json" ), Some( CustomBlockExpression( "Json", block.block, None ) ) )
     }) expression (blockScope ⇒ {
       val result = blockScope.varRef( "json3" )
-      Return( Some(VarCall( result, "getInt", Array( "\"a\"" str ) ) ))
+      Return( Some(call.VarCall( result, "getInt", Array( "\"a\"" str ) ) ))
     })
 
     program.method("method2") bodyBlock() expression(blockScope⇒{
@@ -656,7 +663,7 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == program )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == program )
   }
 
 }

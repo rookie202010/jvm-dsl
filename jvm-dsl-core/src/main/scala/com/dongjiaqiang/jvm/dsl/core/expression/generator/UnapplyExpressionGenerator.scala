@@ -1,7 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.ClazzType
+import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.block.{MatchClass, MatchHead, MatchList, MatchTuple}
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
@@ -32,8 +34,24 @@ object UnapplyExpressionGenerator extends IExpressionGenerator[UnapplyExpression
       case c: UnapplyVarExprContext ⇒
         Right( c.localVariable( ).IDENTIFIER( ).getText )
       case c: UnapplyClazzExprContext ⇒
-        Left( MatchClass( ClazzType( c.clazzType( ).getText, Array( ) ),
-          c.unapplyExpression( ).map( c ⇒ generateExpr( exprContext, c ) ).toArray ) )
+
+        val expressions = c.unapplyExpression( ).map( c ⇒ generateExpr( exprContext, c ) ).toArray
+        val clazzName = c.clazzType().getText
+        exprContext.getProgramScope.classes.get(clazzName) match {
+          case Some(clazzScope)⇒
+            Left( MatchClass(  DefinitionClazzType(clazzName,clazzScope),
+              expressions ) )
+          case None⇒
+            clazzName match {
+              case "Left" ⇒ Left( MatchClass( LeftType( UnResolvedType ), expressions ) )
+              case "Right"⇒ Left(MatchClass(RightType(UnResolvedType),expressions))
+              case "Some"⇒ Left(MatchClass(SomeType(UnResolvedType),expressions))
+              case "None"⇒ Left(MatchClass(NoneType,Array()))
+              case "Success"⇒ Left(MatchClass(SuccessType(UnResolvedType),expressions))
+              case "Failure" ⇒ Left(MatchClass(FailureType,expressions))
+              case _ ⇒ throw ExpressionParseException(s"class in match class expression must be definite in program scope ${clazzName}")
+            }
+        }
       case c: UnapplyHeadExprContext ⇒
         val cs = generateHeadExpr(exprContext,c)
         Left( MatchHead( cs.slice( 0, cs.length - 1 ),
@@ -46,7 +64,12 @@ object UnapplyExpressionGenerator extends IExpressionGenerator[UnapplyExpression
                         generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
     generateExpr( exprContext, ruleContext ) match {
       case Left( expression ) ⇒ expression
-      case Right( clazzName ) ⇒ new ObjectLiteral(ClazzType(clazzName))
+      case Right( clazzName ) ⇒
+        clazzName match {
+          case "None"⇒ MatchClass(NoneType,Array[Either[Expression,String]]())
+          case _⇒ throw ExpressionParseException(s"$clazzName must have fields")
+        }
+
     }
   }
 }

@@ -1,6 +1,10 @@
 package com.dongjiaqiang.jvm.dsl.core
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DslType}
+import com.dongjiaqiang.jvm.dsl.api
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DslType, ImportClazzType}
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{LocalVarDef, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Block
+import com.dongjiaqiang.jvm.dsl.api.expression.literal._
 import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.scope._
 import com.dongjiaqiang.jvm.dsl.core.parser.{ExpressionParser, SymbolDefParser}
@@ -66,6 +70,19 @@ package object expression {
     expressionParser.program
   }
 
+  def generateProgram(input: String,dslTypeResolver:DslType⇒Option[ImportClazzType]): Program = {
+    val jvmDslLexer = new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) )
+    val jvmDslParser = new JvmDslParserParser( new CommonTokenStream( jvmDslLexer ) )
+    val symbolDefParser = new SymbolDefParser( )
+    ParseTreeWalker.DEFAULT.walk( symbolDefParser, jvmDslParser.program( ) )
+
+    symbolDefParser.programScope.importManager.registerDslTypeResolver(dslTypeResolver)
+    val expressionParser = new ExpressionParser( symbolDefParser.programScope )
+    ParseTreeWalker.DEFAULT.walk( expressionParser, new JvmDslParserParser( new CommonTokenStream( new JvmDslLexer( CharStreams.fromReader( new StringReader( input ) ) ) ) )
+      .program( ) )
+    expressionParser.program
+  }
+
   implicit class EnhanceInt(value:Int){
       def int:IntLiteral={
           new IntLiteral(value)
@@ -106,7 +123,7 @@ package object expression {
       def str:StringLiteral={
           new StringLiteral(value)
       }
-      def clazz(expressions:Expression*):ClazzLiteral={
+      def clazz(expressions:ValueExpression*):ClazzLiteral={
           new ClazzLiteral(expressions.toArray,ClazzType(value,Array()))
       }
   }
@@ -186,7 +203,7 @@ package object expression {
     }
 
     def forLoopBlock(loopVarDef: BlockScope ⇒ LocalVarDef,
-                     loopVarCondition: BlockScope ⇒ Expression,
+                     loopVarCondition: BlockScope ⇒ ValueExpression,
                      loopVarUpdate: BlockScope ⇒ Expression): BlockWithScope = {
       block( blockScope ⇒ new ForLoop( loopVarDef.apply( blockScope ),
         loopVarCondition.apply( blockScope ),
@@ -194,13 +211,13 @@ package object expression {
     }
 
     def forCollectionBlock(loopVarDef: BlockScope ⇒ LocalVarDef,
-                           looped: BlockScope ⇒ Expression):BlockWithScope={
+                           looped: BlockScope ⇒ ValueExpression):BlockWithScope={
         block(blockScope⇒new ForLoopCollection(loopVarDef.apply(blockScope),looped.apply(blockScope)))
     }
 
     def forMapBlock(loopKeyDef: BlockScope ⇒ LocalVarDef,
                     loopVarDef: BlockScope ⇒ LocalVarDef,
-                    looped: BlockScope ⇒ Expression):BlockWithScope={
+                    looped: BlockScope ⇒ ValueExpression):BlockWithScope={
       block(blockScope⇒new ForLoopMap(loopKeyDef.apply(blockScope),loopVarDef.apply(blockScope),looped.apply(blockScope)))
     }
 
@@ -233,12 +250,12 @@ package object expression {
     }
 
 
-    def updateVarDef(name: String, dslType: DslType, assign: Option[Expression] = None): BlockWithScope = {
+    def updateVarDef(name: String, dslType: DslType, assign: Option[ValueExpression] = None): BlockWithScope = {
       blockWithScope.block.expressions.append( LocalVarDef( blockWithScope.blockScope.fields( name ), dslType, assign ) )
       blockWithScope
     }
 
-    def varDef(name: String, dslType: DslType, assign: Option[Expression] = None): LocalVarDef = {
+    def varDef(name: String, dslType: DslType, assign: Option[ValueExpression] = None): LocalVarDef = {
       blockWithScope.blockScope match {
         case forStatementBlockScope: ForStatementBlockScope⇒
           forStatementBlockScope.initFields.get(name) match {
@@ -253,7 +270,7 @@ package object expression {
 
     }
 
-    def resolveVarRef(arrayIndexExpressions:MutableMap[Int,List[Expression]],name:String*):VarRef={
+    def resolveVarRef(arrayIndexExpressions:MutableMap[Int,List[ValueExpression]],name:String*):VarRef={
       blockWithScope.blockScope.fields.get( name.head ) match {
         case Some( fieldScope ) ⇒ VarRef( name.toList, arrayIndexExpressions, Some( fieldScope ) )
         case None ⇒
@@ -293,7 +310,7 @@ package object expression {
 
   implicit class EnhanceBlockScope(blockScope: BlockScope){
 
-    def varDef(name:String,dslType: DslType, assign:Option[Expression] = None):LocalVarDef={
+    def varDef(name:String,dslType: DslType, assign:Option[ValueExpression] = None):LocalVarDef={
       val fieldScope = blockScope match {
         case forStatementBlockScope:ForStatementBlockScope⇒
               if(forStatementBlockScope.initFields.contains(name)){
@@ -307,7 +324,7 @@ package object expression {
       LocalVarDef(fieldScope,dslType,assign)
     }
 
-    def resolveVarRef(arrayIndexExpressions:MutableMap[Int,List[Expression]],name:String*):VarRef={
+    def resolveVarRef(arrayIndexExpressions:MutableMap[Int,List[ValueExpression]],name:String*):VarRef={
       blockScope.fields.get( name.head ) match {
         case Some( fieldScope ) ⇒ VarRef( name.toList, arrayIndexExpressions, Some( fieldScope ) )
         case None ⇒
@@ -323,7 +340,7 @@ package object expression {
           blockScope.parentScope match {
             case methodScope: MethodScope ⇒
               methodScope.params.get( name.head ) match {
-                case Some( fieldScope ) ⇒ VarRef( name.toList, MutableMap( ), Some( fieldScope ) )
+                case Some( fieldScope ) ⇒ api.expression.`var`.VarRef( name.toList, MutableMap( ), Some( fieldScope ) )
                 case None ⇒ blockScope.topScope match {
                   case clazzScope: ClazzScope ⇒
                     VarRef( name.toList, arrayIndexExpressions, clazzScope.fields.get( name.head ) )
@@ -356,12 +373,12 @@ package object expression {
     }
 
     def varRef(name:String*):VarRef={
-        VarRef(name.toList,MutableMap(),program.programScope.fields.get(name.head))
+        api.expression.`var`.VarRef(name.toList,MutableMap(),program.programScope.fields.get(name.head))
     }
 
     def method(name:String,ignoreVarRefResolved:Boolean = false):ProgramMethod={
         val methodScope = program.programScope.methods(name)
-        val method = Method(methodScope,Block(ArrayBuffer(),ignoreVarRefResolved))
+        val method = Method(methodScope,block.Block(ArrayBuffer(),ignoreVarRefResolved))
         program.methods.put(name,method)
         ProgramMethod(method, program)
     }

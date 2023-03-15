@@ -32,7 +32,7 @@ class MatchCaseParser(val programScope: ProgramScope) {
       caseExpr ⇒
         if (caseExpr.typeMatchExpression( ) != null) {
           val fieldName = caseExpr.typeMatchExpression( ).localVariable( ).IDENTIFIER( ).getText
-          val dslType = toDslType( caseExpr.typeMatchExpression( ).`type`( ) )
+          val dslType = toDslType( caseExpr.typeMatchExpression( ).`type`( ),programScope )
           caseQueue.add( Array( (fieldName, dslType) ) )
         } else {
           caseQueue.add( resolveUnapplyExpression( caseExpr.unapplyExpression( ) ).map( v ⇒ (v, UnResolvedType) ) )

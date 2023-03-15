@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.api
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.ClazzType
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DefinitionClazzType}
 
 import scala.language.postfixOps
 
@@ -46,6 +46,13 @@ package object scope {
       }
     }
 
+    def resolveDefinitionClazzType(index: Int,
+                                   clazzType: DefinitionClazzType,
+                                   fieldScope: FieldScope,
+                                   childRef: List[(String, Int)]): Option[FieldScope] = {
+        fieldScope.resolve( childRef, arrayRefsIndex, clazzType ).map( _ ⇒ fieldScope )
+    }
+
     if (skipCurrentScope) {
       return parentScope.flatMap( _.resolveVarRefs( currentScope.outerScopeIndex, refs,arrayRefsIndex ) )
     }
@@ -77,6 +84,16 @@ package object scope {
                   }
                 } else {
                   resolve(refIndex,clazzType, fieldScope, childRef)
+                }
+              case definitionClazzType: DefinitionClazzType⇒
+                if (!backRef) {
+                  if (index >= fieldScope.outerScopeIndex) {
+                    resolveDefinitionClazzType( refIndex, definitionClazzType, fieldScope, childRef )
+                  } else {
+                    None
+                  }
+                } else {
+                  resolveDefinitionClazzType( refIndex, definitionClazzType, fieldScope, childRef )
                 }
               case _ ⇒ None
             }

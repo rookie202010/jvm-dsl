@@ -1,8 +1,14 @@
 package com.dongjiaqiang.jvm.dsl.core.expression
 
+import com.dongjiaqiang.jvm.dsl.api
 import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, IntType, ListType, StringType}
 import com.dongjiaqiang.jvm.dsl.api.expression._
-import com.dongjiaqiang.jvm.dsl.core.optimize.DefaultReviser
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.Assign
+import com.dongjiaqiang.jvm.dsl.api.expression.binary._
+import com.dongjiaqiang.jvm.dsl.api.expression.call.VarCall
+import com.dongjiaqiang.jvm.dsl.api.expression.literal.ClazzLiteral
+import com.dongjiaqiang.jvm.dsl.api.expression.statement.{Break, Continue, Return}
+import com.dongjiaqiang.jvm.dsl.core.optimize.OptimizeExpression
 import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
@@ -68,7 +74,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
         scope⇒Lt(scope.varRef("i"),100 int),
         scope⇒Assign(scope.varRef("i"),Add(scope.varRef("i"),1 int))
     ) expression(blockScope⇒{
-        Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),blockScope.varRef("i")))
+        api.expression.`var`.Assign(blockScope.varRef("j"),binary.Add(blockScope.varRef("j"),blockScope.varRef("i")))
     }) belongBlock() expression(blockScope⇒{
         Return(Some(blockScope.varRef("j")))
     })
@@ -81,11 +87,11 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       val scope = blockScope statementBlock(false)
 
       val loopVarDef = scope.varDef("i",IntType,Some(0 int))
-      val loopVarCondition = Lt(scope.varRef("i"),100 int)
-      val loopVarUpdate = Assign(scope.varRef("i"),Add(scope.varRef("i"),1 int))
+      val loopVarCondition = binary.Lt(scope.varRef("i"),100 int)
+      val loopVarUpdate = api.expression.`var`.Assign(scope.varRef("i"),binary.Add(scope.varRef("i"),1 int))
 
       val body = scope expression(blockScope⇒{
-        Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),blockScope.varRef("i")))
+        api.expression.`var`.Assign(blockScope.varRef("j"),binary.Add(blockScope.varRef("j"),blockScope.varRef("i")))
       })
 
       For(loopVarDef,loopVarCondition,loopVarUpdate,body.block)
@@ -99,7 +105,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       scope⇒scope.varDef("i",IntType,None),
       scope⇒scope.varRef("list")
     ) expression(blockScope⇒{
-      Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),blockScope.varRef("i")))
+      api.expression.`var`.Assign(blockScope.varRef("j"),binary.Add(blockScope.varRef("j"),blockScope.varRef("i")))
     }) belongBlock() expression (blockScope ⇒ {
       Return( Some(blockScope.varRef( "j" ) ))
     })
@@ -114,7 +120,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       val looped = scope.varRef("list")
 
       val body = scope expression (blockScope ⇒ {
-        Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), blockScope.varRef( "i" ) ) )
+        api.expression.`var`.Assign( blockScope.varRef( "j" ), binary.Add( blockScope.varRef( "j" ), blockScope.varRef( "i" ) ) )
       })
 
       ForCollection( loopVarDef, looped, body.block )
@@ -130,11 +136,11 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
         scope⇒scope.varRef("map")) expression(blockScope⇒{
         VarCall(blockScope.varRef("sb"),"append",Array(blockScope.varRef("key")))
     }) expression (blockScope ⇒ {
-      VarCall( blockScope.varRef( "sb" ), "append", Array(  ',' char) )
+      call.VarCall( blockScope.varRef( "sb" ), "append", Array(  ',' char) )
     }) expression (blockScope ⇒ {
-      VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "value" ) ) )
+      call.VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "value" ) ) )
     }) belongBlock() expression(blockScope⇒{
-        Return(Some(VarCall(blockScope.varRef("sb"),"toString",Array())))
+        Return(Some(call.VarCall(blockScope.varRef("sb"),"toString",Array())))
     })
 
     programOptimize method (
@@ -149,16 +155,16 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       val looped = scope.varRef("map")
 
       val body = scope expression (blockScope ⇒ {
-        VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "key" ) ) )
+        call.VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "key" ) ) )
       }) expression (blockScope ⇒ {
-        VarCall( blockScope.varRef( "sb" ), "append", Array( ',' char ) )
+        call.VarCall( blockScope.varRef( "sb" ), "append", Array( ',' char ) )
       }) expression (blockScope ⇒ {
-        VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "value" ) ) )
+        call.VarCall( blockScope.varRef( "sb" ), "append", Array( blockScope.varRef( "value" ) ) )
       })
 
       ForMap( loopKeyDef,loopValueDef,looped,body.block )
     }) expression (blockScope ⇒ {
-      Return( Some(VarCall( blockScope.varRef( "sb" ), "toString", Array( ) ) ))
+      Return( Some(call.VarCall( blockScope.varRef( "sb" ), "toString", Array( ) ) ))
     })
 
 
@@ -174,7 +180,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       scope ⇒ scope.varDef( "j", IntType, None ),
       scope ⇒ scope.varRef( "i" )
     ) expression (blockScope ⇒ {
-      Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
+      api.expression.`var`.Assign( blockScope.varRef( "sum" ), binary.Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
     }) belongBlock() belongBlock() expression (blockScope ⇒ {
       Return( Some(blockScope.varRef( "sum" ) ))
     })
@@ -195,7 +201,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
         val localVarDef = scope.varDef( "j", IntType, None )
         val looped = scope.varRef( "i" )
         val body = scope expression(scope⇒{
-          Assign( scope.varRef( "sum" ), Add( scope.varRef( "sum" ), scope.varRef( "j" ) ) )
+          api.expression.`var`.Assign( scope.varRef( "sum" ), binary.Add( scope.varRef( "sum" ), scope.varRef( "j" ) ) )
         })
         ForCollection(localVarDef,looped,body.block)
       })
@@ -207,7 +213,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == programOptimize )
 
   }
 
@@ -257,17 +263,17 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     program method(
       "method2"
     ) bodyBlock() updateVarDef ("j",IntType,Some(0 int)) updateVarDef ("i",IntType,Some(0 int)) updateVarDef ("sum",IntType,Some((0 int))) expression (blockScope⇒{
-        WhileCondition(Lt(blockScope.varRef("j"),100 int))
+        WhileCondition(binary.Lt(blockScope.varRef("j"),100 int))
     }) whileBlock() expression (blockScope⇒{
-        WhileCondition(Lt(blockScope.varRef("i"),100 int))
+        WhileCondition(binary.Lt(blockScope.varRef("i"),100 int))
     }) whileBlock() expression (blockScope⇒{
-        Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("i")))
+        api.expression.`var`.Assign(blockScope.varRef("sum"),binary.Add(blockScope.varRef("sum"),blockScope.varRef("i")))
     }) expression (blockScope⇒{
-      Assign(blockScope.varRef("i"),Add(blockScope.varRef("i"),1 int))
+      api.expression.`var`.Assign(blockScope.varRef("i"),binary.Add(blockScope.varRef("i"),1 int))
     }) belongBlock() expression(blockScope⇒{
-      Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("j")))
+      api.expression.`var`.Assign(blockScope.varRef("sum"),binary.Add(blockScope.varRef("sum"),blockScope.varRef("j")))
     }) expression(blockScope ⇒ {
-      Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), 1 int ) )
+      api.expression.`var`.Assign( blockScope.varRef( "j" ), binary.Add( blockScope.varRef( "j" ), 1 int ) )
     })
 
     programOptimize method(
@@ -277,24 +283,24 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       "i",IntType,Some(0 int)) updateVarDef (
       "sum",IntType,Some((0 int))) expression(blockScope⇒{
 
-      val condition1 = Lt(blockScope.varRef("j"),100 int)
+      val condition1 = binary.Lt(blockScope.varRef("j"),100 int)
       val childScope = blockScope statementBlock(false)
       val childScope1 = childScope statementBlock(false)
 
-      val condition2 = Lt(childScope.varRef("i"),100 int)
+      val condition2 = binary.Lt(childScope.varRef("i"),100 int)
       val body2 = childScope1 expression(blockScope⇒{
-        Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("i")))
+        api.expression.`var`.Assign(blockScope.varRef("sum"),binary.Add(blockScope.varRef("sum"),blockScope.varRef("i")))
       }) expression (blockScope ⇒ {
-        Assign( blockScope.varRef( "i" ), Add( blockScope.varRef( "i" ), 1 int ) )
+        api.expression.`var`.Assign( blockScope.varRef( "i" ), binary.Add( blockScope.varRef( "i" ), 1 int ) )
       })
 
 
       val body1 = childScope expression (_⇒ {
         While(condition2,body2.block)
       })expression (blockScope ⇒ {
-          Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
+          api.expression.`var`.Assign( blockScope.varRef( "sum" ), binary.Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
         }) expression (blockScope ⇒ {
-          Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), 1 int ) )
+          api.expression.`var`.Assign( blockScope.varRef( "j" ), binary.Add( blockScope.varRef( "j" ), 1 int ) )
         })
 
       While(condition1,body1.block)
@@ -305,7 +311,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       ) bodyBlock() updateVarDef("i", IntType, Some( 100 int )) expression(blockScope⇒{
         WhileCondition(Gt(blockScope.varRef("i"),0 int))
     }) whileBlock() expression(blockScope⇒{
-        Assign(blockScope.varRef("i"),Mod(blockScope.varRef("i"),10 int))
+        api.expression.`var`.Assign(blockScope.varRef("i"),Mod(blockScope.varRef("i"),10 int))
     }) belongBlock() expression(blockScope⇒{
         Return(Some(blockScope.varRef("i")))
     })
@@ -313,10 +319,10 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     programOptimize method(
       "method"
     ) bodyBlock() updateVarDef("i", IntType, Some( 100 int )) expression(blockScope⇒{
-        val condition = Gt(blockScope.varRef("i"),0 int)
+        val condition = binary.Gt(blockScope.varRef("i"),0 int)
         val childScope = blockScope statementBlock(false)
         val body = childScope expression (blockScope ⇒ {
-          Assign( blockScope.varRef( "i" ), Mod( blockScope.varRef( "i" ), 10 int ) )
+          api.expression.`var`.Assign( blockScope.varRef( "i" ), binary.Mod( blockScope.varRef( "i" ), 10 int ) )
         })
       While(condition,body.block)
     }) expression (blockScope ⇒ {
@@ -326,28 +332,28 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     program method(
       "method1"
     ) bodyBlock() updateVarDef("j", IntType, Some( 100 int )) expression(blockScope⇒{
-      WhileCondition(Lt(blockScope.varRef("j"),100 int))
+      WhileCondition(binary.Lt(blockScope.varRef("j"),100 int))
     }) whileBlock() expression(blockScope⇒{
         IfCondition(Ge(blockScope.varRef("j"),10 int),first = true)
     }) ifBlock() expression(_⇒Continue) belongBlock() expression(blockScope⇒{
-        Assign(blockScope.varRef("j"),Sub(blockScope.varRef("j"),1 int))
+        api.expression.`var`.Assign(blockScope.varRef("j"),Sub(blockScope.varRef("j"),1 int))
     }) belongBlock() expression(blockScope⇒Return(Some(blockScope.varRef("j"))))
 
     programOptimize method(
       "method1"
     ) bodyBlock() updateVarDef("j", IntType, Some( 100 int )) expression(blockScope⇒{
 
-      val whileCondition = Lt(blockScope.varRef("j"),100 int)
+      val whileCondition = binary.Lt(blockScope.varRef("j"),100 int)
       val childScope = blockScope statementBlock(false)
       val childScope1 = childScope statementBlock(false)
 
-      val ifCondition = Ge(childScope.varRef("j"),10 int)
+      val ifCondition = binary.Ge(childScope.varRef("j"),10 int)
       val ifBlock = childScope1 expression(_⇒Continue)
 
       val whileBody = childScope expression(_⇒{
         If(Array((ifCondition,ifBlock.block)),None)
       }) expression (blockScope ⇒ {
-        Assign( blockScope.varRef( "j" ), Sub( blockScope.varRef( "j" ), 1 int ) )
+        api.expression.`var`.Assign( blockScope.varRef( "j" ), binary.Sub( blockScope.varRef( "j" ), 1 int ) )
       })
 
       While(whileCondition,whileBody.block)
@@ -355,7 +361,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == programOptimize )
 
   }
 
@@ -412,17 +418,17 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     ) doWhileBlock(
 
     ) expression(blockScope⇒{
-        Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("j")))
+        api.expression.`var`.Assign(blockScope.varRef("sum"),binary.Add(blockScope.varRef("sum"),blockScope.varRef("j")))
     }) expression(blockScope⇒{
-        Assign(blockScope.varRef("j"),Add(blockScope.varRef("j"),1 int))
+        api.expression.`var`.Assign(blockScope.varRef("j"),binary.Add(blockScope.varRef("j"),1 int))
     }) belongBlock() expression(blockScope⇒{
-        DoWhileCondition(Lt(blockScope.varRef("j"),100 int))
+        DoWhileCondition(binary.Lt(blockScope.varRef("j"),100 int))
     }) expression(blockScope⇒{
-      Assign(blockScope.varRef("sum"),Add(blockScope.varRef("sum"),blockScope.varRef("i")))
+      api.expression.`var`.Assign(blockScope.varRef("sum"),binary.Add(blockScope.varRef("sum"),blockScope.varRef("i")))
     }) expression (blockScope ⇒ {
-      Assign( blockScope.varRef( "i" ), Add( blockScope.varRef( "i" ), 1 int ) )
+      api.expression.`var`.Assign( blockScope.varRef( "i" ), binary.Add( blockScope.varRef( "i" ), 1 int ) )
     }) belongBlock() expression (blockScope ⇒ {
-      DoWhileCondition( Lt( blockScope.varRef( "i" ), 100 int ) )
+      DoWhileCondition( binary.Lt( blockScope.varRef( "i" ), 100 int ) )
     })
 
     programOptimize method(
@@ -434,22 +440,22 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       val doWhileBlockScope2 = doWhileBlockScope1 statementBlock(false)
 
       val doWhileBody2 = doWhileBlockScope2 expression (blockScope ⇒ {
-        Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
+        api.expression.`var`.Assign( blockScope.varRef( "sum" ), binary.Add( blockScope.varRef( "sum" ), blockScope.varRef( "j" ) ) )
       }) expression (blockScope ⇒ {
-        Assign( blockScope.varRef( "j" ), Add( blockScope.varRef( "j" ), 1 int ) )
+        api.expression.`var`.Assign( blockScope.varRef( "j" ), binary.Add( blockScope.varRef( "j" ), 1 int ) )
       })
 
-      val doWhileCondition2 = Lt(doWhileBlockScope1.varRef("j"),100 int)
+      val doWhileCondition2 = binary.Lt(doWhileBlockScope1.varRef("j"),100 int)
 
       val doWhile2 = DoWhile(doWhileCondition2,doWhileBody2.block)
 
       val doWhileBody1 = doWhileBlockScope1 expression(_⇒doWhile2) expression (blockScope ⇒ {
-        Assign( blockScope.varRef( "sum" ), Add( blockScope.varRef( "sum" ), blockScope.varRef( "i" ) ) )
+        api.expression.`var`.Assign( blockScope.varRef( "sum" ), binary.Add( blockScope.varRef( "sum" ), blockScope.varRef( "i" ) ) )
       }) expression (blockScope ⇒ {
-        Assign( blockScope.varRef( "i" ), Add( blockScope.varRef( "i" ), 1 int ) )
+        api.expression.`var`.Assign( blockScope.varRef( "i" ), binary.Add( blockScope.varRef( "i" ), 1 int ) )
       })
 
-      val doWhileCondition1 = Lt( blockScope.varRef( "i" ), 100 int )
+      val doWhileCondition1 = binary.Lt( blockScope.varRef( "i" ), 100 int )
 
       DoWhile(doWhileCondition1,doWhileBody1.block)
     })
@@ -458,9 +464,9 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       "method"
     ) bodyBlock() updateVarDef("i",IntType,Some(0 int)) doWhileBlock() expression(blockScope⇒{
         val i = blockScope.varRef("i")
-        Assign(i,Add(i,1 int))
+        api.expression.`var`.Assign(i,binary.Add(i,1 int))
     }) belongBlock() expression(blockScope⇒{
-        DoWhileCondition(Lt(blockScope.varRef("i"),100 int))
+        DoWhileCondition(binary.Lt(blockScope.varRef("i"),100 int))
     }) expression(blockScope⇒{
         Return(Some(blockScope.varRef("i")))
     })
@@ -470,11 +476,11 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
     ) bodyBlock() updateVarDef("i",IntType,Some(0 int)) expression(blockScope⇒{
 
       val childScope = blockScope statementBlock(false)
-      val doWhileCondition = Lt(blockScope.varRef("i"),100 int)
+      val doWhileCondition = binary.Lt(blockScope.varRef("i"),100 int)
 
       val doWhileBody = childScope expression (blockScope ⇒ {
         val i = blockScope.varRef( "i" )
-        Assign( i, Add( i, 1 int ) )
+        api.expression.`var`.Assign( i, binary.Add( i, 1 int ) )
       })
 
       DoWhile(doWhileCondition,doWhileBody.block)
@@ -487,10 +493,10 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       "method1"
       ) bodyBlock() updateVarDef("i", IntType, Some( 0 int )) doWhileBlock() expression (blockScope ⇒ {
       val i = blockScope.varRef( "i" )
-      Assign( i, Add( i, 1 int ) )
+      api.expression.`var`.Assign( i, binary.Add( i, 1 int ) )
     }) expression (blockScope⇒IfCondition(Eq(blockScope.varRef("i"),30 int),first = true)) ifBlock() expression (_⇒
       Break) belongBlock() belongBlock() expression (blockScope ⇒ {
-      DoWhileCondition( Lt( blockScope.varRef( "i" ), 100 int ) )
+      DoWhileCondition( binary.Lt( blockScope.varRef( "i" ), 100 int ) )
     }) expression (blockScope ⇒ {
       Return( Some(blockScope.varRef( "i" ) ))
     })
@@ -499,17 +505,17 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
       "method1"
     ) bodyBlock() updateVarDef("i", IntType, Some( 0 int )) expression(blockScope⇒{
 
-      val doWhileCondition = Lt( blockScope.varRef( "i" ), 100 int )
+      val doWhileCondition = binary.Lt( blockScope.varRef( "i" ), 100 int )
 
       val doWhileBlockScope = blockScope statementBlock(false)
       val ifBlockScope = doWhileBlockScope statementBlock(false)
 
-      val ifCondition = Eq(doWhileBlockScope.varRef("i"),30 int)
+      val ifCondition = binary.Eq(doWhileBlockScope.varRef("i"),30 int)
       val ifBody = ifBlockScope expression (_ ⇒ Break)
 
       val doWhileBody = doWhileBlockScope expression (blockScope ⇒ {
         val i = blockScope.varRef( "i" )
-        Assign( i, Add( i, 1 int ) )
+        api.expression.`var`.Assign( i, binary.Add( i, 1 int ) )
       }) expression(_⇒If(Array((ifCondition,ifBody.block)),None))
 
       DoWhile(doWhileCondition,doWhileBody.block)
@@ -521,7 +527,7 @@ class ExpressionParserTestLoopSuit extends AnyFunSuite {
 
     val generateP = generateProgram( input )
     assert( generateP == program )
-    assert( generateP.revise( new DefaultReviser( generateP.programScope ) ) == programOptimize )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == programOptimize )
 
   }
 }

@@ -1,7 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.java.api.enhance
 
+import com.dongjiaqiang.jvm.dsl.api.expression.Expression
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, Lambda}
 
 import scala.collection.mutable.{Map ⇒ MMap}
 

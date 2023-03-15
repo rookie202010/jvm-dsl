@@ -1,5 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.api.scope
 
+import com.dongjiaqiang.jvm.dsl.api.`type`.DslType
+import com.dongjiaqiang.jvm.dsl.api.`type`.mrt.MultiMrt
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
+import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, ValueExpression}
 import com.dongjiaqiang.jvm.dsl.api.scope
 
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
@@ -8,8 +12,21 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
                    val classes: MutableMap[String, ClazzScope],
                    val methods: MutableMap[String, MethodScope],
                    val importManager: ImportManager,
-                   val lambdaScopes: ArrayBuffer[BlockScope] = ArrayBuffer( )
-                  ) extends Scope {
+                   val lambdaScopes: ArrayBuffer[BlockScope] = ArrayBuffer( ),
+                   val customExprTypeResolver:MutableMap[String,Expression⇒DslType] = MutableMap()
+                  ) extends Scope  {
+
+  val multiMrt: MultiMrt = new MultiMrt(this)
+
+  
+
+  def callType(valueExpression:ValueExpression,name:String,params:Array[ValueExpression]):DslType={
+    multiMrt.visit( valueExpression.getValueType( this ),valueExpression, name, params ) match {
+      case Some( dslType ) ⇒ dslType
+      case None ⇒ throw ExpressionParseException( s"method $name in expression $valueExpression doest not accept " +
+        s"params ${params.map( _.getValueType( this ).toString ).mkString( "Array(", ", ", ")" )}" )
+    }
+  }
 
   override def toString:String = {
     val classStr =  if(classes.isEmpty) "" else "classes:\n  "+classes.toList.map(_._2.toString).mkString("\n")

@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.visitor.statement
 
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.Assign
+import com.dongjiaqiang.jvm.dsl.api.expression.statement._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 
 trait StatementExpressionVisitor[T] {

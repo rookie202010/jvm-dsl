@@ -1,16 +1,17 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression
 
+import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.binary._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.binary.expression.BinaryExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression._
 
 trait BinaryExpressionReviser extends BinaryExpressionVisitor[Expression] {
 
   private def revise(binaryExpression: BinaryExpression,
                      visitor: ExpressionVisitor[Expression],
-                     reviser: (Expression, Expression) ⇒ BinaryExpression): BinaryExpression = {
-    val left = visitor.visit( binaryExpression.left )
-    val right = visitor.visit( binaryExpression.right )
+                     reviser: (ValueExpression, ValueExpression) ⇒ BinaryExpression): BinaryExpression = {
+    val left = visitor.visit( binaryExpression.left ).asInstanceOf[ValueExpression]
+    val right = visitor.visit( binaryExpression.right ).asInstanceOf[ValueExpression]
     if (binaryExpression.left == left && binaryExpression.right == right) {
       binaryExpression
     } else {
@@ -19,7 +20,7 @@ trait BinaryExpressionReviser extends BinaryExpressionVisitor[Expression] {
   }
 
   override def visit(div: Div, visitor: ExpressionVisitor[Expression]): Expression = {
-    revise( div, visitor, (l, r) ⇒ Div( l, r ) )
+    revise( div, visitor, (l, r) ⇒ Div( l,r ) )
   }
 
   override def visit(mod: Mod, visitor: ExpressionVisitor[Expression]): Expression = {

@@ -1,8 +1,11 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
-import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParserException
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 import com.dongjiaqiang.jvm.dsl.api.expression
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.LocalVarDef
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Block
+import com.dongjiaqiang.jvm.dsl.api.expression.statement._
 import com.dongjiaqiang.jvm.dsl.api.scope._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.expression.generator._
@@ -163,9 +166,9 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
   override def getCurrentBlock: Block = currentBlock
 
-  private var blockStack: Stack[Block] = new Stack[Block]( )
+  private val blockStack: Stack[Block] = new Stack[Block]( )
 
-  private var lambdaBlocks: java.util.List[(Scope, Block)] = new java.util.LinkedList[(Scope, Block)]( )
+  private val lambdaBlocks: java.util.List[(Scope, Block)] = new java.util.LinkedList[(Scope, Block)]( )
 
   override def enterProgram(ctx: JvmDslParserParser.ProgramContext): Unit = {
 
@@ -282,15 +285,15 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
       def varDef(fieldScope: FieldScope, context: VarDefContext): LocalVarDef = {
         if (context.expression( ) == null) {
-          expression.LocalVarDef( fieldScope, fieldScope.dslType, None )
+          LocalVarDef( fieldScope, fieldScope.dslType, None )
         } else if (context.expression( ).lambdaExpression( ) != null) {
-          expression.LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
+          expression.`var`.LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
         } else {
-          expression.LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
+          expression.`var`.LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
         }
       }
 
-      def getLooped(context: LiteralAndCallChainContext): Expression = {
+      def getLooped(context: LiteralAndCallChainContext): ValueExpression = {
         context match {
           case c: LiteralExprContext ⇒
             LiteralGenerator.generate( this, c.literal( ) )
@@ -355,7 +358,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
           } else if(nextRule.contains("CATCH")){
             new CatchBlock( )
           }else{
-            throw ExpressionParserException(s"error happen when parsing try expression: $nextRule")
+            throw ExpressionParseException(s"error happen when parsing try expression: $nextRule")
           }
       }
     }
@@ -438,7 +441,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
           parseContext.mayNextRule[ParameterContext].foreach(p ⇒ {
               updateExpression(
                 CatchParameter( p.localVariable( ).IDENTIFIER( ).getText,
-                  toDslType( p.`type`( ) ) )
+                  toDslType( p.`type`( ),programScope ) )
               )
             } )
         }

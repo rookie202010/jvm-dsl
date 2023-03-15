@@ -58,6 +58,10 @@ class MethodScope(val name: String,
   override def addScope(symbolName: String, fieldScope: FieldScope): MethodScope = {
     duplicateSymbol( symbolName )
     params.put( symbolName, fieldScope )
+    val existParams = params.toList
+    existParams.foreach{
+      case (k,v)⇒params.put(k,v)
+    }
     this
   }
 

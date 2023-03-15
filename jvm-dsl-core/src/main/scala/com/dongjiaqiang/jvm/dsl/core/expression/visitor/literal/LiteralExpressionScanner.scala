@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.Null
+import com.dongjiaqiang.jvm.dsl.api.expression.literal._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
 

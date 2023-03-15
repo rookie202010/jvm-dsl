@@ -1,43 +1,44 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
 import com.dongjiaqiang.jvm.dsl.api
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{Assign, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.binary._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 
 object AssignGenerator extends IExpressionGenerator[AssignmentContext, Assign,GeneratorContext] {
 
-  def generate(varRef: VarRef,
-               assignOperatorContext: AssignOperatorContext,
-               exprContext: ExprContext,
-               assignmentContext: AssignmentContext): Assign = {
+  private def generate(varRef: VarRef,
+                       assignOperatorContext: AssignOperatorContext,
+                       exprContext: ExprContext,
+                       assignmentContext: AssignmentContext): Assign = {
     val expression = ExpressionGenerator.generate( exprContext, assignmentContext.expression( ) )
 
     if (assignOperatorContext.ASSIGN( ) != null) {
-      api.expression.Assign( varRef, expression )
+      Assign( varRef, expression )
     } else if (assignOperatorContext.OR_ASSIGN( ) != null) {
-      Assign( varRef, Or( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, Or( varRef, expression ) )
     } else if (assignOperatorContext.AND_ASSIGN( ) != null) {
-      Assign( varRef, And( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, And( varRef, expression ) )
     } else if (assignOperatorContext.ADD_ASSIGN( ) != null) {
-      Assign( varRef, Add( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, Add( varRef, expression ) )
     } else if (assignOperatorContext.DIV_ASSIGN( ) != null) {
-      Assign( varRef, Div( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, Div( varRef, expression ) )
     } else if (assignOperatorContext.LSHIFT_ASSIGN( ) != null) {
-      Assign( varRef, LeftShift( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, LeftShift( varRef, expression ) )
     } else if (assignOperatorContext.MOD_ASSIGN( ) != null) {
-      Assign( varRef, Mod( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, Mod( varRef, expression ) )
     } else if (assignOperatorContext.MUL_ASSIGN( ) != null) {
-      Assign( varRef, Mul( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, Mul( varRef, expression ) )
     } else if (assignOperatorContext.RSHIFT_ASSIGN( ) != null) {
-      Assign( varRef, RightShift( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, RightShift( varRef, expression ) )
     } else if (assignOperatorContext.SUB_ASSIGN( ) != null) {
-      Assign( varRef, Sub( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, Sub( varRef, expression ) )
     } else if (assignOperatorContext.URSHIFT_ASSIGN( ) != null) {
-      Assign( varRef, UnsignedRightShift( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, UnsignedRightShift( varRef, expression ) )
     } else if (assignOperatorContext.XOR_ASSIGN( ) != null) {
-      Assign( varRef, Caret( varRef, expression ) )
+      api.expression.`var`.Assign( varRef, Caret( varRef, expression ) )
     } else {
       null
     }
