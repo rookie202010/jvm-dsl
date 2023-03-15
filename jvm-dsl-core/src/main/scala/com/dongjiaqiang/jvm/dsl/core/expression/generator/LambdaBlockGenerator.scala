@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
-import com.dongjiaqiang.jvm.dsl.api.expression.Block
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Block
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.LambdaBlockContext
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 

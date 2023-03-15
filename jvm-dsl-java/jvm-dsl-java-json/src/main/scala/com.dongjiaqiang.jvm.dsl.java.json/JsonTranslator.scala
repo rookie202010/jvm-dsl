@@ -1,7 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.java.json
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.{MapType, UnResolvedType}
-import com.dongjiaqiang.jvm.dsl.api.expression.{Assign, BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, Expression, FloatLiteral, IntLiteral, ListLiteral, LongLiteral, MapLiteral, StringLiteral, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.Expression
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{Assign, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.literal._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
@@ -50,7 +52,7 @@ class JsonTranslator(override val javaTranslatorContext: JavaTranslatorContext)
           val params  = literal.map(translate).mkString(",")
           s"new ${api.toJavaType(clazzType,javaTranslatorContext)}($params)"
       case varRef: VarRef⇒
-          varRef.name.mkString(".")
+          varRef.refs.mkString(".")
       case listLiteral: ListLiteral⇒
           val literal = listLiteral.literal
           val params = literal.map(e⇒s"fluentAdd(${translate(e)})").mkString(".")

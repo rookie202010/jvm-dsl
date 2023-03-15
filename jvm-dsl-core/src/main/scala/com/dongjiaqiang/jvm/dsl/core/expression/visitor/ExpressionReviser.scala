@@ -5,17 +5,20 @@ import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.`var`.VarExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.binary.expression.BinaryExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.block.BlockExpressionReviser
+import com.dongjiaqiang.jvm.dsl.core.expression.visitor.call.CallExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.callchain.CallChainExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal.LiteralExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement.StatementExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression.UnaryExpressionReviser
 
+import scala.collection.mutable.{ListMap ⇒ MutableMap}
 import scala.reflect.ClassTag
 
 
 trait ExpressionReviser extends ExpressionVisitor[Expression]
   with BinaryExpressionReviser
   with BlockExpressionReviser
+  with CallExpressionReviser
   with CallChainExpressionReviser
   with LiteralExpressionReviser
   with StatementExpressionReviser
@@ -58,6 +61,25 @@ object ExpressionReviser{
           None
       }
     }
+  }
+
+
+  def revise[K<:Expression,RK:ClassTag](origin:MutableMap[Int,List[K]],visitorK: ExpressionVisitor[Expression]): Option[MutableMap[Int,List[RK]]] = {
+      val revise = MutableMap[Int,List[RK]]()
+      var success = false
+      origin.foreach{
+        case (index,expressions)⇒
+            val newExpressions = expressions.map(v⇒visitorK.visit(v))
+            if(newExpressions!=expressions){
+                success = true
+            }
+            revise.put(index,newExpressions.map(_.asInstanceOf[RK]))
+      }
+      if(success){
+          Some(revise)
+      }else{
+          None
+      }
   }
 
   def revise[T <: Expression, K <: Expression, RT: ClassTag, RK: ClassTag](origin: Array[(T, K)],

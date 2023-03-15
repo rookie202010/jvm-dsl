@@ -7,7 +7,7 @@ import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 package object scope {
 
 
-  def toDslType(typeContext: TypeContext): DslType = {
+  def toDslType(typeContext: TypeContext,programScope: ProgramScope): DslType = {
     import scala.collection.convert.ImplicitConversions._
     typeContext match {
       case _: IntTypeContext ⇒ IntType
@@ -18,37 +18,49 @@ package object scope {
       case _: CharTypeContext ⇒ CharType
       case _: BoolTypeContext ⇒ BoolType
       case context: ListTypeContext ⇒
-        ListType( toDslType( context.`type`( ) ) )
+        ListType( toDslType( context.`type`( ),programScope ) )
       case context: SetTypeContext ⇒
-        SetType( toDslType( context.`type`( ) ) )
+        SetType( toDslType( context.`type`( ),programScope ) )
       case context: MapTypeContext ⇒
-        MapType( toDslType( context.`type`( 0 ) ), toDslType( context.`type`( 1 ) ) )
+        MapType( toDslType( context.`type`( 0 ),programScope ), toDslType( context.`type`( 1 ),programScope ) )
       case context: TupleTypeContext ⇒
-        TupleType( context.`type`( ).map( `type` ⇒ toDslType( `type` ) ).toArray )
+        TupleType( context.`type`( ).map( `type` ⇒ toDslType( `type`,programScope ) ).toArray )
       case context: OptionTypeContext ⇒
-        OptionType( toDslType( context.`type`( ) ) )
+        OptionType( toDslType( context.`type`( ) ,programScope) )
       case context: FutureTypeContext ⇒
-        FutureType( toDslType( context.`type`( ) ) )
+        FutureType( toDslType( context.`type`( ) ,programScope) )
       case context: LambdaTypeContext ⇒
-        LambdaType( Some( toDslType( context.`type`( ).head ) ), toDslType( context.`type`.last ) )
+        LambdaType( Some( toDslType( context.`type`( ).head,programScope ) ), toDslType( context.`type`.last,programScope ) )
       case context: SupplierTypeContext ⇒
-        LambdaType( None, toDslType( context.`type`( ) ) )
+        LambdaType( None, toDslType( context.`type`( ),programScope ) )
       case context: ParameterizedClassTypeContext ⇒
-        ClazzType( context.clazzType( ).getText, context.`type`( ).map( toDslType ).toArray )
+        val clazzName = context.clazzType().getText
+        clazzName match {
+          case "Array" ⇒ ArrayType(toDslType(context.`type`().head,programScope))
+          case "Some"⇒SomeType(toDslType(context.`type`().head,programScope))
+          case "Left"⇒LeftType(toDslType(context.`type`().head,programScope))
+          case "Right"⇒RightType(toDslType(context.`type`().head,programScope))
+          case "None"⇒NoneType
+          case _⇒  ClazzType( clazzName, context.`type`( ).map( t⇒toDslType(t,programScope) ).toArray )
+        }
       case context: ClassTypeContext ⇒
         if (context.clazzType( ).getText == "Unit") {
           UnitType
         } else if (context.clazzType( ).getText == "Any") {
           AnyType
         } else {
-          ClazzType( context.clazzType( ).getText, Array( ) )
+          if(programScope.classes.contains(context.clazzType().getText)){
+            DefinitionClazzType(context.clazzType().getText,programScope.classes(context.clazzType().getText))
+          }else {
+            ClazzType( context.clazzType( ).getText, Array( ) )
+          }
         }
     }
   }
 
   def addScope(scope: Scope, p: ParameterContext, programScope: ProgramScope, belongScope: Scope): Scope = {
     val symbolName = p.localVariable( ).IDENTIFIER( ).getText
-    val dslType = toDslType( p.`type`( ) )
+    val dslType = toDslType( p.`type`( ),programScope )
     scope.addScope( symbolName, new FieldScope( 0, symbolName, dslType, belongScope, programScope, false ) )
     scope.incStatement( )
     scope

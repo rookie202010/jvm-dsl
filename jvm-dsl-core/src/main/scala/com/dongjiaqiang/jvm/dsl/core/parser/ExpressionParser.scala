@@ -1,8 +1,11 @@
 package com.dongjiaqiang.jvm.dsl.core.parser
 
-import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParserException
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 import com.dongjiaqiang.jvm.dsl.api.expression
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.LocalVarDef
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Block
+import com.dongjiaqiang.jvm.dsl.api.expression.statement._
 import com.dongjiaqiang.jvm.dsl.api.scope._
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.expression.generator._
@@ -132,7 +135,7 @@ trait ExprContext {
 class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseListener with ExprContext {
 
   //context type
-  val parseContextStack = new Stack[ParseContext]()
+   private val parseContextStack = new Stack[ParseContext]()
 
   //scopes
 
@@ -141,31 +144,31 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
   //current method scope
   var currentMethodScope: MethodScope = _
   //current block scope
-  var currentBlockScope: BlockScope = _
+   private var currentBlockScope: BlockScope = _
 
 
-  var currentBlockIndex: Int = _
-  var blockIndexStack: Stack[Int] = new Stack[Int]( )
-  var currentStatementIndex: Int = _
-  var statementIndexStack: Stack[Int] = new Stack[Int]( )
+   private var currentBlockIndex: Int = _
+  private val blockIndexStack: Stack[Int] = new Stack[Int]( )
+  private var currentStatementIndex: Int = _
+  private val statementIndexStack: Stack[Int] = new Stack[Int]( )
 
   //expressions
   var program: Program = _
-  var currentClazz: Clazz = _
-  var currentMethod: Method = _
+  private var currentClazz: Clazz = _
+   private var currentMethod: Method = _
 
-  var currentBlock: Block = _
+   private var currentBlock: Block = _
 
-  var ignoreLambdaBlock: Boolean = false
+   private var ignoreLambdaBlock: Boolean = false
 
 
   override def ignoreLambdaBlock(ignore: Boolean): Unit = ignoreLambdaBlock = ignore
 
   override def getCurrentBlock: Block = currentBlock
 
-  var blockStack: Stack[Block] = new Stack[Block]( )
+  private val blockStack: Stack[Block] = new Stack[Block]( )
 
-  var lambdaBlocks: java.util.List[(Scope, Block)] = new java.util.LinkedList[(Scope, Block)]( )
+  private val lambdaBlocks: java.util.List[(Scope, Block)] = new java.util.LinkedList[(Scope, Block)]( )
 
   override def enterProgram(ctx: JvmDslParserParser.ProgramContext): Unit = {
 
@@ -282,15 +285,15 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
       def varDef(fieldScope: FieldScope, context: VarDefContext): LocalVarDef = {
         if (context.expression( ) == null) {
-          expression.LocalVarDef( fieldScope, fieldScope.dslType, None )
+          LocalVarDef( fieldScope, fieldScope.dslType, None )
         } else if (context.expression( ).lambdaExpression( ) != null) {
-          expression.LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
+          expression.`var`.LocalVarDef( fieldScope, fieldScope.dslType, Some( LambdaGenerator.generate( this, context.expression( ).lambdaExpression( ) ) ) )
         } else {
-          expression.LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
+          expression.`var`.LocalVarDef( fieldScope, fieldScope.dslType, Some( OrGenerator.generate( this, context.expression( ).conditionalOrExpression( ) ) ) )
         }
       }
 
-      def getLooped(context: LiteralAndCallChainContext): Expression = {
+      def getLooped(context: LiteralAndCallChainContext): ValueExpression = {
         context match {
           case c: LiteralExprContext ⇒
             LiteralGenerator.generate( this, c.literal( ) )
@@ -330,8 +333,8 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
         case ContextType.FOR_LOOP_MAP ⇒
 
-          val (_, keyFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.head
-          val (_, valueFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.last
+          val (_, keyFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.last
+          val (_, valueFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.head
           val context = parseContext.getNextRule[ForStatementThreeContext]
 
           //key var def
@@ -355,7 +358,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
           } else if(nextRule.contains("CATCH")){
             new CatchBlock( )
           }else{
-            throw ExpressionParserException(s"error happen when parsing try expression: $nextRule")
+            throw ExpressionParseException(s"error happen when parsing try expression: $nextRule")
           }
       }
     }
@@ -438,7 +441,7 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
           parseContext.mayNextRule[ParameterContext].foreach(p ⇒ {
               updateExpression(
                 CatchParameter( p.localVariable( ).IDENTIFIER( ).getText,
-                  toDslType( p.`type`( ) ) )
+                  toDslType( p.`type`( ),programScope ) )
               )
             } )
         }
@@ -605,14 +608,20 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
    * return e;
    *<pre><code>
    */
-  override def enterThrowOrSideEffectExpr(ctx: JvmDslParserParser.ThrowOrSideEffectExprContext): Unit = {
+  override def enterThrowOrReturnSideEffectExpr(ctx: JvmDslParserParser.ThrowOrReturnSideEffectExprContext): Unit = {
     updateExpression( {
-      if (ctx.throwReturnOrSideEffectStatement( ).THROW( ) != null) {
-        Throw( ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) ) )
-      } else if (ctx.throwReturnOrSideEffectStatement( ).RETURN( ) != null) {
-        Return( ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) ) )
-      } else {
-        ExpressionGenerator.generate( this, ctx.throwReturnOrSideEffectStatement( ).expression( ) )
+      ctx.throwOrReturnSideEffectStatement() match {
+        case throwOrSideEffectExprContext: ThrowOrSideEffectExprContext ⇒
+          if (throwOrSideEffectExprContext.throwOrSideEffectStatement( ).THROW( ) != null) {
+            Throw( ExpressionGenerator.generate( this,
+              throwOrSideEffectExprContext.throwOrSideEffectStatement( ).expression( ) ) )
+          } else {
+            ExpressionGenerator.generate( this, throwOrSideEffectExprContext.throwOrSideEffectStatement( ).expression( ) )
+          }
+        case _: ReturnStatementExprContext ⇒ Return( None )
+        case returnExprStatementExprContext: ReturnExprStatementExprContext ⇒
+          Return( Some( ExpressionGenerator.generate( this,
+            returnExprStatementExprContext.returnExpressionStatement( ).expression( ) ) ) );
       }
     } )
   }

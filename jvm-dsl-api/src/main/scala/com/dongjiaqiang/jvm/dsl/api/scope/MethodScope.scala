@@ -58,6 +58,10 @@ class MethodScope(val name: String,
   override def addScope(symbolName: String, fieldScope: FieldScope): MethodScope = {
     duplicateSymbol( symbolName )
     params.put( symbolName, fieldScope )
+    val existParams = params.toList
+    existParams.foreach{
+      case (k,v)⇒params.put(k,v)
+    }
     this
   }
 
@@ -134,11 +138,11 @@ class MethodScope(val name: String,
    * @param index ref index
    * @param refs  ref names
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope]= {
+  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope]= {
       refs match {
         case "this" :: refs ⇒
-          scope.resolveVarRefs( index, refs, this, params, skipCurrentScope = true, backRef = true, Some( parentScope ) )
-        case _ ⇒ scope.resolveVarRefs( index, refs, this, params, skipCurrentScope = false, backRef = true, Some( parentScope ) )
+          scope.resolveVarRefs( index, refs,arrayRefsIndex, this, params, skipCurrentScope = true, backRef = true, Some( parentScope ) )
+        case _ ⇒ scope.resolveVarRefs( index, refs, arrayRefsIndex,this, params, skipCurrentScope = false, backRef = true, Some( parentScope ) )
       }
   }
 

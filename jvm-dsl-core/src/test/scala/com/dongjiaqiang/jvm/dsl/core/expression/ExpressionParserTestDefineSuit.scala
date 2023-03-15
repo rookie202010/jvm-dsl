@@ -2,6 +2,13 @@ package com.dongjiaqiang.jvm.dsl.core.expression
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{Assign, Null, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.binary._
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
+import com.dongjiaqiang.jvm.dsl.api.expression.call.{FuncCallChain, MethodCall, StaticCall, VarCall}
+import com.dongjiaqiang.jvm.dsl.api.expression.literal.{ListLiteral, MapLiteral, SetLiteral, TupleLiteral}
+import com.dongjiaqiang.jvm.dsl.api.expression.statement.{Assert, Return}
+import com.dongjiaqiang.jvm.dsl.core.optimize.OptimizeExpression
 import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
@@ -19,7 +26,10 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
         }
         """
     val program = Program( generateProgramScope(input), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
-    assert( generateProgram(input) == program )
+    val generateP = generateProgram(input)
+    assert( generateP == program )
+
+    assert( generateP.revise(new OptimizeExpression(generateP.programScope)) == program)
   }
 
 
@@ -27,7 +37,7 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
     val input =
       """
         |program{
-        |   def method(Int a)=Unit{
+        |   synchronized def method(Int a)=Unit{
         |       assert a==1;
         |   }
         |}
@@ -36,6 +46,11 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
     program method("method") bodyBlock() expression(blockScope⇒{
       Assert(Eq(blockScope.varRef("a"),1 int))
     })
+
+    val generateP = generateProgram( input )
+    assert( generateP == program )
+
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == program )
 
   }
 
@@ -68,7 +83,7 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
        val j = blockScope.varRef("j")
        val body = blockScope lambdaBlock() expression(
           scope⇒{
-            Return(Add(scope.varRef("i"),j))
+            Return(Some(Add(scope.varRef("i"),j)))
           }
         )
       blockScope.varDef("plus",LambdaType(Some(DoubleType),DoubleType),Some(Lambda(Array("i"),body.block)))
@@ -77,7 +92,7 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
     }) expression(blockScope⇒{
         val j = blockScope varRef("j")
         val body = blockScope lambdaBlock() expression(scope⇒{
-            Return(Sub(scope.varRef("i"),j))
+            Return(Some(Sub(scope.varRef("i"),j)))
         })
         val minus = blockScope varRef("minus")
         Assign(minus,Lambda(Array("i"),body.block))
@@ -85,7 +100,7 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
         val i = blockScope.varRef("i")
         val plus = blockScope.varRef("plus")
         val minus = blockScope.varRef("minus")
-        Return(Add(VarCall(plus,"apply",Array(i)),VarCall(minus,"apply",Array(i))))
+        Return(Some(binary.Add(VarCall(plus,"apply",Array(i)),call.VarCall(minus,"apply",Array(i)))))
     })
 
     program method (
@@ -97,14 +112,17 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
               val k = scope.varRef("kv","_1")
               val v = scope.varRef("kv","_2")
               val log = blockScope.varRef("log")
-              VarCall(log,"info",Array("\"k: %s v: %s\"" str,k,v))
+              call.VarCall(log,"info",Array("\"k: %s v: %s\"" str,k,v))
           })
-          VarCall(map,"foreach",Array(Lambda(Array("kv"),body.block)))
+          call.VarCall(map,"foreach",Array(Lambda(Array("kv"),body.block)))
       }) expression(_⇒{
-        Return(UnitLiteral)
+        Return(None)
     })
 
-    assert( generateProgram(input) == program )
+    val generateP = generateProgram( input )
+    assert( generateP == program )
+
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == program )
 
   }
 
@@ -135,27 +153,30 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
       "foo"
       ) bodyBlock() expression (blockScope ⇒ {
       val varRef = blockScope.varRef( "lambda" )
-      Return( VarCall( varRef, "apply", Array( 1 int, 2 long ) ) )
+      Return( Some(call.VarCall( varRef, "apply", Array( 1 int, 2 long ) ) ))
     }) belongClazzMethod() belongClazz() method (
       "bar"
       ) bodyBlock() expression (blockScope ⇒ {
       val varRef = blockScope.varRef( "a" )
-      Return( VarCall( varRef, "toInt", Array( ) ) )
+      Return( Some(call.VarCall( varRef, "toInt", Array( ) ) ))
     }) belongClazzMethod() belongClazz() method(
       "koo"
     ) bodyBlock() expression(blockScope⇒{
       val a = blockScope.varRef( "a" )
       val body = (blockScope lambdaBlock() expression (scope⇒{
         val i = scope.varRef( "i" )
-        Return(Div(a,i))
+        Return(Some(Div(a,i)))
       }) ) . block
 
       blockScope.varDef("div",LambdaType(Some(IntType),IntType),Some(Lambda(Array("i"),body)))
     }) expression(blockScope⇒{
-      Return(VarCall(blockScope.varRef( "div" ),"apply",Array(blockScope.varRef( "a" ))))
+      Return(Some(call.VarCall(blockScope.varRef( "div" ),"apply",Array(blockScope.varRef( "a" )))))
     })
 
-    assert( program == generateProgram(input) )
+    val generateP = generateProgram( input )
+    assert( generateP == program )
+
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == program )
 
   }
 
@@ -207,6 +228,11 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
         |            };
         |
         |            Int cc = Foo.call(10);
+        |
+        |            Foo foo = null;
+        |
+        |            String str1 = Foo.foo(12,10).a.b.c.d.ass[11].bss[10].d.bar(10);
+        |
         |         }
         |""".stripMargin
     val program = Program( generateProgramScope(input), assigned = MutableMap( ), classes = MutableMap( ), methods = MutableMap( ) )
@@ -236,54 +262,60 @@ class ExpressionParserTestDefineSuit  extends AnyFunSuite {
       "b", true bool
     ) assign(
       "j2", {
-      Mul( Mul( Mul( Mul( program.varRef( "i" ), program.varRef( "j" ) ), 10 int ), program.varRef( "a", "b" ) )
-        , VarCall( program.varRef( "a" ), "foo", Array( ) ) )
+      Mul( binary.Mul( binary.Mul( binary.Mul( program.varRef( "i" ), program.varRef( "j" ) ), 10 int ), program.varRef( "a", "b" ) )
+        , call.VarCall( program.varRef( "a" ), "foo", Array( ) ) )
     }
     ) assign(
       "and",
       Lambda( Array( "i", "j" ), (program lambdaBlock() expression (blockScope ⇒ {
         val i = blockScope.varRef( "i" )
         val j = blockScope.varRef( "j" )
-        Return( Add( i, j ) )
+        Return( Some(binary.Add( i, j ) ))
       })).block )) assign(
       "mul", Lambda( Array( "i" ), (program lambdaBlock() expression (blockScope ⇒ {
       val i = blockScope.varRef( "i" )
       val and = program.varRef( "and" )
-      Return( Mul( VarCall( and, "apply", Array( i, i ) ), i ) )
+      Return( Some(binary.Mul( call.VarCall( and, "apply", Array( i, i ) ), i ) ))
     })).block )
     ) assign(
       "format", Lambda( Array( "i", "j" ), (program lambdaBlock() expression (blockScope ⇒ {
       val i = blockScope.varRef( "i" )
       val j = blockScope.varRef( "j" )
       val and = blockScope.varRef( "and" )
-      blockScope.varDef( "a", IntType, Some( VarCall( and, "apply", Array( i, j ) ) ) )
+      blockScope.varDef( "a", IntType, Some( call.VarCall( and, "apply", Array( i, j ) ) ) )
     }) expression (blockScope ⇒ {
       val a = blockScope.varRef( "a" )
       val mul = blockScope.varRef( "mul" )
-      blockScope.varDef( "b", IntType, Some( VarCall( mul, "apply", Array( a ) ) ) )
+      blockScope.varDef( "b", IntType, Some( call.VarCall( mul, "apply", Array( a ) ) ) )
     }) expression (blockScope ⇒ {
 
       val body = (blockScope lambdaBlock() expression (scope ⇒ {
         val a = scope.varRef( "a" )
         val b = scope.varRef( "b" )
         val i = scope.varRef( "i" )
-        Return( StaticCall( StringType, "format", Array( "\"%s %s %s\"" str,a, b, i ) ) )
+        Return( Some(StaticCall( StringType, "format", Array( "\"%s %s %s\"" str,a, b, i ) ) ))
       })).block
 
       blockScope.varDef( "f", LambdaType( Some( IntType ), StringType ), Some( Lambda( Array( "i" ), body ) ) )
     }) expression (blockScope ⇒ {
       val f = blockScope.varRef( "f" )
       val b = blockScope.varRef( "b" )
-      Return( VarCall( f, "apply", Array( b ) ) )
+      Return( Some(call.VarCall( f, "apply", Array( b ) ) ))
     }
 
       )
       ).block )) assign(
-      "cc",StaticCall(ClazzType("Foo"),"call",Array(10 int))
-    )
+      "cc",call.StaticCall(ClazzType("Foo"),"call",Array(10 int))
+    ) assign("foo",Null) assign("str1",{
+      FuncCallChain(call.StaticCall(ClazzType("Foo"),"foo",Array(12 int,10 int)),List(
+        VarRef(List("a","b","c","d","ass","bss","d"),MutableMap(4→List((11 int)),5→List((10 int))),None),
+        MethodCall(None,"bar",Array(10 int))
+      ))
+    })
 
-    assert( generateProgram(input) == program )
-
+    val generateP = generateProgram( input )
+    assert( generateP == program )
+    assert( generateP.revise( new OptimizeExpression( generateP.programScope ) ) == program )
 
   }
 

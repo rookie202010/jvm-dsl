@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal
 
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.Null
+import com.dongjiaqiang.jvm.dsl.api.expression.literal._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 
 trait LiteralExpressionVisitor[T] {
@@ -66,9 +67,6 @@ trait LiteralExpressionVisitor[T] {
     throw new UnsupportedOperationException( "not supported" )
   }
 
-  def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[T]): T = {
-    throw new UnsupportedOperationException( "not supported" )
-  }
 
   def visit(literal: Null.type, visitor: ExpressionVisitor[T]): T = {
     throw new UnsupportedOperationException( "not supported" )

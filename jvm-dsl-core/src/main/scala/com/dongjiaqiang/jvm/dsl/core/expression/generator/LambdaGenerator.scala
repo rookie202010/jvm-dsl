@@ -1,16 +1,17 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
-import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, Lambda}
+import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
-object LambdaGenerator extends IExpressionGenerator[LambdaExpressionContext, Expression,GeneratorContext] {
+object LambdaGenerator extends IExpressionGenerator[LambdaExpressionContext, ValueExpression,GeneratorContext] {
 
   override def generate(exprContext: ExprContext,
                         ruleContext: LambdaExpressionContext,
-                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
+                        generatorContext: GeneratorContext = NoneGeneratorContext): ValueExpression = {
     ruleContext match {
       case c: NoParamLambdaExprContext ⇒
         Lambda( Array( ), LambdaBlockGenerator.generate( exprContext, c.lambdaBlock( ) ) )

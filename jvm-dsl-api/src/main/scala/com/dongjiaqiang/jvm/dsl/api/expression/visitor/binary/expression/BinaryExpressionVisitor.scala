@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.visitor.binary.expression
 
-import com.dongjiaqiang.jvm.dsl.api.expression._
+import com.dongjiaqiang.jvm.dsl.api.expression.binary._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 
 trait BinaryExpressionVisitor[T] {

@@ -16,8 +16,8 @@ import scala.collection.mutable.{ArrayBuffer, Map ⇒ MMap}
  *
  * methodName -> methodCode
  */
-case class JavaTranslatorContext(customBlockExpressionJavaTranslators: Map[String,CustomBlockExpressionTranslator],
-                                 customDslTypeTranslator:Map[DslType,JavaTypeTranslator],
+case class JavaTranslatorContext(customBlockExpressionJavaTranslators: MMap[String,CustomBlockExpressionTranslator]  = MMap(),
+                                 customDslTypeTranslator:MMap[DslType,JavaTypeTranslator] = MMap() ,
                                  packageName: String,
                                  javaTranslateConfig: Config,
                                  systemGenerateMethods: MMap[String, ArrayBuffer[String]] = MMap( ),

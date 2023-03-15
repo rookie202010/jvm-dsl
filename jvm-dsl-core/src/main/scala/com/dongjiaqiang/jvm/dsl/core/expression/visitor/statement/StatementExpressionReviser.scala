@@ -1,5 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement
 
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{Assign, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.statement._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.statement.StatementExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression._
@@ -10,7 +12,7 @@ trait StatementExpressionReviser extends StatementExpressionVisitor[Expression] 
     val newVarRef = visitor.visit( assign.varRef ).asInstanceOf[VarRef]
     val newAssigned = visitor.visit( assign.assigned )
     if (newVarRef != assign.varRef || newAssigned != assign.assigned) {
-      Assign( newVarRef, newAssigned )
+      Assign( newVarRef, newAssigned.asInstanceOf[ValueExpression])
     } else {
       assign
       }
@@ -27,16 +29,16 @@ trait StatementExpressionReviser extends StatementExpressionVisitor[Expression] 
   override def visit(throwExpr: Throw, visitor: ExpressionVisitor[Expression]): Expression={
     val newExpr = visitor.visit(throwExpr.expression)
     if(newExpr!=throwExpr.expression){
-        Throw(newExpr)
+        statement.Throw(newExpr)
     }else{
         throwExpr
     }
   }
 
   override def visit(returnExpr: Return, visitor: ExpressionVisitor[Expression]): Expression={
-    val newExpr = visitor.visit(returnExpr.expression)
+    val newExpr = returnExpr.expression.map(visitor.visit)
     if(newExpr!=returnExpr.expression){
-        Return(newExpr)
+        Return(newExpr.map(_.asInstanceOf[ValueExpression]))
     }else{
         returnExpr
     }
@@ -45,7 +47,7 @@ trait StatementExpressionReviser extends StatementExpressionVisitor[Expression] 
   override def visit(assert: Assert, visitor: ExpressionVisitor[Expression]): Expression={
     val newExpr = visitor.visit(assert.expression)
     if(newExpr!=assert.expression){
-        Assert(newExpr)
+        statement.Assert(newExpr.asInstanceOf[ValueExpression])
     }else{
         assert
     }

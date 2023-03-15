@@ -1,6 +1,6 @@
 grammar JvmDslParser;
 
-//import JvmDslLexer;
+import JvmDslLexer;
 
 //@header {package com.dongjiaqiang.jvm.dsl.core;}
 
@@ -35,25 +35,34 @@ blockStatement  :   varDef  SEMI  # VarDefExpr
                 |   statement # StatementExpr
                 ;
 
-statement   :   doWhileStatement # DoWhileExpr
+statement   :   SEMI # SemiExpr
+            |   doWhileStatement # DoWhileExpr
             |   whileStatement # WhileExpr
             |   forStatement # ForExpr
             |   ifStatement # IfExpr
             |   assignment SEMI # AssignExpr
             |   synchronizedStatement # SyncExpr
-            |   throwReturnOrSideEffectStatement # ThrowOrSideEffectExpr
+            |   throwOrReturnSideEffectStatement # ThrowOrReturnSideEffectExpr
             |   breakStatement # BreakExpr
             |   continueStatement # ContinueExpr
             |   tryStatement # TryExpr
             |   assertStatement # AssertExpr
             |   block # BlockExpr
-            |   SEMI # SemiExpr
             ;
 
 synchronizedStatement   :   SYNCHRONIZED    LPAREN  conditionalOrExpression  RPAREN  block
                         ;
 
-throwReturnOrSideEffectStatement  :   (THROW | RETURN)? expression  SEMI;
+throwOrReturnSideEffectStatement  :    throwOrSideEffectStatement # ThrowOrSideEffectExpr
+                                  | returnStatement # ReturnStatementExpr
+                                  | returnExpressionStatement # ReturnExprStatementExpr
+                                  ;
+
+returnExpressionStatement : RETURN  expression SEMI;
+
+returnStatement: RETURN SEMI;
+
+throwOrSideEffectStatement : THROW? expression SEMI;
 
 breakStatement  :   BREAK   SEMI;
 
@@ -103,14 +112,12 @@ expression  :   lambdaExpression
             ;
 
 
-assignment  :  (    variable    |   arrayVariable | mapVariable  )   assignOperator  expression;
+assignment  :  variable   assignOperator  expression;
 
-arrayVariable: variable LBRACK conditionalOrExpression  RBRACK;
-
-mapVariable: variable LPAREN conditionalOrExpression RPAREN;
 
 assignOperator :   ASSIGN  |   ADD_ASSIGN  |   SUB_ASSIGN  |   MUL_ASSIGN  |   DIV_ASSIGN  |   AND_ASSIGN  |   OR_ASSIGN   |   XOR_ASSIGN  |   MOD_ASSIGN  |   LSHIFT_ASSIGN   |   RSHIFT_ASSIGN   |   URSHIFT_ASSIGN;
 
+// (a+b)
 parenExpression :   LPAREN conditionalOrExpression RPAREN;
 
 //or expr a||b
@@ -272,7 +279,7 @@ classDef    :   CLASS IDENTIFIER  parameters
 funcCallChain   : funcCall  (DOT    part    )*;
 literalCallChain :  literal (DOT    part)+;
 
-part:   variable   |   funcCall;
+part:   variable  |   funcCall;
 
 funcCall   :        (variable DOT)? funcName LPAREN RPAREN #   VarCallNoArgs
                  |   (variable DOT)? funcName LPAREN expression (COMMA  expression  )*    RPAREN    # VarCallArgs
@@ -293,10 +300,14 @@ literalAndCallChain :   funcCallChain   # FuncCallChainExpr
         |   literal #   LiteralExpr
         ;
 
+literalAndCallChainAndExpression: literalAndCallChain # LiteralAndCallChainExpr
+                                | expression # ExpressionExpr
+                                ;
+
+
 literal :   baseLiteral
         |   classLiteral
         |   variable
-        |   arrayVariable
         |   optionalLiteral
         |   listLiteral
         |   setLiteral
@@ -320,36 +331,40 @@ numberLiteral   :   INT_LITERAL
 nulLiteral  : NULL_LITERAL;
 
 //list literal  ex. [], [1,2,3],    [[1,1],[2,1,1],[3,3,1,1]]
-listLiteral:    |   LBRACK literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACK
+listLiteral:    |   LBRACK literalAndCallChainAndExpression    (COMMA    literalAndCallChainAndExpression    )* RBRACK
                 |   LBRACK RBRACK ;
 
 blockExpression:    |   IDENTIFIER (LPAREN  variable  RPAREN)? lambdaBlock;
 
 
 //set literal   ex. {}, {1,3,2}
-setLiteral :   LBRACE  literalAndCallChain    (COMMA    literalAndCallChain    )* RBRACE
+setLiteral :   LBRACE  literalAndCallChainAndExpression    (COMMA    literalAndCallChainAndExpression    )* RBRACE
            |   LBRACE   RBRACE;
 
 //optional literal  ex. ?12,    ?a
-optionalLiteral  : QUESTION literalAndCallChain ;
+optionalLiteral  : QUESTION literalAndCallChainAndExpression ;
 
 //map   literal ex. {1:2,3:1}
-mapLiteral :   LBRACE (   literalAndCallChain    )    COLON    (   literalAndCallChain   )
-    (COMMA    (  literalAndCallChain    )    COLON (  literalAndCallChain  )   )*  RBRACE
+mapLiteral :   LBRACE (   literalAndCallChainAndExpression    )    COLON    (   literalAndCallChainAndExpression   )
+    (COMMA    (  literalAndCallChainAndExpression    )    COLON (  literalAndCallChainAndExpression  )   )*  RBRACE
     |   LBRACE RBRACE ;
 //tuple literal ex. (1,"11",1f)
-tupleLiteral   :   LPAREN literalAndCallChain  (COMMA    literalAndCallChain)+    RPAREN ;
+tupleLiteral   :   LPAREN literalAndCallChainAndExpression  (COMMA    literalAndCallChainAndExpression)+    RPAREN ;
 
 //class literal ex. new Foo(a,b)
 classLiteral    : NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN RPAREN
-                | NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN literalAndCallChain   (COMMA    literalAndCallChain)*   RPAREN
+                | NEW clazzType (LBRACK type (COMMA type)* RBRACK)* LPAREN literalAndCallChainAndExpression   (COMMA    literalAndCallChainAndExpression)*   RPAREN
                 ;
 
 //local variable ex. a, b,  c
 localVariable   :   IDENTIFIER;
 
+localArrayVariable : localVariable (LBRACK conditionalOrExpression  RBRACK)+;
+
+localVarOrArrayVar: localVariable | localArrayVariable;
+
 //global variable   or  class instance member
-variable :  IDENTIFIER  (DOT IDENTIFIER)* ;
+variable :  localVarOrArrayVar  (DOT localVarOrArrayVar)* ;
 
 importClazz :    IDENTIFIER  (DOT IDENTIFIER)* ;
 

@@ -1,31 +1,76 @@
 package com.dongjiaqiang.jvm.dsl.api.scope
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.DslType
-import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParserException
+import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, ImportClazzType}
+import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap, Set ⇒ MSet}
 
-case class ResolveField(name:String,dslType: DslType)
-case class ResolveMethod(name:String, params:Array[DslType], returnType:DslType)
-case class ResolveClazz(name:String,
-                        fields:Map[String,ResolveField],
-                        staticFields:Map[String,ResolveField],
-                        methods:Map[String,ResolveMethod],
-                        staticMethods:Map[String,ResolveMethod])
 
-class ImportManager {
+trait ImportRegister{
 
-  var classResolver:String⇒ResolveClazz = _
+  /**
+   * add import class
+   *
+   * @param className import class name
+   */
+  def addClass(className: String): Unit
 
-  val classes: ArrayBuffer[String] = ArrayBuffer( )
+  /**
+   * add import class from package
+   *
+   * @param className   import class name
+   * @param packageName package name
+   */
+  def addClass(className:String, packageName:String):Unit
 
-  val simpleClassRefs:MutableMap[String,MSet[String]] = MutableMap()
+  /**
+   * add package
+   *
+   * @param packageName     package name
+   * @param packageLocation package location
+   */
+  def addPackage(packageName:String,packageLocation: String): Unit
 
-  val resolveClasses: MutableMap[String,ResolveClazz] = MutableMap()
+  def registerDefaultClassResolver(resolver:String⇒ImportClazzType):Unit
 
-  val classesFromPackage: MutableMap[String, String] = MutableMap( )
+  def registerDslTypeResolver(resolver:DslType⇒Option[ImportClazzType]):Unit
 
-  val packages: MutableMap[String, String] = MutableMap( )
+  def registerPackageClassResolver(`package`:String,resolver:String⇒ImportClazzType):Unit
+}
+
+trait ImportResolver{
+
+  /**
+   * contain import class the name can be simple name or full name
+   *
+   * @param className import class name
+   * @return contain class
+   */
+  def containClass(className:String):Boolean
+
+
+  def resolve(className:String):ImportClazzType
+}
+
+class ImportManager extends ImportRegister with ImportResolver {
+
+  private var defaultClassResolver:String⇒ImportClazzType = _
+
+  private var dslTypeResolver:DslType⇒Option[ImportClazzType] = _
+
+  private val classes: ArrayBuffer[String] = ArrayBuffer( )
+
+  private val simpleClassRefs:MutableMap[String,MSet[String]] = MutableMap()
+
+  private val resolveClasses: MutableMap[String,ImportClazzType] = MutableMap()
+
+  private val dslTypeClasses: MutableMap[DslType,Option[ImportClazzType]] = MutableMap()
+
+  private val classesFromPackage: MutableMap[String, String] = MutableMap( )
+
+  private val packages: MutableMap[String, String] = MutableMap( )
+
+  private val packageClassResolvers:MutableMap[String,String⇒ImportClazzType] = MutableMap()
 
   override def equals(obj: Any): Boolean = {
       obj match {
@@ -54,35 +99,78 @@ class ImportManager {
      ).add( className )
   }
 
+
   def addPackage(packageName:String,packageLocation: String): Unit = {
     packages.put(packageName,packageLocation)
   }
 
-  def containClass(clazz:String):Boolean={
-      if(simpleClassRefs.contains(clazz)){
-         if(simpleClassRefs.get(clazz).size>1){
-              throw ExpressionParserException(s"simple clazz $clazz ref more clazz: ${simpleClassRefs.get(clazz).mkString(";")}")
+
+  def containClass(className:String):Boolean={
+      if(simpleClassRefs.contains(className)){
+         if(simpleClassRefs.get(className).size>1){
+              throw ExpressionParseException(s"simple clazz $className ref more clazz: ${simpleClassRefs.get(className).mkString(";")}")
          }else{
               return true
          }
       }
-      classes.contains(clazz) || classesFromPackage.contains(clazz)
+      classes.contains(className) || classesFromPackage.contains(className)
   }
 
-  def registerClassResolver(resolver:String⇒ResolveClazz):Unit={
-      classResolver = resolver
-  }
-
-  def resolve(clazz:String):ResolveClazz={
-      if(classResolver==null){
-        throw ExpressionParserException("class resolver is not register")
-      }
-      val clazzName = if(simpleClassRefs.contains(clazz)){
-          simpleClassRefs(clazz).head
+  def registerDefaultClassResolver(resolver:String⇒ImportClazzType):Unit={
+      if(defaultClassResolver==null) {
+        defaultClassResolver = resolver
       }else{
-          clazz
+        throw new IllegalStateException("default class resolver already registered!")
       }
-      resolveClasses.getOrElseUpdate(clazzName,classResolver.apply(clazzName))
+  }
+
+  def registerDslTypeResolver(resolver:DslType⇒Option[ImportClazzType]):Unit={
+      if(dslTypeResolver==null){
+          dslTypeResolver = resolver
+      }else{
+          throw new IllegalStateException("dsl type resolver already registered!")
+      }
+  }
+
+  def registerPackageClassResolver(`package`:String,resolver:String⇒ImportClazzType):Unit={
+      if(packageClassResolvers.contains(`package`)) {
+        packageClassResolvers.put( `package`, resolver )
+      }else{
+        throw new IllegalStateException(s"${`package`} package class resolver")
+      }
+  }
+
+  def resolve(dslType: DslType): Option[ImportClazzType] = {
+     dslTypeClasses.getOrElseUpdate( dslType, dslTypeResolver.apply( dslType ) )
+  }
+
+  def resolve(className:String):ImportClazzType= {
+    val clazzName = if (simpleClassRefs.contains( className )) {
+      if (simpleClassRefs.get( className ).size > 1) {
+        throw ExpressionParseException( s"simple clazz $className ref more clazz: ${simpleClassRefs.get( className ).mkString( ";" )}" )
+      }
+      simpleClassRefs( className ).head
+    } else {
+      className
+    }
+
+    if (classes.contains( clazzName )) {
+      if (defaultClassResolver != null) {
+        resolveClasses.getOrElseUpdate( clazzName, defaultClassResolver.apply( clazzName ) )
+      } else {
+        throw new IllegalStateException( "default class resolver is not register" )
+      }
+    } else if (classesFromPackage.contains( clazzName )) {
+      val packageName = classesFromPackage( clazzName )
+      packageClassResolvers.get( packageName ) match {
+        case None ⇒
+          throw new IllegalStateException( f"package $packageName class resolver is not register" )
+        case Some( resolver ) ⇒
+          resolveClasses.getOrElseUpdate( clazzName, resolver.apply( clazzName ) )
+      }
+    } else {
+      throw new IllegalArgumentException( f"class $className not imported" )
+    }
   }
 
 }

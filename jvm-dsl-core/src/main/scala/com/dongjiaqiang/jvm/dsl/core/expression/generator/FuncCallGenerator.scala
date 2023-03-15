@@ -1,21 +1,40 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.generator
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.ClazzType
-import com.dongjiaqiang.jvm.dsl.api.expression.{BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, Expression, FloatLiteral, FuncCall, FuncCallChain, IntLiteral, ListLiteral, LiteralCall, LiteralCallChain, LongLiteral, MapLiteral, MethodCall, OptionLiteral, Part, SetLiteral, StaticCall, StringLiteral, TupleLiteral, VarCall, VarName, VarRef}
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.VarRef
+import com.dongjiaqiang.jvm.dsl.api.expression.call.{FuncCall, FuncCallChain, LiteralCall, LiteralCallChain, MethodCall, Part}
+import com.dongjiaqiang.jvm.dsl.api.expression.literal._
+import com.dongjiaqiang.jvm.dsl.api.expression.{ValueExpression, call}
 import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser._
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
+import scala.collection.mutable.{ListMap ⇒ MutableMap}
 
-object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContext, Expression,GeneratorContext] {
+object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContext, ValueExpression,GeneratorContext] {
 
-  def partExpression(partContext: PartContext,
-                     expressionContext: ExprContext,
-                     generatorContext: GeneratorContext = NoneGeneratorContext): Part = {
+  private def partExpression(partContext: PartContext,
+                             expressionContext: ExprContext,
+                             generatorContext: GeneratorContext = NoneGeneratorContext): Part = {
     if (partContext.variable( ) != null) {
-      VarName( partContext.variable( ).IDENTIFIER( ).map( _.getText ).mkString( "." ) )
-    } else {
+
+      val arrayIndexExpressions = MutableMap[Int,List[ValueExpression]]()
+      val varRefs = partContext.variable().localVarOrArrayVar().zipWithIndex.map{
+        case (context,index)⇒
+
+          if(context.localVariable()!=null){
+            context.localVariable().IDENTIFIER().getText
+          }else{
+            val indexExpression = context.localArrayVariable().conditionalOrExpression().map(c⇒OrGenerator.generate(expressionContext,c,generatorContext)).toList
+            arrayIndexExpressions.put(index,indexExpression)
+            context.localArrayVariable().localVariable().IDENTIFIER().getText
+          }
+
+      }.toList
+
+      VarRef(varRefs,arrayIndexExpressions,None)
+    } else{
       partContext.funcCall( ) match {
         case c: VarCallArgsContext ⇒
           VarCallArgs.generate( expressionContext, c )
@@ -27,8 +46,8 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
     }
   }
 
-  def generateMethodCall(exprContext: ExprContext,funcName:String,expressions: List[ExpressionContext]):MethodCall={
-    new MethodCall( exprContext.resolveMethod(funcName),
+  private def generateMethodCall(exprContext: ExprContext, funcName:String, expressions: List[ExpressionContext]):MethodCall={
+    MethodCall( exprContext.resolveMethod(funcName),
       funcName,
       expressions.map( e ⇒ ExpressionGenerator.generate( exprContext, e ) ).toArray )
   }
@@ -37,13 +56,13 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
                 funcName: String, variable: VariableContext, expressions: List[ExpressionContext]): FuncCall = {
     Option.apply(variable) match {
       case Some(v) ⇒
-        if (v.IDENTIFIER().length == 1 &&
-          expressionContext.getProgramScope.isImportClazz(v.IDENTIFIER().head.getText)) {
-          StaticCall(ClazzType(v.IDENTIFIER().head.getText, Array()),
+        if (v.localVarOrArrayVar().size()==1 && v.localVarOrArrayVar().head.localVariable()!=null &&
+          expressionContext.getProgramScope.isImportClazz(v.localVarOrArrayVar().head.localVariable().IDENTIFIER().getText)) {
+          call.StaticCall(ClazzType(v.localVarOrArrayVar().head.localVariable().IDENTIFIER().getText, Array()),
             funcName,
             expressions.map(e ⇒ ExpressionGenerator.generate(expressionContext, e)).toArray)
         } else {
-          VarCall(VarGenerator.generate(expressionContext, v), funcName,
+          call.VarCall(VarRefGenerator.generate(expressionContext, v), funcName,
             expressions.map(e ⇒ ExpressionGenerator.generate(expressionContext, e)).toArray)
         }
       case None ⇒
@@ -55,10 +74,10 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
                 funcName: String, typeContext: TypeContext,
                 expressions: List[ExpressionContext]): FuncCall = {
     Option.apply( typeContext )
-      .map( t ⇒ toDslType( t ) )
+      .map( t ⇒ toDslType( t,expressionContext.getProgramScope ) )
     match {
       case Some( t ) ⇒
-        StaticCall( t, funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ).toArray )
+        call.StaticCall( t, funcName, expressions.map( e ⇒ ExpressionGenerator.generate( expressionContext, e ) ).toArray )
       case _ ⇒
         generateMethodCall(expressionContext,funcName,expressions)
     }
@@ -79,7 +98,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
 
   override def generate(exprContext: ExprContext,
                         ruleContext: LiteralAndCallChainContext,
-                        generatorContext: GeneratorContext = NoneGeneratorContext): Expression = {
+                        generatorContext: GeneratorContext = NoneGeneratorContext): ValueExpression = {
     ruleContext match {
       case c: LiteralExprContext ⇒
         LiteralGenerator.generate( exprContext, c.literal( ) )
@@ -110,12 +129,12 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
           case varRef:VarRef⇒
             val index = parts.indexWhere(_.isInstanceOf[MethodCall])
             if(index == -1){
-              VarRef(varRef.name++parts.map(_.asInstanceOf[VarName]).map(_.name),varRef.fieldScope)
+              varRef merge parts.map(_.asInstanceOf[VarRef])
             }else{
               val methodCall = parts(index).asInstanceOf[MethodCall]
               val leftParts = parts.slice(index+1,parts.length)
 
-              val varCall = VarCall(VarRef(varRef.name++parts.slice(0,index).map(_.asInstanceOf[VarName]).map(_.name),varRef.fieldScope)
+              val varCall = call.VarCall(varRef merge parts.slice(0,index).map(_.asInstanceOf[VarRef])
                 ,methodCall.name,methodCall.params)
               if(leftParts.isEmpty){
                   varCall

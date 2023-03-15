@@ -1,8 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal
 
+import com.dongjiaqiang.jvm.dsl.api.expression.`var`.Null
+import com.dongjiaqiang.jvm.dsl.api.expression.literal._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression._
 
 trait LiteralExpressionScanner extends LiteralExpressionVisitor[Unit] {
   override def visit(literal: IntLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
@@ -78,10 +79,6 @@ trait LiteralExpressionScanner extends LiteralExpressionVisitor[Unit] {
   override def visit(literal: OptionLiteral, visitor: ExpressionVisitor[Unit]): Unit = {
     val expression = literal.literal
     visitor.visit( expression )
-  }
-
-  override def visit(literal: UnitLiteral.type, visitor: ExpressionVisitor[Unit]): Unit = {
-
   }
 
   override def visit(literal: Null.type, visitor: ExpressionVisitor[Unit]): Unit = {

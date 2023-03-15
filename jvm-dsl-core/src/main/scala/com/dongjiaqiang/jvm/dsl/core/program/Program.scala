@@ -1,7 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.core.program
 
+import com.dongjiaqiang.jvm.dsl.api.expression.Expression
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Block
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.api.expression.{Block, Expression}
 import com.dongjiaqiang.jvm.dsl.api.scope.{ClazzScope, MethodScope, ProgramScope}
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionScanner}
 
@@ -27,7 +28,7 @@ case class Program(programScope: ProgramScope,
 
     val methodResult = methods.map {
       case (methodName, method) ⇒
-        expressionVisitor.currentMethodScope = method.methodScope
+        expressionVisitor.setCurrentMethodScope( method.methodScope)
         val result = expressionVisitor.visit( method.body )
         (methodName, result)
     }
@@ -36,7 +37,7 @@ case class Program(programScope: ProgramScope,
       case (clazzName, clazz) ⇒
         (clazzName, clazz.methods.map {
           case (methodName, method) ⇒
-            expressionVisitor.currentMethodScope = method.methodScope
+            expressionVisitor.setCurrentMethodScope(method.methodScope)
             expressionVisitor.currentClazzScope = clazz.clazzScope
             val result = expressionVisitor.visit( method.body )
             (methodName, result)

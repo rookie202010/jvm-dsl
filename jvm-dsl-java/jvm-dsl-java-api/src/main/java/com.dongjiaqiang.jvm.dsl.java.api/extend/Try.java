@@ -40,7 +40,6 @@ public interface Try<T> {
     Throwable getException();
 
     static <T> Try<T> apply(_1_Supplier<? extends T> supplier) {
-
         try {
             return new Success<>(supplier.get());
         } catch (VirtualMachineError | ThreadDeath | InterruptedException | LinkageError e) {

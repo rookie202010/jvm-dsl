@@ -39,6 +39,10 @@ class FieldScope(val outerScopeIndex:Int,
                  val programScope: ProgramScope,
                  val volatile:Boolean = false) extends Scope {
 
+  def resolveDslType(dslType: DslType): FieldScope = {
+   new  FieldScope(outerScopeIndex, symbolName, dslType, belongScope, programScope, volatile)
+  }
+
   override def toString: String =
     s"""
         FieldScope:
@@ -99,24 +103,36 @@ class FieldScope(val outerScopeIndex:Int,
    * resolve localRefs in fieldScope
    *
    * @param index localRefs index in blockScope
+   * @param arrayRefsIndex array refs index
    * @param refs  localRefs names
    * @return
    */
-  override def resolveVarRefs(index: Int, refs: List[String]): Option[FieldScope] = {
-    refs match {
-      case ref :: Nil ⇒
+  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope] = {
+    refs.zipWithIndex match {
+      case (ref,_) :: Nil ⇒
         if (ref == symbolName) {
           Some(this)
         } else {
           None
         }
-      case ref :: childRef ⇒
+      case (ref,index) :: childRef ⇒
         if(ref != symbolName){
             None
         }else {
           dslType match {
             case clazzType: ClazzType ⇒
-              resolve( childRef, clazzType )
+              if(arrayRefsIndex.contains(index) && clazzType.clazzName=="Array"){
+                val parameterType = clazzType.parameterTypes.head
+                parameterType match {
+                  case definitionClazzType: DefinitionClazzType⇒resolve(childRef,arrayRefsIndex,definitionClazzType)
+                  case clazzType: ClazzType⇒ resolve(childRef,arrayRefsIndex,clazzType)
+                  case _⇒None
+                }
+              }else {
+                resolve(childRef,arrayRefsIndex,clazzType)
+              }
+            case definitionClazzType: DefinitionClazzType⇒
+                resolve(childRef,arrayRefsIndex,definitionClazzType)
             case UnResolvedType | AnyType ⇒ Some( this )
             case _ ⇒ None
           }
@@ -124,27 +140,68 @@ class FieldScope(val outerScopeIndex:Int,
     }
   }
 
-  def resolve(childRef: List[String], dslType: ClazzType): Option[FieldScope] = {
-    programScope.classes.get( dslType.clazzName ) match {
-      case Some( clazzScope ) ⇒
-        val fields = clazzScope.fields
-        if (childRef.size == 1) {
-          fields.get( childRef.head ) match {
-            case Some( fieldScope ) ⇒ Some(fieldScope)
-            case None ⇒ None
+  def resolve(childRefWithIndex:List[(String,Int)],arrayRefsIndex:Set[Int],dslType:ClazzType):Option[FieldScope] = {
+    val importClazzType = programScope.importManager.resolve(dslType)
+    importClazzType match {
+      case Some( value ) ⇒
+        val (childRef, index) = childRefWithIndex.head
+        val fields = value.fields
+        if(childRefWithIndex.size==1){
+          fields.get(childRef) match {
+            case Some(_) ⇒ Some(this)
+            case None⇒None
           }
-        } else {
-          fields.get( childRef.head ) match {
+        }else{
+          fields.get( childRef ) match {
             case Some( fieldScope ) ⇒
               fieldScope.dslType match {
                 case childDslType: ClazzType ⇒
-                  resolve( childRef.tail, childDslType )
+                  if (arrayRefsIndex.contains( index ) && childDslType.clazzName == "Array") {
+                    childDslType.parameterTypes.head match {
+                      case clazzType: ClazzType ⇒ resolve( childRefWithIndex, arrayRefsIndex, clazzType )
+                      case definitionClazzType: DefinitionClazzType ⇒ resolve( childRefWithIndex, arrayRefsIndex, definitionClazzType )
+                      case _ ⇒ None
+                    }
+                  } else {
+                    resolve( childRefWithIndex.tail, arrayRefsIndex, childDslType )
+                  }
+                case definitionClazzType: DefinitionClazzType⇒ resolve( childRefWithIndex, arrayRefsIndex, definitionClazzType )
                 case _ ⇒ None
               }
             case None ⇒ None
           }
         }
-      case None ⇒ Some(this)
+      case None ⇒ None
+    }
+
+  }
+  def resolve(childRefWithIndex: List[(String,Int)], arrayRefsIndex:Set[Int], dslType: DefinitionClazzType): Option[FieldScope] = {
+    val (childRef, index) = childRefWithIndex.head
+    val fields = dslType.clazzScope.fields
+    if (childRefWithIndex.size == 1) {
+      fields.get( childRef ) match {
+        case Some( fieldScope ) ⇒ Some( fieldScope )
+        case None ⇒ None
+      }
+    } else {
+      fields.get( childRef ) match {
+        case Some( fieldScope ) ⇒
+          fieldScope.dslType match {
+            case childDslType: ClazzType ⇒
+              if (arrayRefsIndex.contains( index ) && childDslType.clazzName == "Array") {
+                childDslType.parameterTypes.head match {
+                  case definitionClazzType: DefinitionClazzType⇒ resolve( childRefWithIndex, arrayRefsIndex, definitionClazzType )
+                  case clazzType: ClazzType ⇒ resolve( childRefWithIndex, arrayRefsIndex, clazzType )
+                  case _ ⇒ None
+                }
+              } else {
+                resolve( childRefWithIndex.tail, arrayRefsIndex, childDslType )
+              }
+            case definitionClazzType: DefinitionClazzType⇒ resolve( childRefWithIndex, arrayRefsIndex, definitionClazzType )
+            case _ ⇒ None
+          }
+        case None ⇒ None
+      }
     }
   }
 

@@ -1,7 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.java.api.reflect
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
-import com.dongjiaqiang.jvm.dsl.api.scope.{ResolveClazz, ResolveField, ResolveMethod}
 import com.dongjiaqiang.jvm.dsl.java.api.extend.{Either, Try}
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._
@@ -36,11 +35,11 @@ case class ImportClassResolver(classLoader: ClassLoader) {
 
   private def resolveMethods(clazz:Class[_],
                               methods: Array[Method]) = {
-    def help(method: Method): ResolveMethod = {
+    def help(method: Method): ImportClazzMethod = {
       val methodName = method.getName
       val params = method.getParameterTypes.map(`type` ⇒ if(clazz==`type`) ClazzType(clazz.getCanonicalName,Array()) else resolve(`type`))
       val returnType = resolve(method.getReturnType)
-      ResolveMethod(methodName, params, returnType)
+      ImportClazzMethod(methodName, params, returnType)
     }
 
     val (staticMethods, instanceMethods) = filterMembers(methods)
@@ -48,10 +47,10 @@ case class ImportClassResolver(classLoader: ClassLoader) {
   }
 
   private def resolveFields(clazz:Class[_],
-                            fields: Array[Field]): (Array[ResolveField], Array[ResolveField]) = {
+                            fields: Array[Field]): (Array[ImportClazzField], Array[ImportClazzField]) = {
 
-    def help(field: Field): ResolveField = {
-      ResolveField(field.getName, resolve(field.getType))
+    def help(field: Field): ImportClazzField = {
+      ImportClazzField(field.getName, resolve(field.getType))
     }
 
     val (staticFields, instanceFields) = filterMembers(fields)
@@ -221,7 +220,7 @@ case class ImportClassResolver(classLoader: ClassLoader) {
     }
   }
 
-  def resolve(name: String): ResolveClazz = {
+  def resolve(name: String): ImportClazz = {
     val clazz = classLoader.loadClass(name)
 
     val (staticFields, instanceFields) = resolveFields( clazz, clazz.getFields )
