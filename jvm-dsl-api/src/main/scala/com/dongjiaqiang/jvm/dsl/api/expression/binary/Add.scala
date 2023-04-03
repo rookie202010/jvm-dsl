@@ -6,10 +6,10 @@ import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * Long j = 1-2; // 1-2 => Sub
- * Long i = (a+b)*c; // a+b => Add
- * }
+ *    def method()=Unit{
+ *        Long j = 1-2; // 1-2 => Sub
+ *        Long i = (a+b)*c; // a+b => Add
+ *    }
  * }
  * <pre><code>
  */

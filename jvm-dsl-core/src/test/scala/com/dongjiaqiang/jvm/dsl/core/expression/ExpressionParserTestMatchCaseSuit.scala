@@ -11,7 +11,7 @@ import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 import scala.language.postfixOps
 class ExpressionParserTestMatchCaseSuit extends AnyFunSuite {
 
@@ -364,7 +364,7 @@ class ExpressionParserTestMatchCaseSuit extends AnyFunSuite {
         val caseTwo = blockScope.lambdaBlock() expression(scope⇒Return(Some(scope.varRef("r"))))
 
         Return(Some(block.MatchCase(blockScope.varRef("either"),Array((block.MatchClass(LeftType(UnResolvedType),Array(Right[Expression,String]("l"))),caseOne.block),
-          (block.MatchClass(RightType(UnResolvedType),Array(Right[Expression,String]("r"))),caseTwo.block)),None)))
+          (block.MatchClass(RightType(rightParameterType = UnResolvedType),Array(Right[Expression,String]("r"))),caseTwo.block)),None)))
     })
 
     programOptimize method (
@@ -374,7 +374,7 @@ class ExpressionParserTestMatchCaseSuit extends AnyFunSuite {
       val caseTwo = blockScope.lambdaBlock( ) expression (scope ⇒ Return( Some(scope.varRef( "r" ) )))
 
       Return(Some(block.MatchCase( blockScope.varRef( "either" ), Array( (block.MatchClass( LeftType(UnResolvedType), Array( Right[Expression, String]( "l" ) ) ), caseOne.block),
-        (block.MatchClass( RightType(UnResolvedType), Array( Right[Expression, String]( "r" ) ) ), caseTwo.block) ), None ) ))
+        (block.MatchClass( RightType(rightParameterType = UnResolvedType), Array( Right[Expression, String]( "r" ) ) ), caseTwo.block) ), None ) ))
     })
 
     program method(
@@ -384,7 +384,7 @@ class ExpressionParserTestMatchCaseSuit extends AnyFunSuite {
         val caseTwo = blockScope.lambdaBlock() expression(blockScope⇒Throw(blockScope.varRef("e")))
 
         Return(Some(block.MatchCase(blockScope.varRef("v"),Array((block.MatchClass(SuccessType(UnResolvedType),Array(Right[Expression,String]("s"))),caseOne.block),
-          (block.MatchClass(FailureType,Array(Right[Expression,String]("e"))),caseTwo.block)),None)))
+          (block.MatchClass(new FailureType(ThrowableType,UnResolvedType),Array(Right[Expression,String]("e"))),caseTwo.block)),None)))
     })
 
     programOptimize method (
@@ -394,7 +394,7 @@ class ExpressionParserTestMatchCaseSuit extends AnyFunSuite {
       val caseTwo = blockScope.lambdaBlock( ) expression (blockScope ⇒ statement.Throw( blockScope.varRef( "e" ) ))
 
       Return( Some(block.MatchCase( blockScope.varRef( "v" ), Array( (block.MatchClass( SuccessType(UnResolvedType), Array( Right[Expression, String]( "s" ) ) ), caseOne.block),
-        (block.MatchClass( FailureType, Array( Right[Expression, String]( "e" ) ) ), caseTwo.block) ), None ) ))
+        (block.MatchClass( new FailureType(ThrowableType,UnResolvedType), Array( Right[Expression, String]( "e" ) ) ), caseTwo.block) ), None ) ))
     })
 
     program method (

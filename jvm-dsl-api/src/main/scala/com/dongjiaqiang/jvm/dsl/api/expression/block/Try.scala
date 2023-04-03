@@ -25,5 +25,5 @@ case class Try(body: Block, dslType: TryType) extends ValueExpression {
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = TryType( body.getValueType( programScope ) )
+  override def getValueType(programScope: ProgramScope): TryType = new TryType( body.getValueType( programScope ) )
 }

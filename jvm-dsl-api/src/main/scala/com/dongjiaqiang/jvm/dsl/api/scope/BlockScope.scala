@@ -2,7 +2,7 @@ package com.dongjiaqiang.jvm.dsl.api.scope
 
 import com.dongjiaqiang.jvm.dsl.api.scope
 
-import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap ⇒ MutableMap}
 
 class BlockScope(val outerScopeIndex: Int, val fields: MutableMap[String, FieldScope],
                  val parentScope: Scope,

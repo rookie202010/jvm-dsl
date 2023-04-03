@@ -29,5 +29,5 @@ class TupleLiteral(literal: Array[ValueExpression],
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = TupleType( literal.map( _.getValueType( programScope ) ) )
+  override def getValueType(programScope: ProgramScope): TupleType = TupleType( literal.map( _.getValueType( programScope ) ) )
 }

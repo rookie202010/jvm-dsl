@@ -7,10 +7,10 @@ import com.dongjiaqiang.jvm.dsl.api.scope.{FieldScope, ProgramScope}
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * Future[Int] future = Async{ // Async{ ... } => Async
- * return foo();
- * }
+ *      def method()=Unit{
+ *            Future[Int] future = Async{ // Async{ ... } => Async
+ *                return foo();
+ *        }
  * }<pre><code>
  */
 case class Async(body: Block, executor: Option[FieldScope], dslType: FutureType)
@@ -32,5 +32,5 @@ case class Async(body: Block, executor: Option[FieldScope], dslType: FutureType)
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = FutureType( body.getValueType( programScope ) )
+  override def getValueType(programScope: ProgramScope): FutureType = FutureType( body.getValueType( programScope ) )
 }

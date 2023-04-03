@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MethodVisitor
-import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DefinitionClazzType, DslType, MonadDslType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DefinitionClazzType, DslType, MonadDslType, OptionType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
@@ -10,12 +10,15 @@ class MultiOptimize(val programScope: ProgramScope,val optimizeDslType: Optimize
 
 
   private val monadOptimize:MonadOptimize = new MonadOptimize(programScope, optimizeDslType)
+  private val optionOptimize:OptionOptimize = new OptionOptimize(programScope, optimizeDslType)
   private val clazzOptimize:ClazzOptimize = new ClazzOptimize(programScope, optimizeDslType)
   private val definitionClazzOptimize:DefinitionClazzOptimize = new DefinitionClazzOptimize(programScope, optimizeDslType)
 
 
   override def visit(calleeDslType: DslType, callee: ValueExpression, name: String, params: Array[ValueExpression]): Option[Array[ValueExpression]] = {
       val newParams = calleeDslType match {
+        case optionType:OptionType ⇒
+            optionOptimize.visit(optionType,callee, name, params)
         case monadDslType: MonadDslType⇒
             monadOptimize.visit(monadDslType,callee, name, params)
         case clazzType: ClazzType⇒

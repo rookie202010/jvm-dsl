@@ -1,10 +1,13 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
 import com.dongjiaqiang.jvm.dsl.api.`type`._
+import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MethodVisitor
 import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{Assign, LocalVarDef, VarRef}
 import com.dongjiaqiang.jvm.dsl.api.expression.block._
 import com.dongjiaqiang.jvm.dsl.api.expression.call._
+import com.dongjiaqiang.jvm.dsl.api.expression.literal.{BoolLiteral, CharLiteral, ClazzLiteral, DoubleLiteral, FloatLiteral, IntLiteral, ListLiteral, LongLiteral, MapLiteral, OptionLiteral, SetLiteral, StringLiteral, TupleLiteral}
+import com.dongjiaqiang.jvm.dsl.api.expression.unary.Cast
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, ValueExpression}
 import com.dongjiaqiang.jvm.dsl.api.scope.{MethodScope, ProgramScope}
@@ -121,7 +124,7 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
           case UnResolvedType ⇒
             val dslType = resolveSymbolType( fieldScope.symbolName, Math.abs( fieldScope.outerScopeIndex ) )
             if (dslType != UnResolvedType) {
-              super.visit( VarRef( varRef.refs, varRef.arrayRefIndexExpressions, Some( fieldScope.resolveDslType( dslType ) ) ) )
+              super.visit( Cast(VarRef( varRef.refs, varRef.arrayRefIndexExpressions, Some( fieldScope.resolveDslType( dslType ) ) ) ,dslType,flag = 1))
             } else {
               super.visit( varRef, visitor )
             }
@@ -207,14 +210,36 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
   }
 
   override def visit(varCall: VarCall, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newVarRef = visitor.visit( varCall.varRef ).asInstanceOf[VarRef]
+    val newVarRef = visitor.visit( varCall.varRef ).asInstanceOf[ValueExpression]
     val newParams = multiOptimize.visit( newVarRef.getValueType( programScope ), newVarRef, varCall.name, varCall.params )
     VarCall( newVarRef, varCall.name, newParams.get )
   }
 
   override def visit(literalCall: LiteralCall, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParams = multiOptimize.visit( literalCall.literal.getValueType( programScope ), literalCall.literal, literalCall.name, literalCall.params )
-    new LiteralCall( literalCall.literal, literalCall.name, newParams.get )
+    val newLiteral = visitor.visit( literalCall.literal ).asInstanceOf[ValueExpression]
+    val newParams = multiOptimize.visit( newLiteral.getValueType( programScope ), literalCall.literal, literalCall.name, literalCall.params )
+    newLiteral match {
+      case setLiteral: SetLiteral⇒
+        literalCall.name match {
+          case MethodVisitor.TO_SEQ_SET⇒
+              setLiteral.asSeq()
+          case MethodVisitor.TO_SORTED_SET⇒
+              newParams match {
+                case Some(ps)⇒
+                    if(ps.isEmpty){
+                      setLiteral.asSort()
+                    }else {
+                      setLiteral.asSort( ps.head.asInstanceOf[Lambda] )
+                    }
+                case None⇒
+                    setLiteral.asSort()
+              }
+          case _⇒
+            new LiteralCall( newLiteral, literalCall.name, newParams.get )
+        }
+      case _⇒
+        new LiteralCall( newLiteral, literalCall.name, newParams.get )
+    }
   }
 
   override def visit(staticCall: StaticCall, visitor: ExpressionVisitor[Expression]): Expression = {
@@ -255,32 +280,38 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
             (newCalleeType, VarRef( varRef.refs, varRef.arrayRefIndexExpressions, varRef.fieldScope ))
         }
       case methodCall: MethodCall ⇒
-        val newCalleeType = programScope.callType( WrapValueTypeExpression( calleeType ), methodCall.name, methodCall.params )
-        multiOptimize.visit( calleeType, WrapValueTypeExpression( calleeType ), methodCall.name, methodCall.params ) match {
-          case Some( newParams ) ⇒
-            (newCalleeType, MethodCall( methodCall.methodScope, methodCall.name, newParams ))
-          case None ⇒
-            throw ExpressionParseException( "" )
-        }
+        val newMethodCall = multiOptimize.visit( calleeType, WrapValueTypeExpression( calleeType ), methodCall.name, methodCall.params ) match {
+                case Some( newParams ) ⇒
+                  MethodCall( methodCall.methodScope, methodCall.name, newParams )
+                case None ⇒
+                  throw ExpressionParseException( "" )
+              }
+        val newCalleeType = programScope.callType( WrapValueTypeExpression( calleeType ), newMethodCall.name, newMethodCall.params )
+        (newCalleeType,newMethodCall)
     }
   }
 
   @tailrec
-  private def visit(calleeType: DslType, tails: List[Part], newParts: ArrayBuffer[Part], visitor: ExpressionVisitor[Expression], programScope: ProgramScope): Unit = {
+  private def visit(calleeType: DslType, tails: List[Part],newPartDslTypes:ArrayBuffer[DslType], newParts: ArrayBuffer[Part], visitor: ExpressionVisitor[Expression], programScope: ProgramScope): Unit = {
     tails match {
       case Nil ⇒
       case head :: tail ⇒
         val (newCalleeType, newPart) = visit( calleeType, head, visitor, programScope )
+        newPartDslTypes.append(newCalleeType)
         newParts.append( newPart )
-        visit( newCalleeType, tail, newParts, visitor, programScope )
+        visit( newCalleeType, tail, newPartDslTypes,newParts, visitor, programScope )
       case head :: Nil ⇒
-        val (_, newPart) = visit( calleeType, head, visitor, programScope )
+        val (newCalleeType, newPart) = visit( calleeType, head, visitor, programScope )
+        newPartDslTypes.append(newCalleeType)
         newParts.append( newPart )
     }
   }
 
   override def visit(funcCallChain: FuncCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
     val funcCall = funcCallChain.head match {
+      case literalCall: LiteralCall⇒
+        val newLiteralCall = visit(literalCall,visitor)
+        newLiteralCall.asInstanceOf[ValueExpression]
       case varCall: VarCall ⇒
         visit( varCall, visitor ).asInstanceOf[VarCall]
       case methodCall: MethodCall ⇒
@@ -289,87 +320,109 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
         visit( staticCall, visitor ).asInstanceOf[StaticCall]
     }
     val newParts = ArrayBuffer[Part]( )
-    visit( funcCall.getValueType( programScope ), funcCallChain.tails, newParts, visitor, programScope )
-    FuncCallChain( funcCall, newParts.toList )
+    val newPartDslTypes = ArrayBuffer[DslType]()
+    visit( funcCall.getValueType( programScope ), funcCallChain.tails,newPartDslTypes, newParts, visitor, programScope )
+
+    funcCall match {
+      case setLiteral: SetLiteral⇒
+          new SetLiteralCallChain(setLiteral,newParts.toList,newPartDslTypes.toList)
+      case _⇒
+        FuncCallChain( funcCall.asInstanceOf[FuncCall], newParts.toList,newPartDslTypes.toList)
+    }
   }
 
 
-  override def visit(literalCallChain: BoolLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
+  private def visit[T<:ValueExpression](expression:T,tails:List[Part],visitor:ExpressionVisitor[Expression],programScope: ProgramScope):(T,List[Part],List[DslType])={
     val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new BoolLiteralCallChain( literalCallChain.head, newParts.toList )
+    val newPartDslTypes = ArrayBuffer[DslType]( )
+    visit( expression.getValueType( programScope ),tails, newPartDslTypes, newParts, visitor, programScope )
+    (visitor.visit(expression).asInstanceOf[T],newParts.toList,newPartDslTypes.toList)
+  }
+
+  override def visit(literalCallChain: BoolLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
+    val (expression,newParts,newDslTypes) = visit[BoolLiteral](literalCallChain.head,literalCallChain.tails,visitor, programScope)
+    new BoolLiteralCallChain( expression, newParts,newDslTypes )
   }
 
   override def visit(literalCallChain: IntLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new IntLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[IntLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new IntLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: LongLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new LongLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[LongLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new LongLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: DoubleLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new DoubleLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[DoubleLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new DoubleLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: FloatLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new FloatLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[FloatLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new FloatLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: StringLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new StringLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[StringLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new StringLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: CharLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new CharLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[CharLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new CharLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: ListLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new ListLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[ListLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new ListLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: OptionLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new OptionLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[OptionLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new OptionLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: TupleLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new TupleLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[TupleLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new TupleLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: MapLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new MapLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[MapLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new MapLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(literalCallChain: SetLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new SetLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[SetLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    newParts.head match {
+      case MethodCall(_,MethodVisitor.TO_SEQ_SET,_)⇒
+          val newExpression = expression.asSeq()
+          if(newParts.tail.isEmpty){
+              newExpression
+          }else{
+              new SetLiteralCallChain(newExpression,newParts.tail,newDslTypes.tail)
+          }
+      case MethodCall(_,MethodVisitor.TO_SORTED_SET,params)⇒
+          val newExpression = if(params.isEmpty){
+              expression.asSort()
+          }else{
+              expression.asSort(params.head.asInstanceOf[Lambda])
+          }
+          if(newParts.tail.isEmpty){
+              newExpression
+          }else{
+              new SetLiteralCallChain(newExpression,newParts.tail,newDslTypes.tail)
+          }
+      case _⇒
+        new SetLiteralCallChain( expression, newParts, newDslTypes )
+    }
   }
 
   override def visit(literalCallChain: ClazzLiteralCallChain, visitor: ExpressionVisitor[Expression]): Expression = {
-    val newParts = ArrayBuffer[Part]( )
-    visit( literalCallChain.head.getValueType( programScope ), literalCallChain.tails, newParts, visitor, programScope )
-    new ClazzLiteralCallChain( literalCallChain.head, newParts.toList )
+    val (expression, newParts, newDslTypes) = visit[ClazzLiteral]( literalCallChain.head, literalCallChain.tails, visitor, programScope )
+    new ClazzLiteralCallChain( expression, newParts, newDslTypes )
   }
 
   override def visit(matchCase: MatchCase, visitor: ExpressionVisitor[Expression]): Expression = {
@@ -518,9 +571,9 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
         case _: RightType ⇒
           calleeType match {
             case eitherType: EitherType ⇒
-              matchedRight( RightType(eitherType.rightParameterType), matchClass )
+              matchedRight( RightType(eitherType.leftParameterType,eitherType.rightParameterType), matchClass )
             case AnyType ⇒
-              matchedRight( RightType( AnyType ), matchClass )
+              matchedRight( RightType( AnyType,AnyType ), matchClass )
           }
         case _: SuccessType ⇒
           calleeType match {

@@ -1,5 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.api.`type`
 
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.api.scope.{ClazzScope, ImportResolver}
 
 trait DslType {
@@ -52,6 +53,8 @@ trait MonadDslType extends DslType {
   }
 
   override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = anotherDslType match {
+    case monadDslType: MonadDslType if(anotherDslType.getClass==this.getClass) && carryDslType == monadDslType.carryDslType ⇒
+        true
     case monadDslType: MonadDslType if(anotherDslType.getClass==this.getClass  && !monadDslType.carryDslType.isInstanceOf[BasicDslType])⇒
         carryDslType.isSuperDslType(importResolver,monadDslType.carryDslType)
     case _⇒false
@@ -65,7 +68,6 @@ trait NumberDslType extends BasicDslType
 //base type
 
 object IntType extends NumberDslType {
-
 
   override val name: String = "Int"
 
@@ -128,7 +130,7 @@ object DoubleType extends NumberDslType {
   }
 }
 
-object CharType extends DslType with BasicDslType {
+object CharType extends BasicDslType {
   override val name: String = "Char"
 
   override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
@@ -141,7 +143,7 @@ object CharType extends DslType with BasicDslType {
   override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = anotherDslType == CharType
 }
 
-object ByteType extends DslType with BasicDslType {
+object ByteType extends BasicDslType {
   override val name: String = "Byte"
 
   override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
@@ -154,7 +156,7 @@ object ByteType extends DslType with BasicDslType {
   override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = anotherDslType == ByteType
 }
 
-object BoolType extends DslType with BasicDslType {
+object BoolType extends BasicDslType {
   override val name: String = "Bool"
 
   override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
@@ -191,6 +193,12 @@ object AnyType extends DslType {
   override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = true
 }
 
+object NothingType extends DslType{
+  override val name:String = "Nothing"
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = anotherDslType == NothingType
+}
+
 object UnitType extends DslType {
   override val name: String = "Unit"
 
@@ -198,66 +206,91 @@ object UnitType extends DslType {
                              anotherDslType: DslType): DslType = UnitType
 }
 
+object ThrowableType extends ClazzType("Throwable")
+
 //collection type
 
 case class ListType(parameterType: DslType) extends MonadDslType {
   override val name: String = s"List[${parameterType.name}]"
 
-  override def equals(obj: Any): scala.Boolean =
+  override def equals(obj: Any): scala.Boolean = {
     obj match {
       case listType: ListType ⇒ parameterType == listType.parameterType
       case _ ⇒ false
 
     }
-
+  }
 
   override def carryDslType: DslType = parameterType
 
   override def transform(carryDslType: DslType): MonadDslType = ListType(carryDslType)
 }
 
-case class SetType(parameterType:DslType) extends MonadDslType {
+case class SetType(parameterType:DslType,
+                   seq:Boolean=false,
+                   sorted:Boolean=false,
+                   sorter:Option[Lambda] = None) extends MonadDslType {
   override val name: String = s"Set[${parameterType.name}]"
 
+  def asSeq():SetType={
+      this.copy(seq=true,sorted=false,sorter=None)
+  }
+
+  def asSorted():SetType={
+      this.copy(seq=false,sorted=true,sorter=None)
+  }
+
+  def asSorted(sorter: Lambda): SetType = {
+    this.copy( seq = false, sorted = true, sorter = Some( sorter ) )
+  }
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case setType: SetType ⇒ parameterType == setType.parameterType
+      case setType: SetType ⇒ parameterType == setType.parameterType &&
+        seq == setType.seq &&
+        sorted == setType.sorted &&
+        sorter == setType.sorter
       case _ ⇒ false
     }
 
   override def carryDslType: DslType = parameterType
 
-  override def transform(carryDslType: DslType): MonadDslType = SetType(carryDslType)
+  override def transform(carryDslType: DslType): MonadDslType = SetType(carryDslType,seq, sorted,sorter)
 }
 
-case class MapType(keyParameterType:DslType, valueParameterType:DslType) extends MonadDslType {
+case class MapType(keyParameterType:DslType,
+                   valueParameterType:DslType,
+                   seq:Boolean=false,
+                   sorted:Boolean=false,
+                   sorter:Option[Lambda] = None) extends MonadDslType {
   override val name: String = s"Map[${keyParameterType.name},${valueParameterType.name}]"
+
+  def asSeq(): MapType = {
+    this.copy( seq = true, sorted = false, sorter = None )
+  }
+
+  def asSorted(): MapType = {
+    this.copy( seq = false, sorted = true, sorter = None )
+  }
+
+  def asSorted(sorter: Lambda): MapType = {
+    this.copy( seq = false, sorted = true, sorter = Some( sorter ) )
+  }
 
   override def equals(obj: Any): scala.Boolean =
     obj match {
-      case mapType: MapType ⇒ valueParameterType == mapType.valueParameterType && keyParameterType == mapType.keyParameterType
+      case mapType: MapType ⇒ valueParameterType == mapType.valueParameterType &&
+        keyParameterType == mapType.keyParameterType &&
+        seq == mapType.seq &&
+        sorted == mapType.sorted &&
+        sorter == mapType.sorter
       case _ ⇒ false
     }
 
   override def carryDslType: DslType = TupleType(Array(keyParameterType,valueParameterType))
 
   override def transform(carryDslType: DslType): MonadDslType = MapType(carryDslType.asInstanceOf[TupleType].parameterTypes.head,
-    carryDslType.asInstanceOf[TupleType].parameterTypes.last)
-}
-
-case class OptionType(parameterType: DslType) extends MonadDslType {
-  override val name: String = s"Option[${parameterType.name}]"
-
-  override def equals(obj: Any): scala.Boolean =
-    obj match {
-      case option: OptionType ⇒ parameterType == option.parameterType
-      case _ ⇒ false
-    }
-
-  override def carryDslType: DslType = parameterType
-
-  override def transform(carryDslType: DslType): MonadDslType = OptionType(carryDslType)
+    carryDslType.asInstanceOf[TupleType].parameterTypes.last,seq, sorted)
 }
 
 case class ArrayType(parameterType: DslType) extends MonadDslType {
@@ -324,6 +357,14 @@ case class LambdaType(mayInputType: Option[DslType], outputType: DslType) extend
           case tupleType: TupleType⇒s"(${tupleType.parameterTypes.map(_.name).mkString(",")})=>${outputType.name}"
           case _⇒s"${inputType.name}=>${outputType.name}"
         }
+  }
+
+  def getInputParamNum:Int={
+      mayInputType match {
+        case None⇒0
+        case Some(TupleType(parameterTypes))⇒ parameterTypes.length
+        case _⇒ 1
+      }
   }
 
   override def equals(obj: Any): scala.Boolean =
@@ -410,39 +451,42 @@ case class LambdaType(mayInputType: Option[DslType], outputType: DslType) extend
   }
 }
 
-
+object ClazzType {
+  def apply(clazzName: String, parameterTypes: Array[DslType] = Array( )): ClazzType = {
+    new ClazzType( clazzName, parameterTypes )
+  }
+  def unapply(clazzType: ClazzType): Option[(String, Array[DslType])] = {
+    Some( (clazzType.clazzName, clazzType.parameterTypes) )
+  }
+}
 //clazzType
-case class ClazzType(clazzName:String,parameterTypes:Array[DslType] = Array()) extends DslType {
+class ClazzType(val clazzName:String,val parameterTypes:Array[DslType] = Array()) extends DslType {
   override val name: String = if(parameterTypes.isEmpty) {
     s"$clazzName"
   }else{
     s"$clazzName[${parameterTypes.map(_.name).mkString(",")}]"
   }
-
-  override def equals(obj: Any): scala.Boolean =
+  override def equals(obj: Any): scala.Boolean = {
     obj match {
       case clazzType: ClazzType ⇒ clazzType.clazzName == clazzName &&
         parameterTypes.sameElements(clazzType.parameterTypes)
       case _ ⇒ false
     }
+  }
 
   override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
-    case ClazzType(clazzName,_) if clazzName==this.clazzName ⇒ this
-    case ClazzType(clazzName,_) ⇒
-        importResolver.resolve(clazzName).commonDslType(importResolver,importResolver.resolve(this.clazzName))
+    case clazzType: ClazzType if clazzType.clazzName==this.clazzName ⇒ this
+    case clazzType: ClazzType ⇒
+        importResolver.resolve(this.clazzName).commonDslType(importResolver,importResolver.resolve(clazzType.clazzName))
+    case _⇒ AnyType
   }
 
   override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = anotherDslType match {
-    case ClazzType(clazzName,_) if clazzName == this.clazzName ⇒ true
-    case ClazzType(clazzName,_) ⇒
-      importResolver.resolve(this.clazzName).isSuperDslType(importResolver,importResolver.resolve(clazzName))
+    case clazzType: ClazzType if clazzType.clazzName == this.clazzName ⇒ true
+    case clazzType: ClazzType⇒
+      importResolver.resolve(this.clazzName).isSuperDslType(importResolver,importResolver.resolve(clazzType.clazzName))
+    case _⇒false
   }
-}
-
-case class CompositeClazzType(clazzNames:Set[String]) extends DslType{
-  override val name: String = clazzNames.mkString("[",",","]")
-
-  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = ???
 }
 
 case class DefinitionClazzType(clazzName:String,clazzScope: ClazzScope) extends DslType {
@@ -457,6 +501,13 @@ case class DefinitionClazzType(clazzName:String,clazzScope: ClazzScope) extends 
     case DefinitionClazzType(clazzName,_) if clazzName == this.clazzName ⇒ true
     case _⇒false
   }
+}
+
+
+case class CompositeClazzType(clazzNames:Set[String]) extends DslType{
+  override val name: String = clazzNames.mkString("[",",","]")
+
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = ???
 }
 
 case class ImportClazzField(name:String,
@@ -507,10 +558,42 @@ case class Inherit(clazzName:String,inherits:Option[Set[Inherit]]) {
   }
 }
 
+object OptionType{
+    def apply(parameterType: DslType):OptionType={
+        new OptionType(parameterType)
+    }
+}
+class OptionType(val parameterType: DslType) extends MonadDslType {
+  override val name: String = s"Option[${parameterType.name}]"
+  override def equals(obj: Any): scala.Boolean =
+    obj match {
+      case option: OptionType ⇒ this.parameterType == option.parameterType
+      case _ ⇒ false
+    }
+  override def carryDslType: DslType = parameterType
+  override def transform(carryDslType: DslType): MonadDslType = new OptionType(carryDslType)
+
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = {
+    anotherDslType match {
+      case optionType: OptionType ⇒
+        new OptionType( parameterType.commonDslType(importResolver,optionType.parameterType) )
+      case _ ⇒
+        AnyType
+    }
+  }
+
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = {
+    anotherDslType match {
+      case optionType: OptionType ⇒
+         parameterType.isSuperDslType(importResolver,optionType.parameterType)
+      case _ ⇒ false
+    }
+  }
+}
 
 //resolve in expression reviser
 
-case class SomeType(parameterType: DslType) extends MonadDslType {
+case class SomeType(override val parameterType: DslType) extends OptionType(parameterType) {
   override val name: String = s"Some[${parameterType.name}]"
 
   override def equals(obj: Any): scala.Boolean =
@@ -522,19 +605,36 @@ case class SomeType(parameterType: DslType) extends MonadDslType {
   override def carryDslType: DslType = parameterType
 
   override def transform(carryDslType: DslType): MonadDslType = SomeType(carryDslType)
+
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
+    case NothingType⇒ new OptionType(parameterType)
+    case SomeType(parameterType)⇒ SomeType(parameterType.commonDslType(importResolver, this.parameterType))
+    case _⇒ super.commonDslType(importResolver, anotherDslType)
+  }
+
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = this.asInstanceOf[MonadDslType].
+    isSuperDslType(importResolver, anotherDslType)
 }
 
-object NoneType extends MonadDslType {
+object NoneType extends OptionType(NothingType) {
   override val name: String = "None"
 
   override def carryDslType: DslType = NoneType
 
   override def transform(carryDslType: DslType): MonadDslType = NoneType
+
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
+    case SomeType(parameterType)⇒ new OptionType(parameterType)
+    case NoneType ⇒ this
+    case _⇒ super.commonDslType(importResolver, anotherDslType)
+  }
+
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = this.asInstanceOf[MonadDslType].
+    isSuperDslType( importResolver, anotherDslType )
 }
 
-case class EitherType(leftParameterType: DslType, rightParameterType: DslType) extends MonadDslType {
+class EitherType(val leftParameterType: DslType, val rightParameterType: DslType) extends MonadDslType {
   override val name: String = s"Either[${leftParameterType.name},${rightParameterType.name}]"
-
   override def equals(obj: Any): Boolean = {
     obj match {
       case eitherType: EitherType ⇒
@@ -542,91 +642,147 @@ case class EitherType(leftParameterType: DslType, rightParameterType: DslType) e
       case _ ⇒ false
     }
   }
-
   override def carryDslType: DslType = TupleType(Array(leftParameterType,rightParameterType))
-
-  override def transform(carryDslType: DslType): MonadDslType = EitherType(leftParameterType,carryDslType)
-
-  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
-    case EitherType(leftDslType,rightDslType)⇒
-        EitherType(leftDslType.commonDslType(importResolver,leftParameterType),rightDslType.commonDslType(importResolver,rightParameterType))
-    case _⇒AnyType
+  override def transform(carryDslType: DslType): MonadDslType = new EitherType(leftParameterType,carryDslType)
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = {
+      anotherDslType match {
+        case eitherType: EitherType ⇒
+          new EitherType( eitherType.leftParameterType.commonDslType( importResolver, leftParameterType ),
+            eitherType.rightParameterType.commonDslType( importResolver, rightParameterType ) )
+        case _ ⇒
+          AnyType
+      }
   }
-
-  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = anotherDslType match {
-    case EitherType(leftDslType,rightDslType)⇒ leftParameterType.isSuperDslType(importResolver, leftDslType) && rightParameterType.isSuperDslType(importResolver,rightDslType)
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = {
+     anotherDslType match {
+       case eitherType: EitherType⇒
+          leftParameterType.isSuperDslType(importResolver,eitherType.leftParameterType) &&
+            rightParameterType.isSuperDslType(importResolver,eitherType.rightParameterType)
+       case _⇒ false
+     }
   }
 }
 
-case class LeftType(parameterType: DslType) extends MonadDslType {
-  override val name: String = s"Left[${parameterType.name}]"
+case class LeftType(override val leftParameterType: DslType, override val rightParameterType: DslType = AnyType) extends
+  EitherType(leftParameterType, rightParameterType) {
+  override val name: String = s"Left[${leftParameterType.name},${rightParameterType.name}]"
 
   override def equals(obj: Any): Boolean = {
     obj match {
       case leftType: LeftType ⇒
-        leftType.parameterType == parameterType
+        leftType.leftParameterType == leftType.leftParameterType &&
+          leftType.rightParameterType == leftType.rightParameterType
       case _ ⇒ false
     }
   }
+  override def transform(carryDslType: DslType): MonadDslType = LeftType(carryDslType,rightParameterType)
+  override def commonDslType(importResolver: ImportResolver,
+                             anotherDslType: DslType): DslType = {
+    anotherDslType match {
+      case LeftType(leftParameterType,rightParameterType)⇒
+          LeftType(leftParameterType.commonDslType(importResolver,this.leftParameterType),
+            rightParameterType.commonDslType(importResolver,this.rightParameterType))
+      case RightType(leftParameterType,rightParameterType)⇒
+          new EitherType(leftParameterType.commonDslType(importResolver,this.leftParameterType),
+            rightParameterType.commonDslType(importResolver,this.rightParameterType))
+      case _⇒ super.commonDslType(importResolver,anotherDslType)
+    }
+  }
 
-  override def carryDslType: DslType = parameterType
-
-  override def transform(carryDslType: DslType): MonadDslType = LeftType(carryDslType)
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = {
+    this.asInstanceOf[MonadDslType].isSuperDslType(importResolver,anotherDslType)
+  }
 }
 
-case class RightType(parameterType: DslType) extends MonadDslType {
-  override val name: String = s"Right[${parameterType.name}]"
+case class RightType(override val leftParameterType: DslType = AnyType, override val rightParameterType: DslType) extends EitherType(leftParameterType, rightParameterType) {
+  override val name: String = s"Right[${leftParameterType.name},${rightParameterType.name}]"
 
   override def equals(obj: Any): Boolean = {
     obj match {
       case rightType: RightType ⇒
-        rightType.parameterType == parameterType
+        rightType.rightParameterType == rightType.rightParameterType && rightType.leftParameterType == leftParameterType
       case _ ⇒ false
     }
   }
 
-  override def carryDslType: DslType = parameterType
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = {
+    anotherDslType match {
+      case RightType( leftParameterType, rightParameterType ) ⇒
+        RightType( leftParameterType.commonDslType( importResolver, this.leftParameterType ),
+          rightParameterType.commonDslType( importResolver, this.rightParameterType ) )
+      case LeftType( leftParameterType, rightParameterType ) ⇒
+        new EitherType( leftParameterType.commonDslType( importResolver, this.leftParameterType ),
+          rightParameterType.commonDslType( importResolver, this.rightParameterType ) )
+      case _ ⇒ super.commonDslType( importResolver, anotherDslType )
+    }
+  }
 
-  override def transform(carryDslType: DslType): MonadDslType = RightType(carryDslType)
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = {
+    this.asInstanceOf[MonadDslType].isSuperDslType(importResolver,anotherDslType)
+  }
+
+  override def transform(carryDslType: DslType): MonadDslType = RightType( leftParameterType, carryDslType )
 }
 
-case class TryType(parameterType: DslType) extends MonadDslType {
+object TryType{
+  def apply(parameterType: DslType):TryType={
+      new TryType(parameterType)
+  }
+}
+class TryType(val parameterType: DslType) extends MonadDslType {
   override val name: String = s"Try[${parameterType.name}]"
-
   override def equals(obj: Any): scala.Boolean =
     obj match {
       case tryType: TryType ⇒
         parameterType == tryType.parameterType
       case _ ⇒ false
     }
-
   override def carryDslType: DslType = parameterType
-
-  override def transform(carryDslType: DslType): MonadDslType = TryType(carryDslType)
-
+  override def transform(carryDslType: DslType): MonadDslType = new TryType( carryDslType )
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
+    case tryType: TryType ⇒ new TryType( parameterType.commonDslType( importResolver, tryType.carryDslType ) )
+    case _ ⇒ AnyType
+  }
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = anotherDslType match {
+    case tryType:TryType⇒ parameterType.isSuperDslType(importResolver,tryType.carryDslType)
+    case _⇒ false
+  }
 }
 
-case class SuccessType(parameterType: DslType) extends MonadDslType {
+case class SuccessType(override val parameterType: DslType) extends TryType(parameterType) {
   override val name: String = s"Success[${parameterType.name}]"
-
   override def equals(obj: Any): scala.Boolean =
     obj match {
       case successType: SuccessType ⇒
         parameterType == successType.parameterType
       case _ ⇒ false
     }
+  override def carryDslType: DslType = parameterType
+  override def transform(carryDslType: DslType): MonadDslType = SuccessType(carryDslType)
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
+    case FailureType(_,parameterType) ⇒ new TryType(parameterType)
+    case SuccessType(parameterType)⇒ SuccessType(parameterType.commonDslType(importResolver,this.parameterType))
+    case _⇒ super.commonDslType(importResolver, anotherDslType)
+  }
+
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = this.asInstanceOf[MonadDslType].
+    isSuperDslType( importResolver, anotherDslType )
+}
+
+case class  FailureType(error:ThrowableType.type ,override val parameterType: DslType) extends TryType(parameterType) {
+  override val name: String = "Failure"
 
   override def carryDslType: DslType = parameterType
 
-  override def transform(carryDslType: DslType): MonadDslType = SuccessType(carryDslType)
-}
+  override def transform(carryDslType: DslType): MonadDslType = FailureType(error,carryDslType)
 
-object FailureType extends MonadDslType {
-  override val name: String = "Failure"
-
-  override def carryDslType: DslType = FailureType
-
-  override def transform(carryDslType: DslType): MonadDslType = FailureType
+  override def commonDslType(importResolver: ImportResolver, anotherDslType: DslType): DslType = anotherDslType match {
+    case FailureType(error,parameterType) ⇒ FailureType(error,parameterType.commonDslType(importResolver,this.parameterType))
+    case SuccessType( parameterType ) ⇒ new TryType( parameterType.commonDslType(importResolver,this.parameterType) )
+    case _ ⇒ super.commonDslType( importResolver, anotherDslType )
+  }
+  override def isSuperDslType(importResolver: ImportResolver, anotherDslType: DslType): Boolean = this.asInstanceOf[MonadDslType].
+    isSuperDslType( importResolver, anotherDslType )
 }
 
 

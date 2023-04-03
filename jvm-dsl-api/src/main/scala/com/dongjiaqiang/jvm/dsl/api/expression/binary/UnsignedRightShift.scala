@@ -20,6 +20,5 @@ case class UnsignedRightShift(left: ValueExpression, right: ValueExpression) ext
 
   override def getValueType(programScope: ProgramScope): DslType = {
     left.getValueType( programScope )
-    //resolveBitExpressionValueType(leftValueType,rightValueType,onlyAcceptLeftValueType = true)
   }
 }

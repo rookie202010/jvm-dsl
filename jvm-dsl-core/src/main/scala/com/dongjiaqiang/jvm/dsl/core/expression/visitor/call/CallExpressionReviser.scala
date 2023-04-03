@@ -13,7 +13,7 @@ trait CallExpressionReviser extends CallExpressionVisitor[Expression]{
   }
 
   override def visit(varCall: VarCall, visitor: ExpressionVisitor[Expression]): Expression = {
-      VarCall(varCall.varRef.visit(visitor).asInstanceOf[VarRef],varCall.name,
+      VarCall(varCall.varRef.visit(visitor).asInstanceOf[ValueExpression],varCall.name,
         varCall.params.map(_.visit(visitor).asInstanceOf[ValueExpression]))
   }
 

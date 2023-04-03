@@ -6,6 +6,7 @@ import com.dongjiaqiang.jvm.dsl.api.expression.`var`.VarRef
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 case class WrapValueTypeExpression(valueType:DslType) extends ValueExpression{
   override def getValueType(programScope: ProgramScope): DslType = valueType
@@ -18,6 +19,8 @@ object FuncCallChain {
   @tailrec
   def getValueType(programScope: ProgramScope, calleeType: DslType, tails: List[Part]): DslType = {
     tails match {
+      case Nil⇒
+          calleeType
       case head :: tail ⇒
         head match {
           case varRef: VarRef ⇒
@@ -48,12 +51,13 @@ object FuncCallChain {
  * }
  * <pre><code>
  */
-case class FuncCallChain(head: FuncCall, tails: List[Part]) extends ValueExpression {
+case class FuncCallChain(head: FuncCall, tails: List[Part],tailDslTypes:List[DslType] = List()) extends ValueExpression {
+
   override def toString: String = s"$head.${tails.mkString( "." )}"
 
   override def equals(obj: Any): Boolean = obj match {
     case funcCallChain: FuncCallChain ⇒
-      funcCallChain.head == head && funcCallChain.tails == tails
+      funcCallChain.head == head && funcCallChain.tails == tails && funcCallChain.tailDslTypes == tailDslTypes
     case _ ⇒ false
   }
 

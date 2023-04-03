@@ -7,6 +7,7 @@ import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
 //binary expression
 trait BinaryExpression extends ValueExpression {
+
   val left: ValueExpression
   val right: ValueExpression
 
@@ -14,7 +15,7 @@ trait BinaryExpression extends ValueExpression {
     valueType match {
       case DoubleType | FloatType | LongType | IntType | CharType | ByteType ⇒
       case _ ⇒
-        throw ExpressionParseException( f"arithmetic expression only accept double float long int and char type $valueType" )
+        throw ExpressionParseException( f"arithmetic expression only accept double float long int char and byte type $valueType $this" )
     }
   }
 
@@ -33,7 +34,7 @@ trait BinaryExpression extends ValueExpression {
     }
   }
 
-  def checkValueType(leftType: DslType, rightType: DslType): Unit
+  def checkValueType(leftType: DslType, rightType: DslType): Unit = {}
 
   override def getValueType(programScope: ProgramScope): DslType = {
     val leftType = left.getValueType( programScope )

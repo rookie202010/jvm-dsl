@@ -5,7 +5,7 @@ import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 
 trait SeqMrt extends SeqMethodVisitor[DslType]{
-  override def indexOf(calleeDslType: MonadDslType, callee: ValueExpression, param: ValueExpression): DslType = IntType
+  override def indexOf(calleeDslType: MonadDslType, callee: ValueExpression, element: ValueExpression): DslType = IntType
 
   override def get(calleeDslType: MonadDslType, callee: ValueExpression, index: ValueExpression): DslType = calleeDslType.carryDslType
 
@@ -19,7 +19,14 @@ trait SeqMrt extends SeqMethodVisitor[DslType]{
 
   override def addAll(calleeDslType: MonadDslType, callee: ValueExpression, element: ValueExpression): DslType = UnitType
 
-  override def remove(calleeDslType: MonadDslType, callee: ValueExpression, index: ValueExpression): DslType = calleeDslType.carryDslType
+  override def remove(calleeDslType: MonadDslType, callee: ValueExpression, indexOrElement: ValueExpression): DslType = calleeDslType.carryDslType
 
   override def update(calleeDslType: MonadDslType, callee: ValueExpression, index: ValueExpression, element: ValueExpression): DslType = calleeDslType.carryDslType
+
+  override def max(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
+
+  override def min(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
+
+  override def sum(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
+
 }

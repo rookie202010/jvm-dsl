@@ -20,6 +20,8 @@ trait Expression {
     }
 }
 
+trait BlockExpression extends Expression
+
 trait ValueExpression extends Expression{
     def  getValueType(programScope: ProgramScope):DslType
 }
@@ -62,7 +64,7 @@ trait ValueExpression extends Expression{
 case class For(loopVarDef:LocalVarDef,
                loopVarCondition:ValueExpression,
                loopVarUpdate:Expression,
-               body:Block) extends Expression {
+               body:Block) extends BlockExpression {
     override def toString: String =
         s"""
            |for($loopVarDef;$loopVarCondition;$loopVarUpdate)
@@ -111,7 +113,7 @@ class ForLoopCollection(val localVarDef: LocalVarDef,
 }
 
 case class ForCollection(localVarDef: LocalVarDef,
-                    looped:ValueExpression,body:Block) extends Expression {
+                    looped:ValueExpression,body:Block) extends BlockExpression {
     override def toString: String =
         s"""
            |for($localVarDef:$looped)
@@ -163,7 +165,7 @@ class ForLoopMap(val loopKeyDef:LocalVarDef,
 
 case class ForMap(loopKeyDef:LocalVarDef,
              loopValueDef:LocalVarDef,
-             looped:ValueExpression,body:Block) extends Expression {
+             looped:ValueExpression,body:Block) extends BlockExpression {
     override def toString: String =
         s"""
            |for($loopKeyDef,$loopValueDef:$looped)
@@ -215,7 +217,7 @@ class WhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayBuf
     }
 }
 
-case class While(condition: ValueExpression, body:Block) extends Expression {
+case class While(condition: ValueExpression, body:Block) extends BlockExpression {
     override def toString: String =
         s"""
            |while($condition)
@@ -271,7 +273,7 @@ class DoWhileBlock(override val expressions:ArrayBuffer[Expression] = new ArrayB
     }
 }
 
-case class DoWhile(condition:ValueExpression,body:Block) extends Expression {
+case class DoWhile(condition:ValueExpression,body:Block) extends BlockExpression {
     override def toString: String =
         s"""
            |do
@@ -326,7 +328,7 @@ class SyncBlock(override val expressions: ArrayBuffer[Expression] = ArrayBuffer(
     }
 }
 
-case class Sync(condition: Expression,body:Block) extends Expression {
+case class Sync(condition: Expression,body:Block) extends BlockExpression {
     override def toString: String =
         s"""
            |sync($condition)
@@ -385,7 +387,7 @@ class IfBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffer()) 
 
 }
 
-case class If(cases:Array[(ValueExpression,Block)], default:Option[Block]) extends Expression {
+case class If(cases:Array[(ValueExpression,Block)], default:Option[Block]) extends BlockExpression {
 
     override def toString:String = {
         cases.map {
@@ -484,7 +486,7 @@ class FinallyBlock(override val expressions:ArrayBuffer[Expression] = ArrayBuffe
     }
 }
 
-case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],finallyBlock:Option[Block]) extends Expression {
+case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],finallyBlock:Option[Block]) extends BlockExpression {
     override def toString: String =
         s"""
            |try

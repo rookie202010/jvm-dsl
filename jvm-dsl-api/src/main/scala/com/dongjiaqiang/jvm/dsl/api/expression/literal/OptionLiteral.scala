@@ -38,7 +38,7 @@ class OptionLiteral(literal: ValueExpression,
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = {
-    OptionType( literal.getValueType( programScope ) )
+  override def getValueType(programScope: ProgramScope): OptionType = {
+    new OptionType( literal.getValueType( programScope ) )
   }
 }

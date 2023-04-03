@@ -9,7 +9,7 @@ import com.dongjiaqiang.jvm.dsl.core.JvmDslParserParser.VariableContext
 import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 
 import scala.collection.convert.ImplicitConversionsToScala._
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap⇒ MutableMap}
 import scala.language.postfixOps
 
 
@@ -42,7 +42,7 @@ object VarRefGenerator extends IExpressionGenerator[VariableContext, VarRef,VarG
         case None ⇒
             val ref = refs.head
             if(exprContext.getProgramScope.isImportClazz(ref)){
-                new StaticVarRef(ClazzType(ref),exprContext.getProgramScope,refs.tail,arrayRefIndexExpressions)
+                new StaticVarRef(new ClazzType(ref),exprContext.getProgramScope,refs.tail,arrayRefIndexExpressions)
             }else {
               throw ExpressionParseException( s"can't resolve ${refs.mkString( "." )}" )
             }

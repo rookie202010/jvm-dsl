@@ -14,5 +14,5 @@ object NoneLiteral extends Literal[None.type, NoneType.type ]( None ) {
     obj == NoneLiteral
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = dslType
+  override def getValueType(programScope: ProgramScope): NoneType.type = dslType
 }

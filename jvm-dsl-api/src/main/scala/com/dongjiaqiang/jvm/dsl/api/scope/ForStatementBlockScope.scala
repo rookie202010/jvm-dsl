@@ -2,7 +2,7 @@ package com.dongjiaqiang.jvm.dsl.api.scope
 
 import com.dongjiaqiang.jvm.dsl.api.scope
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
 class ForStatementBlockScope(override val outerScopeIndex: Int, val initFields: MutableMap[String, FieldScope], override val parentScope: Scope, override val topScope: Scope)
   extends BlockScope( outerScopeIndex, parentScope, topScope ) {

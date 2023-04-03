@@ -26,7 +26,7 @@ package object scope {
       case context: TupleTypeContext ⇒
         TupleType( context.`type`( ).map( `type` ⇒ toDslType( `type`,programScope ) ).toArray )
       case context: OptionTypeContext ⇒
-        OptionType( toDslType( context.`type`( ) ,programScope) )
+        new OptionType( toDslType( context.`type`( ) ,programScope) )
       case context: FutureTypeContext ⇒
         FutureType( toDslType( context.`type`( ) ,programScope) )
       case context: LambdaTypeContext ⇒
@@ -38,10 +38,24 @@ package object scope {
         clazzName match {
           case "Array" ⇒ ArrayType(toDslType(context.`type`().head,programScope))
           case "Some"⇒SomeType(toDslType(context.`type`().head,programScope))
-          case "Left"⇒LeftType(toDslType(context.`type`().head,programScope))
-          case "Right"⇒RightType(toDslType(context.`type`().head,programScope))
+          case "Left"⇒{
+            if(context.`type`.size()==1) {
+              LeftType( leftParameterType = toDslType( context.`type`( ).head, programScope ) )
+            }else{
+              LeftType( leftParameterType = toDslType( context.`type`( ).head, programScope ),
+                rightParameterType = toDslType( context.`type`( ).last, programScope ) )
+            }
+          }
+          case "Right"⇒{
+            if(context.`type`.size()==1) {
+              RightType( rightParameterType = toDslType( context.`type`( ).head, programScope ) )
+            }else{
+              RightType( leftParameterType = toDslType( context.`type`( ).head, programScope ),
+                rightParameterType = toDslType( context.`type`( ).last, programScope ) )
+            }
+          }
           case "None"⇒NoneType
-          case _⇒  ClazzType( clazzName, context.`type`( ).map( t⇒toDslType(t,programScope) ).toArray )
+          case _⇒  new ClazzType( clazzName, context.`type`( ).map( t⇒toDslType(t,programScope) ).toArray )
         }
       case context: ClassTypeContext ⇒
         if (context.clazzType( ).getText == "Unit") {
@@ -52,7 +66,7 @@ package object scope {
           if(programScope.classes.contains(context.clazzType().getText)){
             DefinitionClazzType(context.clazzType().getText,programScope.classes(context.clazzType().getText))
           }else {
-            ClazzType( context.clazzType( ).getText, Array( ) )
+            new ClazzType( context.clazzType( ).getText, Array( ) )
           }
         }
     }

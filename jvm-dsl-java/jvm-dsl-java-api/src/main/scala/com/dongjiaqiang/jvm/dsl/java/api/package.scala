@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.java
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{AnyType, ArrayType, BoolType, ByteType, CharType, ClazzType, DoubleType, DslType, FloatType, FutureType, IntType, LambdaType, ListType, LongType, MapType, OptionType, SetType, StringType, TupleType, UnitType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{AnyType, ArrayType, BoolType, ByteType, CharType, ClazzType, DefinitionClazzType, DoubleType, DslType, FloatType, FutureType, IntType, LambdaType, ListType, LongType, MapType, OptionType, SetType, StringType, TupleType, UnitType}
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
 import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaTranslatorContext
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer.{_1_Consumer, _2_Consumer, _3_Consumer, _4_Consumer, _5_Consumer, _6_Consumer, _7_Consumer, _8_Consumer, _DoubleConsumer, _IntConsumer, _LongConsumer, _ObjDoubleConsumer, _ObjIntConsumer, _ObjLongConsumer}
@@ -42,11 +42,11 @@ package object api {
 
 
       case `type`: ListType ⇒
-        String.format("%s<%s>", classOf[java.util.ArrayList[_]].getCanonicalName, toJavaType(`type`.parameterType, javaTranslatorContext))
+        String.format("%s<%s>", classOf[java.util.List[_]].getCanonicalName, toJavaType(`type`.parameterType, javaTranslatorContext))
       case `type`: SetType ⇒
-        String.format("%s<%s>", classOf[java.util.HashSet[_]].getCanonicalName, toJavaType(`type`.parameterType, javaTranslatorContext))
+        String.format("%s<%s>", classOf[java.util.Set[_]].getCanonicalName, toJavaType(`type`.parameterType, javaTranslatorContext))
       case `type`: MapType ⇒
-        String.format("%s<%s,%s>", classOf[java.util.HashMap[_, _]].getCanonicalName, toJavaType(`type`.keyParameterType, javaTranslatorContext),
+        String.format("%s<%s,%s>", classOf[java.util.Map[_, _]].getCanonicalName, toJavaType(`type`.keyParameterType, javaTranslatorContext),
           toJavaType(`type`.valueParameterType, javaTranslatorContext))
       case `type`: OptionType ⇒
         String.format("%s<%s>", classOf[Optional[_]].getCanonicalName, toJavaType(`type`.parameterType, javaTranslatorContext))
@@ -75,6 +75,9 @@ package object api {
             toJavaType(`type`, javaTranslatorContext)
           }).mkString(",")).append(">").toString
         }
+
+      case `type`:DefinitionClazzType⇒
+          `type`.clazzName
 
 
       case `type`: LambdaType ⇒
@@ -350,7 +353,7 @@ package object api {
         }
       case _⇒ javaTranslatorContext.customDslTypeTranslator.get(dslType) match {
         case Some(translator)⇒translator.translate()
-        case _⇒ throw JavaTranslatorException(s"dslType ${dslType} cannot parse")
+        case _⇒ throw JavaTranslatorException(s"dslType $dslType cannot parse")
       }
     }
   }

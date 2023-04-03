@@ -3,66 +3,119 @@ package com.dongjiaqiang.jvm.dsl.api.`type`.mrt
 import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MonadMethodVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 
 trait MonadMrt extends MonadMethodVisitor[DslType] {
-  override def map(callee: ValueExpression, param: ValueExpression): DslType = {
-    val monadDslType = callee.getValueType( programScope ).asInstanceOf[MonadDslType]
+  override def map(calleeType:MonadDslType,
+                   callee: ValueExpression,
+                   param: ValueExpression): DslType = {
     val lambdaType = param.getValueType( programScope ).asInstanceOf[LambdaType]
-    monadDslType.transform( lambdaType.outputType )
+    calleeType.transform( lambdaType.outputType )
   }
-
-  override def flatMap(callee: ValueExpression, param: ValueExpression): DslType = {
-    val monadDslType = callee.getValueType( programScope ).asInstanceOf[MonadDslType]
+  override def flatMap(calleeType:MonadDslType,
+                       callee: ValueExpression,
+                       param: ValueExpression): DslType = {
     val lambdaType = param.getValueType( programScope ).asInstanceOf[LambdaType]
-    monadDslType.transform( lambdaType.outputType.asInstanceOf[MonadDslType].carryDslType )
+    calleeType.transform( lambdaType.outputType.asInstanceOf[MonadDslType].carryDslType )
   }
-
-  override def flatten(callee: ValueExpression): DslType = {
-    callee.getValueType( programScope ).asInstanceOf[MonadDslType]
-      .carryDslType.asInstanceOf[MonadDslType].carryDslType
+  override def flatten(calleeType:MonadDslType,
+                       callee: ValueExpression): DslType = {
+    calleeType.transform(calleeType.carryDslType.asInstanceOf[MonadDslType].carryDslType)
   }
-
-  override def filter(callee: ValueExpression, param: ValueExpression): DslType = {
-    callee.getValueType( programScope )
+  override def filter(calleeType:MonadDslType,
+                      callee: ValueExpression,
+                      param: ValueExpression): DslType = {
+    calleeType
   }
-
-  override def filterNot(callee: ValueExpression, param: ValueExpression): DslType = {
-    callee.getValueType( programScope )
+  override def filterNot(calleeType:MonadDslType,
+                         callee: ValueExpression,
+                         param: ValueExpression): DslType = {
+    calleeType
   }
-
-  override def foreach(callee: ValueExpression, param: ValueExpression): DslType = UnitType
-
-  override def exist(callee: ValueExpression, param: ValueExpression): DslType = BoolType
-
-  override def find(callee: ValueExpression, param: ValueExpression): DslType = OptionType( callee.getValueType( programScope ) )
-
-  override def toList(callee: ValueExpression): DslType = ListType( callee.getValueType( programScope ).asInstanceOf[MonadDslType].carryDslType )
-
-  override def toSet(callee: ValueExpression): DslType = SetType( callee.getValueType( programScope ).asInstanceOf[MonadDslType].carryDslType )
-
-  override def toMap(callee: ValueExpression): DslType = {
-    val kv = callee.getValueType( programScope ).asInstanceOf[MonadDslType].carryDslType.asInstanceOf[TupleType].parameterTypes
+  override def foreach(calleeType:MonadDslType,
+                       callee: ValueExpression,
+                       param: ValueExpression): DslType = UnitType
+  override def exist(calleeType:MonadDslType,
+                     callee: ValueExpression,
+                     param: ValueExpression): DslType = BoolType
+  override def find(calleeType:MonadDslType,
+                    callee: ValueExpression,
+                    param: ValueExpression): DslType = new OptionType( callee.getValueType( programScope ) )
+  override def toList(calleeType:MonadDslType,
+                      callee: ValueExpression): DslType = {
+    ListType( calleeType.carryDslType )
+  }
+  override def toSet(calleeType:MonadDslType,
+                     callee: ValueExpression): DslType = SetType( calleeType.carryDslType )
+  override def toMap(calleeType:MonadDslType,
+                     callee: ValueExpression): DslType = {
+    val kv = calleeType.carryDslType.asInstanceOf[TupleType].parameterTypes
     MapType( kv.head, kv.last )
   }
+  override def contains(calleeType:MonadDslType,
+                        callee: ValueExpression,
+                        param: ValueExpression): DslType = BoolType
+  override def sort(calleeType:MonadDslType,
+                    callee: ValueExpression,
+                    param: ValueExpression): DslType =  calleeType
+  override def zipWithIndex(calleeType:MonadDslType,
+                            callee: ValueExpression): DslType = {
+    ListType( TupleType( Array( calleeType.carryDslType, IntType ) ) )
+  }
+  override def isEmpty(calleeType:MonadDslType,
+                       callee: ValueExpression): DslType = BoolType
+  override def nonEmpty(calleeType:MonadDslType,
+                        callee: ValueExpression): DslType = BoolType
+  override def length(calleeType:MonadDslType,
+                      callee: ValueExpression): DslType = IntType
+  override def reduce(calleeType:MonadDslType,
+                      callee: ValueExpression,
+                      param: ValueExpression): DslType = calleeType.carryDslType
 
-  override def contains(callee: ValueExpression, param: ValueExpression): DslType = BoolType
-
-
-  override def sort(callee: ValueExpression, param: ValueExpression): DslType =  callee.getValueType( programScope )
-
-  override def zipWithIndex(callee: ValueExpression): DslType = {
-    val carryDslType = callee.getValueType( programScope ).asInstanceOf[MonadDslType].carryDslType
-    ListType( TupleType( Array( carryDslType, IntType ) ) )
+  override def reduceOption(calleeType:MonadDslType,
+                            callee: ValueExpression,
+                            param: ValueExpression): DslType = new OptionType(calleeType.carryDslType)
+  override def toSeqSet(calleeType: MonadDslType,
+                        callee: ValueExpression): DslType = SetType( calleeType.carryDslType,seq = true )
+  override def toSortedSet(calleeType: MonadDslType,
+                           callee: ValueExpression): DslType = SetType(calleeType.carryDslType,sorted = true)
+  override def toSeqMap(calleeType: MonadDslType,
+                        callee: ValueExpression): DslType = {
+    val kv = calleeType.carryDslType.asInstanceOf[TupleType].parameterTypes
+    MapType( kv.head, kv.last,seq = true )
+  }
+  override def toSortedMap(calleeType: MonadDslType,
+                           callee: ValueExpression): DslType = {
+    val kv = calleeType.carryDslType.asInstanceOf[TupleType].parameterTypes
+    MapType( kv.head, kv.last,sorted = true )
   }
 
+  override def toSortedSet(calleeType: MonadDslType,
+                           callee: ValueExpression,
+                           param: ValueExpression): DslType = SetType(calleeType.carryDslType,sorted = true,sorter = Some(param.asInstanceOf[Lambda]))
 
-  override def isEmpty(callee: ValueExpression): DslType = BoolType
+  override def toSortedMap(calleeType: MonadDslType,
+                           callee: ValueExpression,
+                           param: ValueExpression): DslType ={
+    val kv = calleeType.carryDslType.asInstanceOf[TupleType].parameterTypes
+    MapType( kv.head, kv.last, sorted = true )
+  }
 
-  override def nonEmpty(callee: ValueExpression): DslType = BoolType
+  override def reverse(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType
 
-  override def length(callee: ValueExpression): DslType = IntType
+  override def toArray(calleeType: MonadDslType, callee: ValueExpression): DslType = ArrayType(calleeType.carryDslType)
 
-  override def reduce(callee: ValueExpression, param: ValueExpression): DslType = callee.getValueType(programScope)
+  override def reduce(calleeType: MonadDslType, callee: ValueExpression, init: ValueExpression, param: ValueExpression): DslType = calleeType.carryDslType
 
-  override def reduceOption(callee: ValueExpression, param: ValueExpression): DslType = OptionType(callee.getValueType(programScope))
+  override def mkString(calleeType: MonadDslType, callee: ValueExpression, sep: ValueExpression): DslType = StringType
+
+  override def mkString(calleeType: MonadDslType, callee: ValueExpression, start: ValueExpression, sep: ValueExpression, end: ValueExpression): DslType = StringType
+
+  override def head(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
+
+  override def tail(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
+
+  override def headOption(calleeType: MonadDslType, callee: ValueExpression): DslType = OptionType(calleeType.carryDslType)
+
+  override def tailOption(calleeType: MonadDslType, callee: ValueExpression): DslType = OptionType(calleeType.carryDslType)
 }

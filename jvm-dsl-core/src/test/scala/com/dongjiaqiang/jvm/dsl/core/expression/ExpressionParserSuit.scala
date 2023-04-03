@@ -13,7 +13,7 @@ import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 import scala.language.postfixOps
 
 class ExpressionParserSuit extends AnyFunSuite {
@@ -143,7 +143,7 @@ class ExpressionParserSuit extends AnyFunSuite {
     program method(
       "foo2"
     ) bodyBlock() tryBlock() expression(_⇒Return(Some("\"1\"" str))) belongBlock() expression(_⇒{
-        CatchParameter("ex",ClazzType("Ex"))
+        CatchParameter("ex",new ClazzType("Ex"))
     }) catchBlock() expression(scope⇒{
       Return(Some(scope.varRef("ex","a")))
     })
@@ -275,7 +275,7 @@ class ExpressionParserSuit extends AnyFunSuite {
         )),10 int)))
     })
 
-    program.method("foo1") bodyBlock() updateVarDef("c",ClazzType("C"),None) expression(scope⇒{
+    program.method("foo1") bodyBlock() updateVarDef("c",new ClazzType("C"),None) expression(scope⇒{
 
       val caseCondition1 = MatchList(Array(Left("\"dd\"" str),Left(MatchClass(DefinitionClazzType("A",programScope.classes("A")),Array(Right("dd"),Left(MatchList(Array(Left(1 int),Left(1 int),Right("x")))))))))
       val caseBlock1 = scope lambdaBlock() expression (_⇒Return(Some(1 int)))
@@ -283,7 +283,7 @@ class ExpressionParserSuit extends AnyFunSuite {
       val caseCondition2 = block.MatchClass(LeftType(UnResolvedType),Array(Left(12 int)))
       val caseBlock2 = scope lambdaBlock() expression (_⇒Return(Some(2 int)))
 
-      val caseCondition3 = block.MatchClass(ClazzType("Array"),Array(Left(1 int),Left(2 int),Right("None")))
+      val caseCondition3 = block.MatchClass(new ClazzType("Array"),Array(Left(1 int),Left(2 int),Right("None")))
       val caseBlock3 = scope lambdaBlock() expression(_⇒Return(Some(3 int)))
 
       val default = scope lambdaBlock() updateVarDef("d",IntType,Some(100 int)) expression(s⇒{

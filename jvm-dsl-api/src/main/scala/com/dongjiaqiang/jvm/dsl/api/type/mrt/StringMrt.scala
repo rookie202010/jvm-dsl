@@ -30,5 +30,15 @@ class StringMrt(override val programScope: ProgramScope) extends StringMethodVis
                          startIndex: ValueExpression,
                          endIndex: ValueExpression): DslType = StringType
 
+  override def split(callee: ValueExpression, param: ValueExpression, limit: ValueExpression): DslType =  ArrayType(StringType)
 
+  override def isNumeric(callee: ValueExpression): DslType = BoolType
+
+  override def head(callee: ValueExpression): DslType = CharType
+
+  override def headOption(callee: ValueExpression): DslType = OptionType(CharType)
+
+  override def tail(callee: ValueExpression): DslType = CharType
+
+  override def tailOption(callee: ValueExpression): DslType = OptionType(CharType)
 }

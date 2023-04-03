@@ -17,59 +17,142 @@ import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
  *        arr.map((e1,e2)=>{ return e1+e2;});  // e1 and e2 is UnResolved type and we should determine e1 to LongType and e2 to IntType
  *    }
  * }
- *
  * <pre><code>
  */
 class MonadOptimize(override val programScope: ProgramScope,val optimizeDslType: OptimizeDslType) extends MonadMethodVisitor[Array[ValueExpression]] {
 
-  private def transform(callee: ValueExpression, param: ValueExpression):Array[ValueExpression]={
-    val monadDslType = callee.getValueType( programScope ).asInstanceOf[MonadDslType]
-    val lambda = param.asInstanceOf[Lambda]
-    monadDslType.carryDslType match {
-      case TupleType( parameterTypes ) ⇒
-        optimizeDslType.push( lambda.inputs.zip( parameterTypes ).toMap )
-        val newParam = optimizeDslType.visit( param )
-        optimizeDslType.pop( )
-        Array( newParam.asInstanceOf[ValueExpression] )
-      case _ ⇒
-        optimizeDslType.push( Map( lambda.inputs.head → monadDslType.carryDslType ) )
-        val newParam  = optimizeDslType.visit( param )
-        optimizeDslType.pop( )
-        Array( newParam.asInstanceOf[ValueExpression] )
+  override val paramsChecker: Boolean = false
+
+  def transform(calleeType:MonadDslType,
+                        param: ValueExpression):ValueExpression={
+    param match {
+      case lambda: Lambda⇒
+        if (lambda.inputs.nonEmpty) {
+          calleeType.carryDslType match {
+            case TupleType( parameterTypes ) ⇒
+              optimizeDslType.push( lambda.inputs.zip( parameterTypes ).toMap )
+              val newParam = optimizeDslType.visit( param )
+              optimizeDslType.pop( )
+              newParam.asInstanceOf[ValueExpression]
+            case _ ⇒
+              val map = lambda.inputs.map(input⇒(input,calleeType.carryDslType)).toMap
+              optimizeDslType.push(map)
+              val newParam = optimizeDslType.visit( param )
+              optimizeDslType.pop( )
+              newParam.asInstanceOf[ValueExpression]
+          }
+        } else {
+          optimizeDslType.visit( param ).asInstanceOf[ValueExpression]
+        }
+      case _⇒
+        optimizeDslType.visit( param ).asInstanceOf[ValueExpression]
     }
   }
-  override def map(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = transform(callee, param)
-  override def flatten(callee: ValueExpression): Array[ValueExpression] = Array()
-  override def flatMap(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = transform(callee, param)
-  override def filter(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = transform(callee, param)
-  override def filterNot(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = transform(callee, param)
-  override def foreach(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = transform(callee, param)
-  override def exist(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = transform(callee, param)
 
-  override def find(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = transform(callee, param)
-
-  override def toList(callee: ValueExpression): Array[ValueExpression] = Array()
-  override def toSet(callee: ValueExpression): Array[ValueExpression] = Array()
-
-  override def toMap(callee: ValueExpression): Array[ValueExpression] =Array()
-
-
-  override def sort(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = ???
-
-  override def contains(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = Array(optimizeDslType.visit(param).asInstanceOf[ValueExpression])
-  override def zipWithIndex(callee: ValueExpression): Array[ValueExpression] = Array()
-  private def agg(callee: ValueExpression, param: ValueExpression)={
-    val monadDslType = callee.getValueType( programScope ).asInstanceOf[MonadDslType]
+  private def agg(calleeType: MonadDslType,
+                  param: ValueExpression) = {
     val lambda = param.asInstanceOf[Lambda]
-    optimizeDslType.push( lambda.inputs.map( name ⇒ (name, monadDslType.carryDslType) ).toMap )
+    optimizeDslType.push( lambda.inputs.map( name ⇒ (name, calleeType.carryDslType) ).toMap )
     val newParam = optimizeDslType.visit( param )
     optimizeDslType.pop( )
     Array( newParam.asInstanceOf[ValueExpression] )
   }
-  override def reduce(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = agg(callee, param)
-  override def reduceOption(callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = agg(callee, param)
-  override def isEmpty(callee: ValueExpression): Array[ValueExpression] = Array()
-  override def nonEmpty(callee: ValueExpression): Array[ValueExpression] = Array()
-  override def length(callee: ValueExpression): Array[ValueExpression] = Array()
+  override def toArray(calleeType: MonadDslType,
+                       callee: ValueExpression): Array[ValueExpression] = Array()
+  override def toSortedSet(calleeType: MonadDslType,
+                           callee: ValueExpression,
+                           param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+  override def toSortedMap(calleeType: MonadDslType,
+                           callee: ValueExpression,
+                           param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType,param))
+  override def reverse(calleeType: MonadDslType,
+                       callee: ValueExpression): Array[ValueExpression] = Array()
+  override def reduce(calleeType: MonadDslType,
+                      callee: ValueExpression,
+                      init: ValueExpression,
+                      param: ValueExpression): Array[ValueExpression] = Array(optimizeDslType.visit(init).asInstanceOf[ValueExpression],
+    transform(calleeType,param))
+  override def map(calleeType:MonadDslType,
+                   callee: ValueExpression,
+                   param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+  override def flatten(calleeType:MonadDslType,
+                       callee: ValueExpression): Array[ValueExpression] = Array()
+  override def flatMap(calleeType:MonadDslType,
+                       callee: ValueExpression,
+                       param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+  override def filter(calleeType:MonadDslType,
+                      callee: ValueExpression,
+                      param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+  override def filterNot(calleeType:MonadDslType,
+                         callee: ValueExpression,
+                         param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+  override def foreach(calleeType:MonadDslType,
+                       callee: ValueExpression,
+                       param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+  override def exist(calleeType:MonadDslType,
+                     callee: ValueExpression,
+                     param: ValueExpression): Array[ValueExpression] = {
+    Array(transform(calleeType, param))
+  }
 
+  override def find(calleeType:MonadDslType,
+                    callee: ValueExpression,
+                    param: ValueExpression): Array[ValueExpression] = {
+    Array(transform(calleeType, param))
+  }
+
+  override def toList(calleeType:MonadDslType,
+                      callee: ValueExpression): Array[ValueExpression] = Array()
+  override def toSet(calleeType:MonadDslType,
+                     callee: ValueExpression): Array[ValueExpression] = Array()
+
+  override def toMap(calleeType:MonadDslType,
+                     callee: ValueExpression): Array[ValueExpression] =Array()
+
+  override def toSeqSet(calleeType: MonadDslType,
+                        callee: ValueExpression): Array[ValueExpression] =  Array()
+  override def toSortedSet(calleeType: MonadDslType,
+                           callee: ValueExpression): Array[ValueExpression] =  Array()
+  override def toSeqMap(calleeType: MonadDslType,
+                        callee: ValueExpression): Array[ValueExpression] =  Array()
+  override def toSortedMap(calleeType: MonadDslType,
+                           callee: ValueExpression): Array[ValueExpression] =  Array()
+  override def sort(calleeType:MonadDslType,
+                    callee: ValueExpression,
+                    param: ValueExpression): Array[ValueExpression] = {
+    Array(transform(calleeType, param))
+  }
+  override def contains(calleeType:MonadDslType,
+                        callee: ValueExpression,
+                        param: ValueExpression): Array[ValueExpression] = Array(optimizeDslType.visit(param).asInstanceOf[ValueExpression])
+  override def zipWithIndex(calleeType:MonadDslType,
+                            callee: ValueExpression): Array[ValueExpression] = Array()
+  override def reduce(calleeType:MonadDslType,
+                      callee: ValueExpression,
+                      param: ValueExpression): Array[ValueExpression] = agg(calleeType,param)
+  override def reduceOption(calleeType:MonadDslType,
+                            callee: ValueExpression,
+                            param: ValueExpression): Array[ValueExpression] = agg(calleeType,param)
+  override def isEmpty(calleeType:MonadDslType,
+                       callee: ValueExpression): Array[ValueExpression] = Array()
+  override def nonEmpty(calleeType:MonadDslType,
+                        callee: ValueExpression): Array[ValueExpression] = Array()
+  override def length(calleeType:MonadDslType,
+                      callee: ValueExpression): Array[ValueExpression] = Array()
+
+  override def mkString(calleeType: MonadDslType, callee: ValueExpression, sep: ValueExpression): Array[ValueExpression] = Array( optimizeDslType.visit( sep ).asInstanceOf[ValueExpression])
+
+  override def mkString(calleeType: MonadDslType, callee: ValueExpression, start: ValueExpression, sep: ValueExpression, end: ValueExpression): Array[ValueExpression] = Array(
+    optimizeDslType.visit( start ).asInstanceOf[ValueExpression],
+    optimizeDslType.visit( sep ).asInstanceOf[ValueExpression],
+    optimizeDslType.visit( end ).asInstanceOf[ValueExpression],
+  )
+
+  override def head(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
+
+  override def tail(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
+
+  override def headOption(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
+
+  override def tailOption(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
 }

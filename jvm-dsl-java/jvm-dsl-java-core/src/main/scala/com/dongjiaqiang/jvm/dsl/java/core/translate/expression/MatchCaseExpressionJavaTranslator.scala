@@ -11,7 +11,7 @@ import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisi
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
-import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaLocalVarDef, JavaTranslatorContext, JavaVarCall, JavaVarRef}
+import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaCode, JavaLocalVarDef, JavaTranslatorContext, JavaCall}
 
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.ArrayBuffer
@@ -37,7 +37,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
     val returnType = matched.getValueType(programScope)
     if (returnType.isInstanceOf[AnyType.type] || returnType.isInstanceOf[UnResolvedType.type] || returnType == matchCondition.dslType) {
       body.expressions.insert( 0, JavaLocalVarDef( matchCondition.name, returnType,
-        Some( Cast( JavaVarRef( matched.refs,returnType ), matchCondition.dslType ) ) ) )
+        Some( Cast( JavaCode( matched.refs.mkString("."),returnType ), matchCondition.dslType ) ) ) )
       s"""
          |${matched.refs.mkString( "." )} instanceof ${matchCondition.dslType}
          |""".stripMargin
@@ -87,7 +87,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
 //                body.expressions.insert( 0, JavaLocalVarDef( name, tryType.parameterType,
 //                  Some( JavaVarCall( List( matched ), "get", Array( ) ) ) ) )
 //            }
-          case FailureType ⇒
+          case FailureType(_,_) ⇒
             conditions.append(
               s"""
                  |if ($matched.success()){
@@ -96,8 +96,8 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                  |""".stripMargin )
             expressions.head match {
               case Right( name ) ⇒
-                body.expressions.insert( 0, JavaLocalVarDef( name, ClazzType( "Throwable", Array( ) ),
-                  Some( JavaVarCall( List( s"$matched" ), "getException", Array( ),UnResolvedType ) ) ) )
+                body.expressions.insert( 0, JavaLocalVarDef( name, new ClazzType( "Throwable", Array( ) ),
+                  Some( JavaCall( JavaCode(matched,UnResolvedType ), "getException", Array( ),UnResolvedType ) ) ) )
             }
         }
     }
@@ -117,7 +117,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
           s"$matched.get()", parameterType, expression, body, visitor, counter ) )
       case Right( name ) ⇒
         body.expressions.insert( 0, JavaLocalVarDef( name, parameterType,
-          Some( JavaVarCall( List( matched ), "get", Array( ) ,UnResolvedType) ) ) )
+          Some( JavaCall( JavaCode( matched,UnResolvedType ), "get", Array( ) ,UnResolvedType) ) ) )
     }
   }
   /**
@@ -210,7 +210,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                 conditions.appendAll( translateMatchCondition( s"${matched}.left()", eitherType.leftParameterType, expression, body, visitor, counter ) )
               case Right( name ) ⇒
                 body.expressions.insert( 0, JavaLocalVarDef( name, eitherType.leftParameterType,
-                  Some( JavaVarCall( List( matched ), "left", Array( ) ,UnResolvedType) ) ) )
+                  Some( JavaCall( JavaCode( matched,UnResolvedType ), "left", Array( ) ,UnResolvedType) ) ) )
             }
           case _: RightType ⇒
             conditions.append(
@@ -224,7 +224,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                 conditions.appendAll( translateMatchCondition( s"${matched}.right()", eitherType.rightParameterType, expression, body, visitor, counter ) )
               case Right( name ) ⇒
                 body.expressions.insert( 0, JavaLocalVarDef( name, eitherType.rightParameterType,
-                  Some( JavaVarCall( List( matched ), "right", Array( ),UnResolvedType ) ) ) )
+                  Some( JavaCall( JavaCode( matched ,UnResolvedType), "right", Array( ),UnResolvedType ) ) ) )
             }
         }
     }
@@ -251,7 +251,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
                     conditions.appendAll( translateMatchCondition( s"$matched.$fieldName", valueType, expression, body, visitor, counter ) )
                   case Right( name ) ⇒
                     body.expressions.insert( 0, JavaLocalVarDef( name, valueType,
-                      Some( JavaVarRef( List( matched, fieldName ),valueType ) ) ) )
+                      Some( JavaCode( s"$matched.$fieldName",valueType ) ) ) )
                 }
             }
         }
@@ -311,12 +311,12 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
           case _: SuccessType ⇒
             testCode( matched, classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Success[_]].getCanonicalName,
               classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Success[_]].getCanonicalName, "instanceof", counter )
-          case FailureType ⇒
+          case _:FailureType ⇒
             testCode( matched, classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Failure[_]].getCanonicalName,
               classOf[com.dongjiaqiang.jvm.dsl.java.api.extend.Failure[_]].getCanonicalName, "instanceof", counter )
-          case clazzType: ClazzType ⇒
-            testCode( matched, clazzType.clazzName,
-              clazzType.clazzName, "instanceof", counter )
+          case ClazzType(clazzName,_) ⇒
+            testCode( matched, clazzName,
+              clazzName, "instanceof", counter )
           case _ ⇒
             throw new java.lang.AssertionError( "assertion failed" )
         }
@@ -359,7 +359,7 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
           case Left( expression ) ⇒
             conditions.appendAll( translateMatchCondition( s"${matched}_$index", dslType, expression, body, visitor, counter ) )
           case Right( name ) ⇒
-            body.expressions.insert( 0, JavaLocalVarDef( name, dslType, Some( JavaVarRef( List( matched, s"_$index" ),dslType ) ) ) )
+            body.expressions.insert( 0, JavaLocalVarDef( name, dslType, Some( JavaCode( s"$matched._$index" ,dslType ) ) ) )
         }
     }
   }
@@ -398,14 +398,14 @@ trait MatchCaseExpressionJavaTranslator extends BlockExpressionVisitor[String] {
               listType.parameterType, expression, body, visitor, counter ) )
           case Right( name ) ⇒
             body.expressions.insert( 0, JavaLocalVarDef( name, listType.parameterType,
-              Some( JavaVarCall( List( s"${matched}_$index" ), "get", Array( new IntLiteral( index ) ),UnResolvedType ) ) ) )
+              Some( JavaCall( JavaCode(s"${matched}_$index",UnResolvedType ), "get", Array( new IntLiteral( index ) ),UnResolvedType ) ) ) )
         }
     }
 
     expression match {
       case matchHead: MatchHead ⇒
-        val tailLiteral = new ListLiteral( Array( JavaVarCall( List( matched ),
-          "subList", Array( new IntLiteral( matchHead.head.length ), JavaVarCall( List( matched ), "size", Array( ),UnResolvedType ) ),UnResolvedType ) ), listType )
+        val tailLiteral = new ListLiteral( Array( JavaCall(JavaCode(matched,listType ),
+          "subList", Array( new IntLiteral( matchHead.head.length ), JavaCall( JavaCode( matched,UnResolvedType ), "size", Array( ),UnResolvedType ) ),UnResolvedType ) ), listType )
 
         matchHead.tail match {
           case Left( expression ) ⇒

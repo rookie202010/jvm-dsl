@@ -43,12 +43,12 @@ object UnapplyExpressionGenerator extends IExpressionGenerator[UnapplyExpression
               expressions ) )
           case None⇒
             clazzName match {
-              case "Left" ⇒ Left( MatchClass( LeftType( UnResolvedType ), expressions ) )
-              case "Right"⇒ Left(MatchClass(RightType(UnResolvedType),expressions))
+              case "Left" ⇒ Left( MatchClass( LeftType( UnResolvedType,UnResolvedType ), expressions ) )
+              case "Right"⇒ Left(MatchClass(RightType(UnResolvedType,UnResolvedType),expressions))
               case "Some"⇒ Left(MatchClass(SomeType(UnResolvedType),expressions))
               case "None"⇒ Left(MatchClass(NoneType,Array()))
               case "Success"⇒ Left(MatchClass(SuccessType(UnResolvedType),expressions))
-              case "Failure" ⇒ Left(MatchClass(FailureType,expressions))
+              case "Failure" ⇒ Left(MatchClass(FailureType(ThrowableType,UnResolvedType),expressions))
               case _ ⇒ throw ExpressionParseException(s"class in match class expression must be definite in program scope ${clazzName}")
             }
         }

@@ -7,7 +7,7 @@ import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
-import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaAsync, JavaCustomBlockExpression, JavaTranslatorContext, JavaVarCall}
+import com.dongjiaqiang.jvm.dsl.java.api.expression.{JavaAsync, JavaCall, JavaCode, JavaCustomBlockExpression, JavaTranslatorContext}
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._Runnable
 
 trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
@@ -33,9 +33,9 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
 
   override def visit(forMap: ForMap, visitor: ExpressionVisitor[String]): String = {
     val sysEntryVar = s"_sys_entry_${javaTranslatorContext.systemVarIndex.incrementAndGet( )}"
-    val keyDef = forMap.loopKeyDef.copy( assigned = Some( JavaVarCall( List( sysEntryVar ), "getKey", Array( ),
+    val keyDef = forMap.loopKeyDef.copy( assigned = Some( JavaCall( JavaCode(sysEntryVar,forMap.loopKeyDef.dslType), "getKey", Array( ),
       forMap.loopKeyDef.dslType ) ) )
-    val valueDef = forMap.loopValueDef.copy( assigned = Some( JavaVarCall( List( sysEntryVar ), "getValue", Array( )
+    val valueDef = forMap.loopValueDef.copy( assigned = Some( JavaCall( JavaCode(sysEntryVar,forMap.loopValueDef.dslType) , "getValue", Array( )
     ,forMap.loopValueDef.dslType) ) )
     forMap.body.expressions.insert( 0, keyDef, valueDef )
 
@@ -121,23 +121,30 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
              |     public void run() throws Exception {
              |           $code
              |     }
-             |}.run()
+             |}.run();
              |
              |""".stripMargin
         case async: Async⇒
-          visitor.visit(JavaAsync(async.body,async.executor,new FutureType(UnitType)))
+          val code = visitor.visit(JavaAsync(async.body,async.executor,FutureType(UnitType)))
+          s"$code;"
         case _: Try⇒
           throw JavaTranslatorException("illegal definition of a try block alone in java")
         case _: Lambda ⇒
           throw JavaTranslatorException( "illegal definition of a lambda expression alone in java" )
         case customBlockExpression: CustomBlockExpression⇒
-          visitor.visit(JavaCustomBlockExpression(customBlockExpression,UnitType))
-        case _ ⇒ visitor.visit( expression )
+          val code = visitor.visit(JavaCustomBlockExpression(customBlockExpression,UnitType))
+          s"$code;"
+        case _ ⇒
+          val code = visitor.visit( expression )
+          expression match {
+            case _:BlockExpression⇒code
+            case _⇒ s"$code;"
+          }
       }
     }
     s"""
        |{
-       |   ${block.expressions.map( help ).mkString("", ";\n" ,";")}
+       |   ${block.expressions.map( help ).mkString("")}
        |}
        |""".stripMargin
   }

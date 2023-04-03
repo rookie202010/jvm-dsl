@@ -77,7 +77,7 @@ object ClassLiteralGenerator extends IExpressionGenerator[ClassLiteralContext,Va
         val clazzType = DefinitionClazzType(clazzName,clazzScope)
         new ClazzLiteral(expressions,clazzType)
       case None⇒
-        val clazzType = ClazzType( clazzName, valueTypes )
+        val clazzType = new ClazzType( clazzName, valueTypes )
         new ClazzLiteral( expressions, clazzType )
     }
 
@@ -90,7 +90,7 @@ object OptionLiteralGenerator extends IExpressionGenerator[OptionalLiteralContex
                         generatorContext: GeneratorContext = NoneGeneratorContext): OptionLiteral = {
     val expression = LiteralGenerator.expression( exprContext,
       ruleContext.literalAndCallChainAndExpression())
-    new OptionLiteral( expression, OptionType( UnResolvedType ) )
+    new OptionLiteral( expression, new OptionType( UnResolvedType ) )
   }
 }
 

@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.literal
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, EitherType, LeftType, RightType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, EitherType, LeftType, MonadDslType, RightType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
@@ -33,9 +33,9 @@ class EitherLiteral(literal: Either[ValueExpression, ValueExpression],
   }
 
 
-  override def getValueType(programScope: ProgramScope): DslType = literal match {
-    case Left( expression ) ⇒ LeftType( expression.getValueType( programScope ) )
-    case Right( expression ) ⇒ RightType( expression.getValueType( programScope ) )
+  override def getValueType(programScope: ProgramScope): MonadDslType = literal match {
+    case Left( expression ) ⇒ LeftType( expression.getValueType( programScope ),dslType.rightParameterType )
+    case Right( expression ) ⇒ RightType( dslType.leftParameterType,expression.getValueType( programScope ) )
   }
 
 

@@ -12,13 +12,12 @@ trait DefinitionClazzMethodVisitor[T] extends MethodVisitor[T]{
     val definitionClazzType = calleeDslType.asInstanceOf[DefinitionClazzType]
     definitionClazzType.clazzScope.methods.get(name) match {
         case Some(methodScope)⇒
-          val (actualDslTypes,msg) =  actualTypes(programScope,params,name,calleeDslType,methodScope.params.values.map(_.dslType.toString).toArray)
             val fs = methodScope.params.values
-            require(fs.size==actualDslTypes.length && fs.zip(actualDslTypes).forall({
-              case (f,p)⇒ f.dslType.isSuperDslType(programScope.importManager,p)
-            }),msg)
-            Some(visit(methodScope,definitionClazzType,callee,methodScope.name,params))
-        case _⇒None
+            generate(fs.map(_.dslType).toArray,params,()⇒{
+              visit(methodScope,definitionClazzType,callee,methodScope.name,params)
+            })
+        case _⇒
+          super.visit(calleeDslType, callee, name, params)
       }
   }
 }

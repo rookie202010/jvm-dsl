@@ -3,7 +3,7 @@ package com.dongjiaqiang.jvm.dsl.api.scope
 import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, ImportClazzType}
 import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 
-import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap, Set ⇒ MSet}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap ⇒ MutableMap, Set ⇒ MSet}
 
 
 trait ImportRegister{

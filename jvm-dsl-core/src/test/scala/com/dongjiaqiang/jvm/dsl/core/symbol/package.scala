@@ -132,7 +132,7 @@ package object symbol {
         childBlockScope
       }
 
-      import scala.collection.mutable.{ListMap ⇒ MutableMap}
+      import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
       def forBlock(outerScopeIndex: Int,blockStatements:Int):ForStatementBlockScope={
         val childBlockScope = new ForStatementBlockScope( outerScopeIndex,MutableMap(), blockScope, blockScope.topScope )

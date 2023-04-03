@@ -6,11 +6,11 @@ import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * Long j = 1/2; // 1/2 => Div
- * Long k = a%b; // a%b => Mod
- * Long i = (a+b)*c; // (a+b)*c => Mul
- * }
+ *      def method()=Unit{
+ *          Long j = 1/2; // 1/2 => Div
+ *          Long k = a%b; // a%b => Mod
+ *          Long i = (a+b)*c; // (a+b)*c => Mul
+ *      }
  * }
  * <pre><code>
  */

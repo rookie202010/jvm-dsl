@@ -16,20 +16,17 @@ class IntMrt(override val programScope: ProgramScope) extends ConvertMrt with Ra
 class FloatMrt(override val programScope: ProgramScope) extends ConvertMrt with FloatMethodVisitor[DslType]
 class ByteMrt(override val programScope: ProgramScope) extends ConvertMrt with ByteMethodVisitor[DslType]
 class CharMrt(override val programScope: ProgramScope) extends ConvertMrt with CharMethodVisitor[DslType]{
-  override def toLower(callee: ValueExpression): DslType = CharType
-  override def toUpper(callee: ValueExpression): DslType = CharType
+  override def toLowerCase(callee: ValueExpression): DslType = CharType
+  override def toUpperCase(callee: ValueExpression): DslType = CharType
 }
 
 class ListMrt(override val programScope: ProgramScope) extends MonadMrt with SeqMrt with ListMethodVisitor[DslType]
 
-class ArrayMrt(override val programScope: ProgramScope) extends MonadMrt with ArrayMethodVisitor[DslType]
+class ArrayMrt(override val programScope: ProgramScope) extends MonadMrt with SeqMrt with ArrayMethodVisitor[DslType]
 
 class MultiMrt(override val programScope: ProgramScope) extends MultiMethodVisitor[DslType]{
 
   {
-
-    registerSysVisitor(classOf[DefinitionClazzType],new DefinitionClazzMrt(programScope))
-
     //basic types
     val intMrt = new IntMrt(programScope)
     registerSysVisitor(IntType.getClass.asSubclass(classOf[DslType]),intMrt)
@@ -55,17 +52,26 @@ class MultiMrt(override val programScope: ProgramScope) extends MultiMethodVisit
     registerSysVisitor(classOf[DefinitionClazzType],new DefinitionClazzMrt(programScope))
     registerSysVisitor(classOf[ClazzType],new ClazzMrt(programScope))
 
-    val tryMrt = new TryMrt(programScope)
     //try type
+    val tryMrt = new TryMrt(programScope)
     registerSysVisitor(classOf[TryType],tryMrt)
     registerSysVisitor(classOf[SuccessType],tryMrt)
-    registerSysVisitor(FailureType.getClass.asSubclass(classOf[DslType]),tryMrt)
+    registerSysVisitor(classOf[FailureType],tryMrt)
 
     //option type
     val optionMrt = new OptionMrt(programScope)
     registerSysVisitor(classOf[OptionType],optionMrt)
     registerSysVisitor(classOf[SomeType],optionMrt)
     registerSysVisitor(NoneType.getClass.asSubclass(classOf[DslType]),optionMrt)
+
+    //either type
+    val eitherMrt = new EitherMrt(programScope)
+    registerSysVisitor(classOf[EitherType],eitherMrt)
+    registerSysVisitor(classOf[LeftType],eitherMrt)
+    registerSysVisitor(classOf[RightType],eitherMrt)
+
+    //future type
+    registerSysVisitor(classOf[FutureType],eitherMrt)
 
   }
 

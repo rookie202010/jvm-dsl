@@ -4,7 +4,7 @@ import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DslType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
 /**
  * <p>var ref can refer to static field in import clazz<p>

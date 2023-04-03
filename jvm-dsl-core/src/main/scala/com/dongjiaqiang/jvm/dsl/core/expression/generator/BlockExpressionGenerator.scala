@@ -37,7 +37,7 @@ object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionCont
         if (ruleContext.variable( ) != null) {
           throw ExpressionParseException( "Try block must not define variable" )
         } else {
-          Try( block, TryType( UnResolvedType ) )
+          Try( block, new TryType( UnResolvedType ) )
         }
       case "Async" ⇒
         Async( block, fieldScope, FutureType( UnResolvedType ) )

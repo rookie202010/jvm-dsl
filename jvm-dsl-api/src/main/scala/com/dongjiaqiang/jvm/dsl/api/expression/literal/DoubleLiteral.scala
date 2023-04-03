@@ -15,5 +15,5 @@ class DoubleLiteral(literal: Double) extends Literal[Double, DoubleType.type]( l
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = DoubleType
+  override def getValueType(programScope: ProgramScope): DoubleType.type = DoubleType
 }

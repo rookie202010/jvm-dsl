@@ -8,7 +8,7 @@ import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserBaseListener, JvmDslParserPars
 
 import java.util.{LinkedList ⇒ Stack}
 import scala.collection.convert.ImplicitConversionsToScala._
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
 
 class BlockStack(val programScope: ProgramScope) {
@@ -133,7 +133,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
     methodScope.addScope(new BlockScope( 0,methodScope,currentScope ))
 
     if(ctx.throwDef()!=null){
-        methodScope.throws.appendAll(ctx.throwDef().clazzType().map(_.getText).map(c⇒ClazzType(c,Array())))
+        methodScope.throws.appendAll(ctx.throwDef().clazzType().map(_.getText).map(c⇒new ClazzType(c,Array())))
     }
 
     addScope( methodScope, ctx.parameters( ).parameter( ), methodScope, programScope )

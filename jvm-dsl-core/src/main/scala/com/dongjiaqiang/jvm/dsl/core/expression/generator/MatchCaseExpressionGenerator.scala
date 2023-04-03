@@ -8,7 +8,7 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
 object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpressionContext, ValueExpression,GeneratorContext] {
 

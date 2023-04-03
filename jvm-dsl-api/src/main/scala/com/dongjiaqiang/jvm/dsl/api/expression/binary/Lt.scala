@@ -1,17 +1,18 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.binary
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.DslType
+import com.dongjiaqiang.jvm.dsl.api.`type`.{BoolType, DslType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
+import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * Bool j = 1&lt;2; // 1&lt;2 => Lt
- * Bool k = 1>2; // 1>2 => Gt
- * Bool i = 1&lt;=2; // 1&lt;=2 => Le
- * Bool z = 1>=2; // 1>=2 => Ge
- * }
+ *      def method()=Unit{
+ *          Bool j = 1&lt;2; // 1&lt;2 => Lt
+ *          Bool k = 1>2; // 1>2 => Gt
+ *          Bool i = 1&lt;=2; // 1&lt;=2 => Le
+ *          Bool z = 1>=2; // 1>=2 => Ge
+ *      }
  * }
  * <pre><code>
  */
@@ -26,6 +27,6 @@ case class Lt(left: ValueExpression, right: ValueExpression) extends BinaryExpre
   }
 
 
-  override def checkValueType(leftType: DslType, rightType: DslType): Unit = checkRelationExpressionValueType( leftType, rightType )
+  override def getValueType(programScope: ProgramScope): DslType = BoolType
 
 }

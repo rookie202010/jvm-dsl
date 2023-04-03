@@ -37,7 +37,7 @@ case class ImportClassResolver(classLoader: ClassLoader) {
                               methods: Array[Method]) = {
     def help(method: Method): ImportClazzMethod = {
       val methodName = method.getName
-      val params = method.getParameterTypes.map(`type` ⇒ if(clazz==`type`) ClazzType(clazz.getCanonicalName,Array()) else resolve(`type`))
+      val params = method.getParameterTypes.map(`type` ⇒ if(clazz==`type`) new ClazzType(clazz.getCanonicalName,Array()) else resolve(`type`))
       val returnType = resolve(method.getReturnType)
       ImportClazzMethod(methodName, params, returnType)
     }
@@ -77,13 +77,13 @@ case class ImportClassResolver(classLoader: ClassLoader) {
         } else if (instanceClazz( clazz, classOf[JMap[_, _]] )) {
           MapType( AnyType, AnyType )
         } else if (instanceClazz( clazz, classOf[JOptional[_]] )) {
-          OptionType( AnyType )
+          new OptionType( AnyType )
         } else if (instanceClazz( clazz, classOf[Try[_]] )) {
-          TryType( AnyType )
+          new TryType( AnyType )
         } else if (instanceClazz( clazz, classOf[JFuture[_]] )) {
           FutureType( AnyType )
         } else if (instanceClazz( clazz, classOf[Either[_, _]] )) {
-          EitherType( AnyType, AnyType )
+          new EitherType( AnyType, AnyType )
         } else if (clazz.isArray) {
           ArrayType( resolve( clazz.getComponentType ) )
         } else if (instanceClazz( clazz, classOf[Tuple2[_, _]] )) {
@@ -215,17 +215,17 @@ case class ImportClassResolver(classLoader: ClassLoader) {
         } else if (instanceClazz( clazz, classOf[_LongSupplier] )) {
           LambdaType( None, LongType )
         } else {
-          ClazzType( clazz.getCanonicalName, Array( ) )
+          new ClazzType( clazz.getCanonicalName, Array( ) )
         }
     }
   }
 
-  def resolve(name: String): ImportClazz = {
+  def resolve(name: String): ImportClazzType = {
     val clazz = classLoader.loadClass(name)
 
     val (staticFields, instanceFields) = resolveFields( clazz, clazz.getFields )
     val (staticMethods, instanceMethods) = resolveMethods( clazz, clazz.getMethods.filterNot( m ⇒ m.getDeclaringClass == classOf[JObject] ) )
-    ResolveClazz( name, instanceFields.map( f ⇒ (f.name, f) ).toMap
+    ImportClazzType( name, instanceFields.map( f ⇒ (f.name, f) ).toMap
       , staticFields.map( f ⇒ (f.name, f) ).toMap,
       instanceMethods.map( m ⇒ (m.name, m) ).toMap
       , staticMethods.map( m ⇒ (m.name, m) ).toMap )

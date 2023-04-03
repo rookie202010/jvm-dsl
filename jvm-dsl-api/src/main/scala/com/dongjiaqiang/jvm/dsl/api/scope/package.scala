@@ -6,7 +6,7 @@ import scala.language.postfixOps
 
 package object scope {
 
-  import scala.collection.mutable.{ListMap ⇒ MutableMap}
+  import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
   object SymbolType extends Enumeration {
     val FIELD, CLAZZ, METHOD, UNDEFINED = Value

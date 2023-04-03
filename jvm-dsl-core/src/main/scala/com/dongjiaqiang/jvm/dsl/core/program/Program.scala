@@ -6,7 +6,7 @@ import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.scope.{ClazzScope, MethodScope, ProgramScope}
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.{ExpressionReviser, ExpressionScanner}
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
 
 case class Method(methodScope: MethodScope, body: Block)

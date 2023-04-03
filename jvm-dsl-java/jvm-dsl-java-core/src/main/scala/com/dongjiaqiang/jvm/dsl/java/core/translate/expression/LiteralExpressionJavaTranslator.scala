@@ -4,7 +4,10 @@ import com.dongjiaqiang.jvm.dsl.api.expression.`var`.Null
 import com.dongjiaqiang.jvm.dsl.api.expression.literal._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
+import com.dongjiaqiang.jvm.dsl.java.api.codes.{_SYS_GEN_CODES, _SYS_LIST_CODES, _SYS_MAP_CODES, _SYS_SET_CODES}
 import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaTranslatorContext
+
+import java.util.Comparator
 
 trait LiteralExpressionJavaTranslator extends LiteralExpressionVisitor[String] {
 
@@ -21,26 +24,58 @@ trait LiteralExpressionJavaTranslator extends LiteralExpressionVisitor[String] {
 
   override def visit(literal: BoolLiteral, visitor: ExpressionVisitor[String]): String = literal.toString
 
-  override def visit(literal: StringLiteral, visitor: ExpressionVisitor[String]): String = literal.toString
+  override def visit(literal: StringLiteral, visitor: ExpressionVisitor[String]): String = literal.literal
 
   override def visit(literal: CharLiteral, visitor: ExpressionVisitor[String]): String = literal.toString
 
   override def visit(literal: ListLiteral, visitor: ExpressionVisitor[String]): String = {
     val list = literal.literal
-    s"com.dongjiaqiang.jvm.dsl.java.core.ofList(${list.map( visitor.visit ).mkString( "," )})"
+    s"${_SYS_LIST_CODES.CLAZZ_NAME}.ofList(${list.map( visitor.visit ).mkString( "," )})"
   }
 
   override def visit(literal: MapLiteral, visitor: ExpressionVisitor[String]): String = {
     val list = literal.literal
     val tuples = list.map {
-      case (k, v) ⇒ s"new com.dongjiaqiang.jvm.dsl.java.core.tuple.Tuple2(${visitor.visit( k )},${visitor.visit( v )})"
+      case (k, v) ⇒ s"new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2(${visitor.visit( k )},${visitor.visit( v )})"
     }.mkString( "," )
-    s"com.dongjiaqiang.jvm.dsl.java.core.ofMap($tuples)"
+
+    if(literal.dslType.seq){
+      s"${_SYS_MAP_CODES.CLAZZ_NAME}.ofSeqMap($tuples)"
+    }else if(literal.dslType.sorted){
+        literal.dslType.sorter match {
+          case None⇒
+            s"${_SYS_MAP_CODES.CLAZZ_NAME}.ofSortMap($tuples)"
+          case Some(lambda)⇒
+            val comparator = LambdaToAnonymousClassTranslator.translateComparator(visitor,javaTranslatorContext,lambda)
+            s"${_SYS_MAP_CODES.CLAZZ_NAME}.ofSortMap($comparator,$tuples)"
+        }
+    }else{
+      s"${_SYS_MAP_CODES.CLAZZ_NAME}.ofMap($tuples)"
+    }
   }
 
   override def visit(literal: SetLiteral, visitor: ExpressionVisitor[String]): String = {
     val list = literal.literal
-    s"com.dongjiaqiang.jvm.dsl.java.core.ofSet(${list.map( visitor.visit ).mkString( "," )})"
+    val code  = list.map( visitor.visit ).mkString( "," )
+    if(literal.dslType.seq){
+        s"${_SYS_SET_CODES.CLAZZ_NAME}.ofSeqSet($code)"
+    }else if(literal.dslType.sorted){
+        literal.dslType.sorter match {
+          case None⇒
+            s"${_SYS_SET_CODES.CLAZZ_NAME}.ofSortedSet($code)"
+          case Some(lambda)⇒
+            val comparator = s"""
+               |new ${classOf[Comparator[_]].getCanonicalName}<Object>(){
+               |    @Override
+               |    public int compare(Object ${lambda.inputs.head},Object ${lambda.inputs.last})
+               |        ${visitor.visit(lambda)}
+               |}
+               |""".stripMargin
+            s"${_SYS_SET_CODES.CLAZZ_NAME}.ofSortedSet($comparator,$code)"
+        }
+    }else{
+      s"${_SYS_SET_CODES.CLAZZ_NAME}.ofSet($code)"
+    }
   }
 
   override def visit(literal: TupleLiteral, visitor: ExpressionVisitor[String]): String = {
