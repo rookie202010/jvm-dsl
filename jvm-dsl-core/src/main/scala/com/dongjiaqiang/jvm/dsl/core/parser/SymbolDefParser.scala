@@ -71,6 +71,8 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
 
   private var catchParam:(DslType,String) = _
 
+  private var ignoreBlock:Boolean = false
+
   override def enterProgram(ctx: JvmDslParserParser.ProgramContext): Unit = {
     programScope = new ProgramScope( )
     stack = new BlockStack( programScope )
@@ -133,7 +135,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
     methodScope.addScope(new BlockScope( 0,methodScope,currentScope ))
 
     if(ctx.throwDef()!=null){
-        methodScope.throws.appendAll(ctx.throwDef().clazzType().map(_.getText).map(c⇒new ClazzType(c,Array())))
+        methodScope.throws.appendAll(ctx.throwDef().clazzType().map(_.getText).map(c⇒ClazzType(c,Array())))
     }
 
     addScope( methodScope, ctx.parameters( ).parameter( ), methodScope, programScope )
@@ -149,11 +151,15 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
   }
 
   override def enterBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
+    if(ignoreBlock){
+        ignoreBlock = false
+        return
+    }
     if (stack.empty( )) {
       stack.push( currentMethodScope.blockScope )
     } else {
       val parent = stack.peek( )
-      if (!parent.isInstanceOf[ForStatementBlockScope]) {
+    //  if (!parent.isInstanceOf[ForStatementBlockScope]) {
         val topScope = Option.apply( currentClazzScope ).getOrElse( programScope )
 
         val blockScope = new BlockScope( parent.statements, parent, topScope )
@@ -166,7 +172,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
         stack.push( blockScope )
         parent.incStatement( )
       }
-    }
+   // }
   }
 
   override def exitBlock(ctx: JvmDslParserParser.BlockContext): Unit = {
@@ -281,6 +287,7 @@ class SymbolDefParser(var programScope: ProgramScope = new ProgramScope( )) exte
     parent.incStatement( )
     stack.push( blockScope )
 
+    ignoreBlock = true
   }
 
 

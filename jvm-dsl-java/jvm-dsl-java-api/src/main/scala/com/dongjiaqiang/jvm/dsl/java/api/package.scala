@@ -52,7 +52,7 @@ package object api {
         String.format("%s<%s>", classOf[Optional[_]].getCanonicalName, toJavaType(`type`.parameterType, javaTranslatorContext))
       case `type`: TupleType ⇒
         val sb = new StringBuffer()
-        sb.append("com.dongjiaqiang.jvm.dsl.java.core.tuple.Tuple")
+        sb.append("com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple")
         sb.append(`type`.parameterTypes.length)
         sb.append("<")
         sb.append(`type`.parameterTypes.map(`type` ⇒ {
