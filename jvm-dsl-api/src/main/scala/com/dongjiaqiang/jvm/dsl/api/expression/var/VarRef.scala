@@ -7,7 +7,7 @@ import com.dongjiaqiang.jvm.dsl.api.expression.call.Part
 import com.dongjiaqiang.jvm.dsl.api.scope.{FieldScope, ProgramScope}
 
 import scala.annotation.tailrec
-import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap ⇒ MutableMap}
 
 /**
  * <p>var ref can refer to a local var def or a global var def<p>

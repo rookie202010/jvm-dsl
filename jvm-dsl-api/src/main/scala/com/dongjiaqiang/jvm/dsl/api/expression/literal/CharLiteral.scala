@@ -15,5 +15,5 @@ class CharLiteral(literal: Char) extends Literal[Char, CharType.type]( literal )
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = CharType
+  override def getValueType(programScope: ProgramScope): CharType.type = CharType
 }

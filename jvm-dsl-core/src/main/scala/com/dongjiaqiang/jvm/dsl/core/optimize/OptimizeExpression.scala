@@ -129,19 +129,19 @@ class OptimizeExpression(val programScope: ProgramScope) extends ExpressionRevis
           case "Array" ⇒ new ArrayLiteral( literal.literal, ArrayType( clazzType.parameterTypes.headOption.getOrElse( UnResolvedType ) ) )
           case "Left" ⇒
             val list = literal.literal
-            new EitherLiteral( Left( list.head ), EitherType(
+            new EitherLiteral( Left( list.head ), new EitherType(
               clazzType.parameterTypes.headOption.getOrElse( UnResolvedType ),
               clazzType.parameterTypes.lastOption.getOrElse( UnResolvedType )
             ) )
           case "Right" ⇒
             val list = literal.literal
-            new EitherLiteral( Right( list.head ), EitherType(
+            new EitherLiteral( Right( list.head ), new EitherType(
               clazzType.parameterTypes.headOption.getOrElse( UnResolvedType ),
               clazzType.parameterTypes.lastOption.getOrElse( UnResolvedType )
             ) )
           case "Some" ⇒
             val list = literal.literal
-            new OptionLiteral( list.head, OptionType( UnResolvedType ) )
+            new OptionLiteral( list.head, new OptionType( UnResolvedType ) )
           case "None" ⇒
             NoneLiteral
           case _ ⇒ literal

@@ -12,7 +12,7 @@ import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 import scala.language.postfixOps
 
 class ExpressionParserTestLambdaSuit extends AnyFunSuite{

@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 
 import java.io.StringReader
-import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap ⇒ MutableMap}
 
 
 case class BlockWithScope(block: Block,

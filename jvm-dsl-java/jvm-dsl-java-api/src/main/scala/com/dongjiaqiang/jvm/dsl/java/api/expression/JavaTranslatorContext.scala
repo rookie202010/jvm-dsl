@@ -6,7 +6,7 @@ import com.typesafe.config.Config
 
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.{ArrayBuffer, Map ⇒ MMap}
-
+import com.dongjiaqiang.jvm.dsl.java.api.config._
 /**
  * clazz methods generate by java translator
  *
@@ -22,4 +22,17 @@ case class JavaTranslatorContext(customBlockExpressionJavaTranslators: MMap[Stri
                                  javaTranslateConfig: Config,
                                  systemGenerateMethods: MMap[String, ArrayBuffer[String]] = MMap( ),
                                  systemGenerateProgramMethods: ArrayBuffer[String] = ArrayBuffer( ),
-                                 systemVarIndex: AtomicInteger = new AtomicInteger( 0 ))
+                                 systemVarIndex: AtomicInteger = new AtomicInteger( 0 )){
+
+  def genericErasure():Boolean={
+    true
+  //  javaTranslateConfig.hasPath(JAVA_TRANSLATOR_GENERIC_ERASURE) &&
+  //    javaTranslateConfig.getBoolean(JAVA_TRANSLATOR_GENERIC_ERASURE)
+  }
+
+  def lambdaGrammarEnable():Boolean={
+      javaTranslateConfig.hasPath(JAVA_TRANSLATOR_CONFIG_LAMBDA_GRAMMAR_ENABLE) &&
+        javaTranslateConfig.getBoolean(JAVA_TRANSLATOR_CONFIG_LAMBDA_GRAMMAR_ENABLE)
+  }
+
+}

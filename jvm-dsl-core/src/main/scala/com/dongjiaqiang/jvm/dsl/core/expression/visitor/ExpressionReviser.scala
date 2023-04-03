@@ -11,7 +11,7 @@ import com.dongjiaqiang.jvm.dsl.core.expression.visitor.literal.LiteralExpressio
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.statement.StatementExpressionReviser
 import com.dongjiaqiang.jvm.dsl.core.expression.visitor.unary.expression.UnaryExpressionReviser
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 import scala.reflect.ClassTag
 
 

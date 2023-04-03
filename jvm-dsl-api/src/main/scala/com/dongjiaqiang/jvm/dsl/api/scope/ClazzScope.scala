@@ -2,7 +2,7 @@ package com.dongjiaqiang.jvm.dsl.api.scope
 
 import com.dongjiaqiang.jvm.dsl.api.scope
 
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
 class ClazzScope(val outerScopeIndex: Int, val name: String,
                  val fields: MutableMap[String, FieldScope],

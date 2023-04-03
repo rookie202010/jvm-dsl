@@ -2,10 +2,13 @@ package com.dongjiaqiang.jvm.dsl.java.api.extend;
 
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._1_Consumer;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._2_Function;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._1_Predicate;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._1_Supplier;
+import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class Failure<T> implements Try<T> {
 
@@ -37,7 +40,7 @@ public class Failure<T> implements Try<T> {
     }
 
     @Override
-    public <K> Try<K> flatMap(_1_Function<? super T, Try<? extends K>> function) {
+    public <K> Try<K> flatMap(_1_Function<? super T, Try<K>> function) {
         return new Failure<>(exception);
     }
 
@@ -47,8 +50,33 @@ public class Failure<T> implements Try<T> {
     }
 
     @Override
+    public boolean exist(_1_Predicate<? super T> predicate) throws Exception {
+        return false;
+    }
+
+    @Override
+    public Optional<T> find(_1_Predicate<? super T> predicate) throws Exception {
+        return Optional.empty();
+    }
+
+    @Override
     public void foreach(_1_Consumer<? super T> consumer) {
 
+    }
+
+    @Override
+    public boolean contains(Try<T> tTry, T t) {
+        return false;
+    }
+
+    @Override
+    public List<Tuple2<T, Integer>> zipWithIndex() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public T reduce(_2_Function<? super T, ? super T, T> reducer) {
+       throw new UnsupportedOperationException("empty reduce");
     }
 
     @Override
@@ -57,13 +85,13 @@ public class Failure<T> implements Try<T> {
     }
 
     @Override
-    public T getOrElse(_1_Supplier<? extends T> supplier) throws Exception {
+    public T getOrElse(_1_Supplier<T> supplier) throws Exception {
         return supplier.get();
     }
 
     @Override
-    public Try<T> orElse(_1_Supplier<Try<? extends T>> supplier) {
-        return this;
+    public T orElse(T t) {
+        return t;
     }
 
     @Override
@@ -81,5 +109,29 @@ public class Failure<T> implements Try<T> {
         return Optional.empty();
     }
 
+    @Override
+    public List<T> toList() {
+        return new ArrayList<>();
+    }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public T[] toArray() {
+        return (T[]) new Object[]{};
+    }
+
+    @Override
+    public Set<T> toSet() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<T> toSeqSet() {
+        return new LinkedHashSet<>();
+    }
+
+    @Override
+    public Set<T> toSortedSet(Try<T> tTry, Comparator<T> comparator) {
+        return new TreeSet<>(comparator);
+    }
 }

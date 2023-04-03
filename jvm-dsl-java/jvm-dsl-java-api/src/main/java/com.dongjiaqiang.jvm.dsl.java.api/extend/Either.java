@@ -4,8 +4,8 @@ import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._1_Consumer;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._1_Supplier;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public interface Either<L, R> {
@@ -38,9 +38,9 @@ public interface Either<L, R> {
         }
     }
 
-    default <NR> Either<L, NR> flatMap(_1_Function<? super R, Either<? extends L, ? extends NR>> function) throws Exception {
+    default <NR> Either<L, NR> flatMap(_1_Function<? super R, Either<L, NR>> function) throws Exception {
         if (isRight()) {
-            return (Either<L, NR>) function.apply(right());
+            return function.apply(right());
         } else {
             return new Left<>(left());
         }
@@ -101,7 +101,7 @@ public interface Either<L, R> {
         }
     }
 
-    default Collection<R> toSeq() {
+    default List<R> toList() {
         if (isRight()) {
             return Collections.singletonList(right());
         } else {

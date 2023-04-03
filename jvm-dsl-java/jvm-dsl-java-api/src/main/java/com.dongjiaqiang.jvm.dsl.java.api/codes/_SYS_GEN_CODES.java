@@ -1,4 +1,4 @@
-package com.dongjiaqiang.jvm.dsl.java.api.util;
+package com.dongjiaqiang.jvm.dsl.java.api.codes;
 
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._1_Consumer;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._2_Consumer;
@@ -8,36 +8,15 @@ import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._IntBinaryOperator;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._1_Predicate;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._2_Predicate;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._1_Supplier;
-import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class CodeUtils {
+public class _SYS_GEN_CODES {
 
-    @SafeVarargs
-    public static <K, V> Map<K, V> ofMap(Tuple2<K, V>... ts) {
-        HashMap<K, V> map = new HashMap<>();
-        for (Tuple2<K, V> t : ts) {
-            map.put(t._1, t._2);
-        }
-        return map;
-    }
 
-    @SafeVarargs
-    public static <V> List<V> ofList(V... vs) {
-        List<V> list = new ArrayList<>();
-        Collections.addAll(list, vs);
-        return list;
-    }
-
-    @SafeVarargs
-    public static <V> Set<V> ofSet(V... vs) {
-        Set<V> set = new HashSet<>();
-        Collections.addAll(set, vs);
-        return set;
-    }
+    public static final String CLAZZ_NAME = " _SYS_GEN_CODES";
 
     @SafeVarargs
     public static <V> V[] ofArray(V... vs) {

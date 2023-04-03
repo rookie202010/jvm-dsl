@@ -7,17 +7,17 @@ import com.dongjiaqiang.jvm.dsl.api.scope.{FieldScope, ProgramScope}
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * String body = "body";
- * Int len = body.length;
- * Json maySuccess = Json{ // Json{ ... } => Json
- * {"body":body,"len":len}
- * }
+ *      def method()=Unit{
+ *          String body = "body";
+ *          Int len = body.length;
+ *          Json maySuccess = Json{ // Json{ ... } => Json
+ *              {"body":body,"len":len}
+ *          }
  *
- * Json data = Json{
- * [1,2,3]
- * }
- * }
+ *          Json data = Json{
+ *                  [1,2,3]
+ *          }
+ *      }
  * }<pre><code>
  */
 case class CustomBlockExpression(name: String, body: Block, param: Option[FieldScope]) extends ValueExpression {

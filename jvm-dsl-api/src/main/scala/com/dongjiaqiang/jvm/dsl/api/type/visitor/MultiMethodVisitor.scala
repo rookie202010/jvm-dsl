@@ -3,6 +3,7 @@ package com.dongjiaqiang.jvm.dsl.api.`type`.visitor
 import com.dongjiaqiang.jvm.dsl.api.`type`.DslType
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 
+import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
 trait MultiMethodVisitor[T] extends MethodVisitor[T] {
 
@@ -22,9 +23,10 @@ trait MultiMethodVisitor[T] extends MethodVisitor[T] {
 
 
   override def visit(calleeType: DslType, callee: ValueExpression, name: String, params: Array[ValueExpression]): Option[T] = {
-    val sysMrt = sysVisitors.get( calleeType.getClass ).flatMap( _.visit( calleeType, callee, name, params ) )
-    if (sysMrt.isDefined) {
-      return sysMrt
+    val sysVisitor = sysVisitors.get( calleeType.getClass )
+    val result = sysVisitor.flatMap( _.visit( calleeType, callee, name, params ) )
+    if (result.isDefined) {
+      return result
     }
     extendVisitors.get( calleeType.getClass ) match {
       case Some( visitors ) ⇒

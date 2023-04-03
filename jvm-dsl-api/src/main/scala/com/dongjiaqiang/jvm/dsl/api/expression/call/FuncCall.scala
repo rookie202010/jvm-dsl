@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.api.expression.call
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.errorMsg
+import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.requireMsg
 import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, ImportClazzMethod, ImportClazzType}
 import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
@@ -15,7 +15,7 @@ sealed trait FuncCall extends ValueExpression {
 }
 
 //var call expression
-case class VarCall(varRef: VarRef,
+case class VarCall(varRef: ValueExpression,
                    override val name: String,
                    override val params: Array[ValueExpression]) extends FuncCall {
   override def toString: String = getString( varRef, name, params )
@@ -55,7 +55,7 @@ case class StaticCall(`type`: DslType,
                 }){
                   returnType
                 }else{
-                  val msg = errorMsg(name,`type`,params.map(_.toString),this.params.map(_.getValueType(programScope)))
+                  val msg = requireMsg(name,`type`,params,this.params.map(_.getValueType(programScope)))
                   throw ExpressionParseException(msg)
                 }
             case None⇒ throw ExpressionParseException(s"type ${`type`} not find static methods $name")
@@ -91,7 +91,7 @@ case class MethodCall(methodScope: Option[MethodScope],
         }) {
           scope.returnType
         } else {
-          val msg = errorMsg(name,params.map(_.toString),this.params.map(_.getValueType(programScope)))
+          val msg = requireMsg(name,scope.params.values.map(_.dslType).toArray,params.map(_.getValueType(programScope)))
           throw ExpressionParseException( msg )
         }
     }

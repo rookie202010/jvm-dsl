@@ -22,7 +22,7 @@ class ArrayLiteral(literal: Array[ValueExpression], override val dslType: ArrayT
   extends Literal[Array[ValueExpression], ArrayType]( literal ) {
   override def toString: String = s"new Array(${literal.mkString( "," )})"
 
-  override def getValueType(programScope: ProgramScope): DslType = {
+  override def getValueType(programScope: ProgramScope): ArrayType = {
     literal.map( v ⇒ v.getValueType( programScope ) )
       .reduceOption[DslType] {
         case (d1, d2) ⇒ d1.commonDslType( programScope.importManager, d2 )

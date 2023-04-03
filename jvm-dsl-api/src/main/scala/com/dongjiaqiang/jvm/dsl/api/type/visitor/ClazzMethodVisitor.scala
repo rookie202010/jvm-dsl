@@ -23,7 +23,7 @@ trait ClazzMethodVisitor[T] extends MethodVisitor[T]{
           })){
               Some(visit(resolvedClazzType,method,callee, name, params))
           }else{
-              None
+              super.visit(calleeDslType, callee, name, params)
           }
         })
   }

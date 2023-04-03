@@ -7,11 +7,11 @@ import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * Int j = 1&lt;&lt;2; // 1&lt;&lt;2 => LeftShit
- * Int k = 1>>2; // 1>>2 => RightShift
- * Int i = 1>>>2; // 1>>>2 => UnsignedRightShift
- * }
+ *      def method()=Unit{
+ *          Int j = 1&lt;&lt;2; // 1&lt;&lt;2 => LeftShit
+ *          Int k = 1>>2; // 1>>2 => RightShift
+ *          Int i = 1>>>2; // 1>>>2 => UnsignedRightShift
+ *      }
  * }
  * <pre><code>
  */
@@ -32,6 +32,5 @@ case class LeftShift(left: ValueExpression, right: ValueExpression) extends Bina
 
   override def getValueType(programScope: ProgramScope): DslType = {
     left.getValueType( programScope )
-    //resolveBitExpressionValueType(leftValueType,rightValueType,onlyAcceptLeftValueType = true)
   }
 }

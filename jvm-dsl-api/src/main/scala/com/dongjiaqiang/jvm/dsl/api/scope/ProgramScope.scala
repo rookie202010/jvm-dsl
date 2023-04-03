@@ -6,7 +6,7 @@ import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
 import com.dongjiaqiang.jvm.dsl.api.expression.{Expression, ValueExpression}
 import com.dongjiaqiang.jvm.dsl.api.scope
 
-import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap ⇒ MutableMap}
 
 class ProgramScope(val fields: MutableMap[String, FieldScope],
                    val classes: MutableMap[String, ClazzScope],
@@ -22,7 +22,9 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
 
   def callType(valueExpression:ValueExpression,name:String,params:Array[ValueExpression]):DslType={
     multiMrt.visit( valueExpression.getValueType( this ),valueExpression, name, params ) match {
-      case Some( dslType ) ⇒ dslType
+      case Some( dslType ) ⇒ {
+        dslType
+      }
       case None ⇒ throw ExpressionParseException( s"method $name in expression $valueExpression doest not accept " +
         s"params ${params.map( _.getValueType( this ).toString ).mkString( "Array(", ", ", ")" )}" )
     }

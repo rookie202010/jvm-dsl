@@ -3,12 +3,14 @@ package com.dongjiaqiang.jvm.dsl.java.core.translate.expression
 import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.expression.Expression
 import com.dongjiaqiang.jvm.dsl.api.expression.block.Block
+import com.dongjiaqiang.jvm.dsl.api.expression.unary.Cast
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.exception.JavaTranslatorException
 import com.dongjiaqiang.jvm.dsl.java.api.expression._
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.supplier._
+import com.dongjiaqiang.jvm.dsl.java.core.translate.method.MultiMethodJavaTranslator
 
 class JavaTranslator(val javaTranslatorContext: JavaTranslatorContext,
                      override val programScope: ProgramScope) extends ExpressionVisitor[String]
@@ -18,13 +20,39 @@ class JavaTranslator(val javaTranslatorContext: JavaTranslatorContext,
   with LiteralExpressionJavaTranslator
   with StatementExpressionJavaTranslator
   with MatchCaseExpressionJavaTranslator
+  with CallExpressionJavaTranslator
+  with CallChainExpressionJavaTranslator
   with BlockExpressionJavaTranslator {
+
+  override val multiTranslator: MultiMethodJavaTranslator = new MultiMethodJavaTranslator(programScope,this)
+
+  def specifyDslType(code:String,dslType: DslType):String={
+    if (javaTranslatorContext.genericErasure( )) {
+      dslType match {
+        case IntType⇒
+          s"((${api.toJavaType( dslType, javaTranslatorContext )})($code)).intValue()"
+        case LongType⇒
+          s"((${api.toJavaType( dslType, javaTranslatorContext )})($code)).longValue()"
+        case FloatType⇒
+          s"((${api.toJavaType( dslType, javaTranslatorContext )})($code)).floatValue()"
+        case DoubleType⇒
+          s"((${api.toJavaType( dslType, javaTranslatorContext )})($code)).doubleValue()"
+        case ByteType⇒
+          s"((${api.toJavaType( dslType, javaTranslatorContext )})($code)).byteValue()"
+        case _⇒
+          s"((${api.toJavaType( dslType, javaTranslatorContext )})($code))"
+      }
+    } else {
+      code
+    }
+  }
 
   override def defaultVisit(expression: Expression, visitor: ExpressionVisitor[String]): String = {
     expression match {
-      case JavaVarCall( varRef, name, params,_ ) ⇒
-        s"${varRef.mkString( "." )}.$name(${params.map( visitor.visit ).mkString( "," )})"
-      case JavaVarRef( name,_ ) ⇒ name.mkString( "." )
+      case JavaCode(code,_)⇒
+          code
+      case JavaCall( JavaCode(code,_), name, params,_ ) ⇒
+        s"$code.$name(${params.map( visitor.visit ).mkString( "," )})"
       case JavaLocalVarDef( name, dslType, assigned ) ⇒
         assigned match {
           case None ⇒ s"${api.toJavaType( dslType,javaTranslatorContext )} ${name}"
@@ -43,7 +71,7 @@ class JavaTranslator(val javaTranslatorContext: JavaTranslatorContext,
         if (javaTranslatorContext.javaTranslateConfig.getBoolean( "java.translator.lambda.grammar.enable" )) {
           s"(${lambda.inputs.mkString( "," )})->${visitor.visit( lambda )}"
         } else {
-          LambdaToAnonymousClassTranslator.translate( lambdaType, lambda, javaTranslatorContext,visitor )
+          LambdaToAnonymousClassTranslator.translate( lambdaType, lambda, javaTranslatorContext,visitor,true,false )
         }
       case JavaTry(body:Block,tryType)⇒
         if (javaTranslatorContext.javaTranslateConfig.getBoolean( "java.translator.lambda.grammar.enable" )) {

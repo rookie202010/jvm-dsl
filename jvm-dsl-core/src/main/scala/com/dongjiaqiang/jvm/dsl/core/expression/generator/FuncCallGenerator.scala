@@ -10,7 +10,7 @@ import com.dongjiaqiang.jvm.dsl.core.parser.ExprContext
 import com.dongjiaqiang.jvm.dsl.core.scope.toDslType
 
 import scala.collection.convert.ImplicitConversionsToScala._
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
 object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContext, ValueExpression,GeneratorContext] {
 
@@ -58,7 +58,7 @@ object CallChainGenerator extends IExpressionGenerator[LiteralAndCallChainContex
       case Some(v) ⇒
         if (v.localVarOrArrayVar().size()==1 && v.localVarOrArrayVar().head.localVariable()!=null &&
           expressionContext.getProgramScope.isImportClazz(v.localVarOrArrayVar().head.localVariable().IDENTIFIER().getText)) {
-          call.StaticCall(ClazzType(v.localVarOrArrayVar().head.localVariable().IDENTIFIER().getText, Array()),
+          call.StaticCall(new ClazzType(v.localVarOrArrayVar().head.localVariable().IDENTIFIER().getText, Array()),
             funcName,
             expressions.map(e ⇒ ExpressionGenerator.generate(expressionContext, e)).toArray)
         } else {

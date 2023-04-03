@@ -13,9 +13,10 @@ class OptionMrt(override val programScope: ProgramScope) extends MonadMrt with O
                          callee: ValueExpression,
                          default: ValueExpression): DslType = calleeType.carryDslType
 
+
+  override def orElse(calleeType: OptionType, callee: ValueExpression, default: ValueExpression): DslType = calleeType.carryDslType
+
   override def isDefine(calleeType: OptionType,
                         callee: ValueExpression): DslType = BoolType
-
-  override def isEmpty(calleeType: OptionType,
-                       callee: ValueExpression): DslType = BoolType
+  
 }

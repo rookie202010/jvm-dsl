@@ -6,9 +6,9 @@ import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * bool condition = 1>2 || 2>1; // 1>2 || 2>1 => Or
- * }
+ *        def method()=Unit{
+ *          bool condition = 1>2 || 2>1; // 1>2 || 2>1 => Or
+ *        }
  * }
  * <pre><code>
  */

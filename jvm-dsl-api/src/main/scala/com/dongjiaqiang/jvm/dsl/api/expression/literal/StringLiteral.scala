@@ -18,5 +18,5 @@ class StringLiteral(literal: String) extends Literal[String, StringType.type]( l
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = StringType
+  override def getValueType(programScope: ProgramScope): StringType.type = StringType
 }

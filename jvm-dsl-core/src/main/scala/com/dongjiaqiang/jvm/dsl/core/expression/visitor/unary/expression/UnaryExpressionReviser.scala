@@ -27,7 +27,7 @@ trait UnaryExpressionReviser extends UnaryExpressionVisitor[Expression] {
   }
 
   override def visit(cast: Cast,visitor: ExpressionVisitor[Expression]):Expression={
-    revise(cast,visitor,e⇒ Cast(e,cast.castType))
+    revise(cast,visitor,e⇒ Cast(e,cast.castType,cast.flag))
   }
 
   override def visit(instanceof: Instanceof,visitor: ExpressionVisitor[Expression]):Expression={

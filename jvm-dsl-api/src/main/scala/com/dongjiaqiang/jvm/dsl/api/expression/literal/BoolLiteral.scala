@@ -15,5 +15,5 @@ class BoolLiteral(literal: Boolean) extends Literal[Boolean, BoolType.type]( lit
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = BoolType
+  override def getValueType(programScope: ProgramScope): BoolType.type = BoolType
 }

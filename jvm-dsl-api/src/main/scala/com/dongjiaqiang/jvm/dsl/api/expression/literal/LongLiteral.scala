@@ -15,5 +15,5 @@ class LongLiteral(literal: Long) extends Literal[Long, LongType.type]( literal )
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = LongType
+  override def getValueType(programScope: ProgramScope): LongType.type = LongType
 }

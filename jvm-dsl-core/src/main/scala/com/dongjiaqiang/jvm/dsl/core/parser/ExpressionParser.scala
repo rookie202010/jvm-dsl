@@ -15,7 +15,7 @@ import com.dongjiaqiang.jvm.dsl.core.{JvmDslParserBaseListener, JvmDslParserPars
 
 import java.util.{LinkedList ⇒ Stack}
 import scala.collection.convert.ImplicitConversionsToScala._
-import scala.collection.mutable.{ListMap ⇒ MutableMap}
+import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 import scala.reflect.ClassTag
 
 /**

@@ -3,7 +3,7 @@ package com.dongjiaqiang.jvm.dsl.api.scope
 import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.scope
 
-import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap ⇒ MutableMap}
 
 /**
  * <pre><code>

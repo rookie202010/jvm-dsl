@@ -52,6 +52,7 @@ case class Block(expressions: ArrayBuffer[Expression] = ArrayBuffer( ),var ignor
                 case Some(dslType)⇒Array(dslType)
                 case None⇒Array[DslType]()
             }
+            case _ ⇒ Array[DslType]()
         }
         returnTypes.filter(_!=UnitType).reduceOption[DslType]{
             case (t1,t2)⇒t1.commonDslType(programScope.importManager,t2)

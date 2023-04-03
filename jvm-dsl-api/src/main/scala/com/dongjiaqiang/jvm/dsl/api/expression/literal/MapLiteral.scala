@@ -28,9 +28,9 @@ class MapLiteral(literal: Array[(ValueExpression, ValueExpression)],
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = {
+  override def getValueType(programScope: ProgramScope): MapType = {
     val keyType = literal.map( _._1 ).map( _.getValueType( programScope ) ).reduce( (t1, t2) ⇒ t1.commonDslType( programScope.importManager, t2 ) )
     val valueType = literal.map( _._2 ).map( _.getValueType( programScope ) ).reduce( (t1, t2) ⇒ t1.commonDslType( programScope.importManager, t2 ) )
-    MapType( keyType, valueType )
+    MapType( keyType, valueType,dslType.seq,dslType.sorted,dslType.sorter )
   }
 }

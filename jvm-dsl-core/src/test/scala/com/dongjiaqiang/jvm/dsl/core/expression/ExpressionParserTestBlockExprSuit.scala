@@ -14,7 +14,7 @@ import com.dongjiaqiang.jvm.dsl.core.program.Program
 import com.dongjiaqiang.jvm.dsl.core.symbol.generateProgramScope
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.collection.mutable.{ArrayBuffer, ListMap ⇒ MutableMap}
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap ⇒ MutableMap}
 import scala.language.postfixOps
 
 class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
@@ -90,9 +90,9 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
     }) expression (blockScope ⇒ {
       Return( Some(VarCall( blockScope.varRef( "plus" ), "apply", Array( blockScope.varRef( "a" ) ) ) ))
     }) belongBlock() ifBlock() expression (_ ⇒ {
-      Throw( new ClazzLiteral( Array( "\"xx\"" str ), ClazzType( "RuntimeException" ) ) )
+      Throw( new ClazzLiteral( Array( "\"xx\"" str ), new ClazzType( "RuntimeException" ) ) )
     }) belongBlock() belongBlock() expression (_ ⇒ {
-      CatchParameter( "e", ClazzType( "Exception" ) )
+      CatchParameter( "e", new ClazzType( "Exception" ) )
     }) catchBlock() expression (_ ⇒ {
       Return( Some(1 double ))
     })
@@ -112,7 +112,7 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
       })
 
       val ifBlock2 = blockScope statementBlock (false) expression (_ ⇒ {
-        statement.Throw( new ClazzLiteral( Array( "\"xx\"" str ), ClazzType( "RuntimeException" ) ) )
+        statement.Throw( new ClazzLiteral( Array( "\"xx\"" str ), new ClazzType( "RuntimeException" ) ) )
         })
 
       If(Array((binary.Ge( blockScope.varRef( "a" ), blockScope.varRef( "b" )),ifBlock1.block)),Some(ifBlock2.block))
@@ -184,17 +184,17 @@ class ExpressionParserTestBlockExprSuit extends AnyFunSuite {
         Return( Some(2 double ))
       })
 
-      TryCatch( tryBlock.block, Array((("e1",ClazzType( "Exception" )),catchBlock1.block),(("e2",ClazzType( "Exception" )),catchBlock2.block)), None )
+      TryCatch( tryBlock.block, Array((("e1",new ClazzType( "Exception" )),catchBlock1.block),(("e2",ClazzType( "Exception" )),catchBlock2.block)), None )
     })
 
     program.method( "method4" ) bodyBlock() tryBlock() expression (blockScope ⇒ {
       Return( Some(MethodCall( program.programScope.methods.get( "method3" ), "method3", Array( blockScope.varRef( "c" ), blockScope.varRef( "d" ) ) ) ))
     }) belongBlock() expression (_ ⇒ {
-      CatchParameter( "e1", ClazzType( "Exception" ) )
+      CatchParameter( "e1", new ClazzType( "Exception" ) )
     }) catchBlock() expression (_ ⇒ {
       Return( Some(1 double ))
     }) belongBlock() expression (_ ⇒ {
-      CatchParameter( "e2", ClazzType( "Exception" ) )
+      CatchParameter( "e2", new ClazzType( "Exception" ) )
     }) catchBlock() expression (_ ⇒ {
       Return( Some(2 double ))
     }) belongBlock() finallyBlock() expression (_ ⇒ {

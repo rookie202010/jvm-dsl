@@ -106,7 +106,9 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
       case v: MatchList ⇒ visit( v, this )
 
       //visit call chain expression
-      case v: FuncCallChain ⇒ visit( v, this )
+      case v: FuncCallChain ⇒
+        val funcCallChain = visit( v, this )
+        funcCallChain
       case v: IntLiteralCallChain ⇒ visit( v, this )
       case v: LongLiteralCallChain ⇒ visit( v, this )
       case v: FloatLiteralCallChain ⇒ visit( v, this )
@@ -132,7 +134,7 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
         v.varRef.getValueType(programScope) match {
           case lambdaType: LambdaType ⇒
             currentLambdaScope = lambdaType
-          case _⇒   visit( v, this )
+          case _⇒   //visit( v, this )
         }
         visit( v, this )
       case v: Break.type ⇒ visit( v, this )
@@ -155,7 +157,7 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
             if (v.assigned.isDefined) {
               currentLambdaScope = lambdaType
             }
-          case _ ⇒  visit( v, this )
+          case _ ⇒ // visit( v, this )
         }
         visit( v, this )
       case v: VarRef ⇒ visit( v, this )

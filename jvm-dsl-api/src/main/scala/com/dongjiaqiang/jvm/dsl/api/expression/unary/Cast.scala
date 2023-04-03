@@ -14,7 +14,7 @@ import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
  * }
  * <pre><code>
  */
-case class Cast(child: ValueExpression, castType: DslType) extends UnaryExpression {
+case class Cast(child: ValueExpression, castType: DslType,flag:Int = 0) extends UnaryExpression {
   override def toString: String = s"($castType)$child"
 
   override def equals(obj: Any): Boolean = obj match {

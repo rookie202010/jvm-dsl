@@ -15,5 +15,5 @@ class IntLiteral(literal: Int) extends Literal[Int, IntType.type]( literal ) wit
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = IntType
+  override def getValueType(programScope: ProgramScope): IntType.type = IntType
 }

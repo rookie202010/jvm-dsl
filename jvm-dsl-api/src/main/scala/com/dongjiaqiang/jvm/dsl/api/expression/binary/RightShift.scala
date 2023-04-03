@@ -20,7 +20,6 @@ case class RightShift(left: ValueExpression, right: ValueExpression) extends Bin
 
   override def getValueType(programScope: ProgramScope): DslType = {
     left.getValueType( programScope )
-    //resolveBitExpressionValueType(leftValueType,rightValueType,onlyAcceptLeftValueType = true)
   }
 
 }

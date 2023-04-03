@@ -15,5 +15,5 @@ class FloatLiteral(literal: Float) extends Literal[Float, FloatType.type]( liter
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = FloatType
+  override def getValueType(programScope: ProgramScope): FloatType.type = FloatType
 }

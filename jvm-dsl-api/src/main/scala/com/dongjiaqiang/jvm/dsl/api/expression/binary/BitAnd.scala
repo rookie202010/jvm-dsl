@@ -6,9 +6,9 @@ import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * Int value = 1 & 2; // 1 & 2 => BitAnd
- * }
+ *    def method()=Unit{
+ *        Int value = 1 & 2; // 1 & 2 => BitAnd
+ *    }
  * }
  * <pre><code>
  */

@@ -1,89 +1,79 @@
 package com.dongjiaqiang.jvm.dsl.api.`type`.visitor
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, IntType, MonadDslType}
-import com.dongjiaqiang.jvm.dsl.api.exception.ExpressionParseException
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ByteType, CharType, DslType, IntType, MonadDslType, NumberDslType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
-
+import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MethodVisitor._
 trait SeqMethodVisitor[T] extends MethodVisitor[T]{
 
-  def indexOf(calleeDslType:MonadDslType,callee:ValueExpression,param:ValueExpression):T
+  def indexOf(calleeDslType:MonadDslType, callee:ValueExpression, element:ValueExpression):T
   def get(calleeDslType:MonadDslType,callee:ValueExpression,index:ValueExpression):T
   def splitAt(calleeDslType:MonadDslType,callee:ValueExpression,index:ValueExpression):T
   def add(calleeDslType:MonadDslType,callee:ValueExpression,index:ValueExpression,element:ValueExpression):T
   def add(calleeDslType:MonadDslType,callee:ValueExpression,element:ValueExpression):T
   def addAll(calleeDslType:MonadDslType,callee:ValueExpression,index:ValueExpression,element:ValueExpression):T
   def addAll(calleeDslType:MonadDslType,callee:ValueExpression,element:ValueExpression):T
-  def remove(calleeDslType:MonadDslType,callee:ValueExpression,index:ValueExpression):T
+  def remove(calleeDslType:MonadDslType, callee:ValueExpression, indexOrElement:ValueExpression):T
   def update(calleeDslType:MonadDslType,callee:ValueExpression,index:ValueExpression,element:ValueExpression):T
+  def max(calleeType: MonadDslType, callee: ValueExpression): T
+  def min(calleeType: MonadDslType, callee: ValueExpression): T
+  def sum(calleeType: MonadDslType, callee: ValueExpression): T
 
   override def visit(calleeType:DslType, callee: ValueExpression, name: String, params: Array[ValueExpression]): Option[T] = {
     val calleeDslType = calleeType.asInstanceOf[MonadDslType]
-    val (actualDslTypes,msg)  = actualTypes(programScope,params,name,calleeDslType)
-    name match {
-      case "indexOf"⇒
-
-        val (actualDslTypes,msg)  = actualTypes(programScope,params,name,calleeDslType)
-        require(params.length==1 && calleeDslType.carryDslType.isSuperDslType(programScope.importManager,actualDslTypes.head),
-          ()⇒msg.apply(Array(calleeDslType.carryDslType.toString)))
-
-        Some(indexOf(calleeDslType,callee,params.head))
-      case  "get" | "splitAt"⇒
-
-        val (actualDslTypes,msg)  = actualTypes(programScope,params,name,calleeDslType)
-        require(params.length==1 && actualDslTypes.head == IntType,()⇒msg.apply(Array(IntType.toString)))
-
-        if(name=="get") {
-          Some( get( calleeDslType, callee, params.head ) )
-        }else{
-          Some(splitAt(calleeDslType,callee,params.head))
+    (name match {
+      case INDEX_OF⇒
+        generate(Array(calleeDslType.carryDslType),params,()⇒indexOf(calleeDslType,callee,params.head))
+      case  GET | SPLIT_AT⇒
+        generate(Array(IntType),params,()⇒{
+          name match {
+            case GET ⇒ get( calleeDslType, callee, params.head )
+            case SPLIT_AT ⇒ splitAt( calleeDslType, callee, params.head )
+          }
+        })
+      case SUM | MAX | MIN ⇒
+        calleeDslType.carryDslType match {
+          case _: NumberDslType | ByteType | CharType ⇒
+            name match {
+              case SUM ⇒ Some( sum( calleeDslType, callee ) )
+              case MAX ⇒ Some( max( calleeDslType, callee ) )
+              case MIN ⇒ Some( min( calleeDslType, callee ) )
+            }
+          case _ ⇒ None
         }
+      case ADD⇒
+        generateOverload(Array(Array(IntType,calleeDslType.carryDslType),
+          Array(calleeDslType.carryDslType)),params,()⇒{
+          if (params.length == 2) {
+            add( calleeDslType, callee, params.head, params.last )
+          } else {
+            add( calleeDslType, callee, params.head )
+          }
+        })
+      case ADD_ALL⇒
+        generateOverload(Array(Array(calleeDslType.carryDslType),Array(IntType,calleeDslType.carryDslType)),params,(requireTypes,actualTypes)⇒{
+           if(requireTypes.length==1){
+             actualTypes.head.isInstanceOf[MonadDslType] &&
+               requireTypes.head.isSuperDslType( programScope.importManager,actualTypes.head.asInstanceOf[MonadDslType].carryDslType )
+           }else if(requireTypes.length==2){
+             actualTypes.last.isInstanceOf[MonadDslType] &&
+               requireTypes.last.isSuperDslType( programScope.importManager, actualTypes.last.asInstanceOf[MonadDslType].carryDslType )
+           }else{
+             false
+           }
+        },()⇒{
+          if(params.length==1){
+            addAll(calleeDslType,callee,params.head)
+          }else{
+            addAll(calleeDslType,callee,params.head,params.last)
+          }
+        })
 
-      case "add"⇒
-
-        val (actualDslTypes,msg)  = actualTypes(programScope,params,name,calleeDslType)
-
-        if(params.length==2) {
-
-          require( actualDslTypes.head == IntType &&
-            calleeDslType.carryDslType.isSuperDslType( programScope.importManager,actualDslTypes.last )
-            , ()⇒msg.apply(Array(IntType.toString,calleeDslType.carryDslType.toString)) )
-          Some( add( calleeDslType, callee, params.head, params.last ) )
-
-        }else if(params.length==1){
-
-          require( calleeDslType.carryDslType.isSuperDslType(programScope.importManager,actualDslTypes.head),()⇒msg.apply(Array(calleeDslType.carryDslType.toString)))
-          Some(add(calleeDslType,callee,params.head))
-
-        }else{
-          throw ExpressionParseException( s"${msg.apply(Array(IntType.toString))}\nor\n${msg.apply(Array(IntType.toString,calleeDslType.carryDslType.toString))}")
-        }
-
-      case "addAll"⇒
-
-        val (actualDslTypes,msg)  = actualTypes(programScope,params,name,calleeDslType)
-
-        if(params.length==2){
-          require(actualDslTypes.head==IntType && actualDslTypes.last.isInstanceOf[MonadDslType] &&
-            calleeDslType.carryDslType.isSuperDslType(programScope.importManager,actualDslTypes.last.asInstanceOf[MonadDslType].carryDslType),msg)
-          Some(addAll(calleeDslType,callee,params.head,params.last))
-        }else if(params.length==1){
-          require( actualDslTypes.head.isInstanceOf[MonadDslType] &&
-            calleeDslType.carryDslType.isSuperDslType( programScope.importManager, actualDslTypes.head.asInstanceOf[MonadDslType].carryDslType ), msg )
-          Some(addAll(calleeDslType,callee,params.head))
-        }else{
-          val msg1 = msg.apply(Array(IntType.toString,s"Monad[${calleeDslType.carryDslType.toString}]"))
-          val msg2 = msg.apply(Array(s"Monad[${calleeDslType.carryDslType}]"))
-          throw ExpressionParseException(s"$msg1\nor\n$msg2")
-        }
-
-      case "remove"⇒
-        require(params.length==1 && actualDslTypes.head == IntType,msg)
-        Some(remove(calleeDslType,callee,params.head))
-      case "update"⇒
-        require(params.length==2 && actualDslTypes.head == IntType && calleeDslType.carryDslType.isSuperDslType( programScope.importManager, actualDslTypes.last),msg)
-        Some(update(calleeDslType,callee,params.head,params.last))
+      case REMOVE⇒
+        generateOverload(Array(Array(IntType),Array(calleeDslType.carryDslType)),params,()⇒remove(calleeDslType,callee,params.head))
+      case UPDATE⇒
+        generate(Array(IntType,calleeDslType.carryDslType),params,()⇒update(calleeDslType,callee,params.head,params.last))
       case _⇒
-        super.visit(calleeDslType, callee, name, params)
-    }
+        None
+    }).orElse(super.visit(calleeDslType, callee, name, params))
   }
 }

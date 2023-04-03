@@ -7,11 +7,11 @@ import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 /**
  * <pre><code>
  * program{
- * def method()=Unit{
- * Int=>Int lambda = p=>{  // p=> { ... } => Lambda
- * return p*2;
- * }
- * lambda.apply(2);
+ *          def method()=Unit{
+ *                Int=>Int lambda = p=>{  // p=> { ... } => Lambda
+ *                return p*2;
+ *          }
+ *          lambda.apply(2);
  * }
  * }<pre><code>
  */
@@ -29,7 +29,7 @@ case class Lambda(inputs: Array[String], body: Block) extends ValueExpression {
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = {
+  override def getValueType(programScope: ProgramScope): LambdaType = {
     val inputType = if (inputs.isEmpty) {
       None
     } else if (inputs.length == 1) {

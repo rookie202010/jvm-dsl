@@ -1,5 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate.expression
 
+import com.dongjiaqiang.jvm.dsl.api.`type`.BasicDslType
 import com.dongjiaqiang.jvm.dsl.api.expression.unary._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.unary.expression.UnaryExpressionVisitor
@@ -12,11 +13,15 @@ trait UnaryExpressionJavaTranslator extends UnaryExpressionVisitor[String] {
 
 
   override def visit(cast: Cast, visitor: ExpressionVisitor[String]): String = {
-    s"((${api.toJavaType( cast.castType,javaTranslatorContext )})(${visitor.visit( cast.child )}))"
+    if(cast.flag==1) {
+      s"((${api.toJavaType( cast.castType, javaTranslatorContext )})(${visitor.visit( cast.child )}))"
+    }else{
+      s"((${api.toBasicType( cast.castType, javaTranslatorContext )})(${visitor.visit( cast.child )}))"
+    }
   }
 
   override def visit(negate: Negate, visitor: ExpressionVisitor[String]): String = {
-    s"!${visitor.visit( negate )}"
+    s"!${visitor.visit( negate.child )}"
   }
 
   override def visit(opposite: Opposite, visitor: ExpressionVisitor[String]): String = {

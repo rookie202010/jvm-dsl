@@ -31,6 +31,6 @@ class ListLiteral(literal: Array[ValueExpression],
     }
   }
 
-  override def getValueType(programScope: ProgramScope): DslType = ListType( literal.map( _.getValueType( programScope ) )
+  override def getValueType(programScope: ProgramScope): ListType = ListType( literal.map( _.getValueType( programScope ) )
     .reduce( (t1, t2) ⇒ t1.commonDslType( programScope.importManager, t2 ) ) )
 }
