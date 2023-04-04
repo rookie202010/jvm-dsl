@@ -1,5 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.java.api.codes;
 
+import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._2_Consumer;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._2_Function;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.predicate._1_Predicate;
@@ -112,6 +113,15 @@ public class _SYS_MAP_CODES {
             head = entry.next();
         }
         return head==null?Optional.empty():Optional.of(new Tuple2<>(head.getKey(),head.getValue()));
+    }
+
+    /**
+     *a.foreach((k,v)=>{ ... })
+     */
+    public static <K,V> void foreach(Map<K,V> map, _2_Consumer<? super K,? super V> consumer) throws Exception{
+        for(Map.Entry<K,V> entry:map.entrySet()){
+            consumer.accept(entry.getKey(),entry.getValue());
+        }
     }
 
     //mkString

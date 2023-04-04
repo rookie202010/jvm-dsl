@@ -25,6 +25,11 @@ public class Tuple2<T1, T2> {
     }
 
     @Override
+    public String toString(){
+        return String.format("(%s,%s)",_1,_2);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(_1, _2);
     }
