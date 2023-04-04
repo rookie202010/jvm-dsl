@@ -1,7 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.core.optimize
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MonadMethodVisitor
-import com.dongjiaqiang.jvm.dsl.api.`type`.{MonadDslType, TupleType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ListType, MapType, MonadDslType, TupleType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
@@ -78,7 +78,14 @@ class MonadOptimize(override val programScope: ProgramScope,val optimizeDslType:
                    param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
 
 
-  override def mapValue(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+  override def mapValue(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = {
+    calleeType match {
+      case mapType: MapType⇒
+        Array(transform(ListType(mapType.valueParameterType), param))
+      case _⇒
+        Array(transform(calleeType, param))
+    }
+  }
 
   override def flatten(calleeType:MonadDslType,
                        callee: ValueExpression): Array[ValueExpression] = Array()

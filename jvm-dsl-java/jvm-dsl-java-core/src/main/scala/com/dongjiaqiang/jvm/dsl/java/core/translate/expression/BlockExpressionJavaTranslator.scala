@@ -1,8 +1,9 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate.expression
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{FutureType, UnitType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{BasicDslType, FutureType, UnitType}
 import com.dongjiaqiang.jvm.dsl.api.expression._
 import com.dongjiaqiang.jvm.dsl.api.expression.block._
+import com.dongjiaqiang.jvm.dsl.api.expression.unary.Cast
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.block.BlockExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.java.api
@@ -25,23 +26,40 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
   }
 
   override def visit(forCollection: ForCollection, visitor: ExpressionVisitor[String]): String = {
-    s"""
-       |for(${visitor.visit( forCollection.localVarDef )}:${visitor.visit( forCollection.looped )})
-       |  ${visitor.visit( forCollection.body )}
-       |""".stripMargin
+    if (javaTranslatorContext.genericErasure()) {
+      val sysVar = s"_sys_element_${javaTranslatorContext.systemVarIndex.incrementAndGet()}"
+      val elementDef = forCollection.localVarDef.copy(assigned = Some(Cast(JavaCode(sysVar,forCollection.localVarDef.dslType),
+        forCollection.localVarDef.dslType,1)))
+      forCollection.body.expressions.insert(0,elementDef)
+      s"""
+         |for(Object $sysVar:${visitor.visit(forCollection.looped)})
+         |  ${visitor.visit(forCollection.body)}
+         |""".stripMargin
+    } else {
+      s"""
+         |for(${visitor.visit(forCollection.localVarDef)}:${visitor.visit(forCollection.looped)})
+         |  ${visitor.visit(forCollection.body)}
+         |""".stripMargin
+      }
   }
 
   override def visit(forMap: ForMap, visitor: ExpressionVisitor[String]): String = {
     val sysEntryVar = s"_sys_entry_${javaTranslatorContext.systemVarIndex.incrementAndGet( )}"
-    val keyDef = forMap.loopKeyDef.copy( assigned = Some( JavaCall( JavaCode(sysEntryVar,forMap.loopKeyDef.dslType), "getKey", Array( ),
-      forMap.loopKeyDef.dslType ) ) )
-    val valueDef = forMap.loopValueDef.copy( assigned = Some( JavaCall( JavaCode(sysEntryVar,forMap.loopValueDef.dslType) , "getValue", Array( )
-    ,forMap.loopValueDef.dslType) ) )
+    val keyDef = forMap.loopKeyDef.copy( assigned = Some( Cast(JavaCall( JavaCode(sysEntryVar,forMap.loopKeyDef.dslType), "getKey", Array( ),
+      forMap.loopKeyDef.dslType ),forMap.loopKeyDef.dslType,forMap.loopKeyDef.dslType match {
+      case _: BasicDslType⇒ 1
+      case _⇒ 0
+    }) ) )
+    val valueDef = forMap.loopValueDef.copy( assigned = Some( Cast(JavaCall( JavaCode(sysEntryVar,forMap.loopValueDef.dslType) , "getValue", Array( )
+    ,forMap.loopValueDef.dslType),forMap.loopValueDef.dslType,forMap.loopValueDef.dslType match {
+      case _: BasicDslType⇒ 1
+      case _⇒ 0
+    } ) ))
     forMap.body.expressions.insert( 0, keyDef, valueDef )
 
     s"""
        |for(java.util.Map.Entry<${api.toJavaType( forMap.loopKeyDef.dslType,javaTranslatorContext )},
-       |   ${api.toJavaType( forMap.loopValueDef.dslType,javaTranslatorContext )}> $sysEntryVar:${visitor.visit( forMap.looped )})
+       |   ${api.toJavaType( forMap.loopValueDef.dslType,javaTranslatorContext )}> $sysEntryVar:${visitor.visit( forMap.looped )}.entrySet())
        | ${visitor.visit( forMap.body )}
        |""".stripMargin
   }

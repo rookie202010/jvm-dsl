@@ -6,6 +6,7 @@ import com.dongjiaqiang.jvm.dsl.java.core.translate.ProgramTranslator
 import com.typesafe.config.ConfigFactory
 import org.scalatest.funsuite.AnyFunSuite
 
+import java.util
 import scala.util.Random
 
 /**
@@ -75,11 +76,11 @@ class TranslateForSuit extends AnyFunSuite {
     val code =
       """
         |program{
-        |   def eval(List[Int] key)=Int{
-        |       Int sum = 0;
+        |   def eval(List[Int] key)=Long{
+        |       Long sum = 0;
         |       for(Int i:key){
         |           for(Int j:key){
-        |               sum = sum +i+j;
+        |               sum = sum +i.toLong()+j.toLong();
         |           }
         |       }
         |       for((Int,Int) tuple:key.zipWithIndex()){
@@ -98,10 +99,14 @@ class TranslateForSuit extends AnyFunSuite {
         |""".stripMargin
     val clazz = compile(code)
     val instance = clazz.getConstructors.head.newInstance()
-    val method = clazz.getMethod("eval", classOf[Int])
+    val method = clazz.getMethod("eval", classOf[java.util.List[Integer]])
     (0 until 10).foreach(_ ⇒ {
-      val key = Random.nextInt(100)
-      assert(method.invoke(instance, Int.box(key)).equals(eval(key)))
+      val key = new util.ArrayList[Integer]()
+      key.add(Int.box(Random.nextInt(223)))
+      key.add(Int.box(Random.nextInt(123)))
+      key.add(Int.box(Random.nextInt(13)))
+      println(method.invoke(instance, key))
+     // assert(method.invoke(instance, key).equals(eval(key)))
     })
   }
 

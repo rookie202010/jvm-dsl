@@ -333,8 +333,8 @@ class ExpressionParser(val programScope: ProgramScope) extends JvmDslParserBaseL
 
         case ContextType.FOR_LOOP_MAP ⇒
 
-          val (_, keyFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.last
-          val (_, valueFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.head
+          val (_, keyFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.head
+          val (_, valueFieldScope) = currentBlockScope.asInstanceOf[ForStatementBlockScope].initFields.last
           val context = parseContext.getNextRule[ForStatementThreeContext]
 
           //key var def

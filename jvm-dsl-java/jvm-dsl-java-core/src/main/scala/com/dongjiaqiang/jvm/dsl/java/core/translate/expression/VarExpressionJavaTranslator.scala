@@ -50,6 +50,8 @@ trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
 
 
   override def visit(varRef: VarRef, visitor: ExpressionVisitor[String]): String = {
+    //todo no call here
+    varRef.getValueType(visitor.programScope)
     varRef.refs.zipWithIndex.map {
       case (n, index) ⇒
         if (varRef.arrayRefIndexExpressions.contains( index )) {

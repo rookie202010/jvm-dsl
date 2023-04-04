@@ -33,6 +33,6 @@ class StaticVarRef(val clazzType: ClazzType, val programScope: ProgramScope, ove
   }
 
   override def getValueType: DslType = {
-    VarRef.getDslType( refs.zipWithIndex,arrayRefIndexExpressions, clazzType, programScope )
+    VarRef.getDslType( refs.zipWithIndex,arrayRefIndexExpressions, clazzType, programScope,this )
   }
 }

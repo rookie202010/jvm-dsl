@@ -286,10 +286,10 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
         val refsWithIndex = varRef.refs.zipWithIndex
         calleeType match {
           case definitionClazzType: DefinitionClazzType ⇒
-            val newCalleeType = VarRef.getDslType( refsWithIndex, newArrayRefIndexExpressions, definitionClazzType, programScope )
+            val newCalleeType = VarRef.getDslType( refsWithIndex, newArrayRefIndexExpressions, definitionClazzType, programScope,varRef )
             (newCalleeType, VarRef( varRef.refs, varRef.arrayRefIndexExpressions, varRef.fieldScope ))
           case clazzType: ClazzType ⇒
-            val newCalleeType = VarRef.getDslType( refsWithIndex, newArrayRefIndexExpressions, clazzType, programScope )
+            val newCalleeType = VarRef.getDslType( refsWithIndex, newArrayRefIndexExpressions, clazzType, programScope,varRef )
             (newCalleeType, VarRef( varRef.refs, varRef.arrayRefIndexExpressions, varRef.fieldScope ))
         }
       case methodCall: MethodCall ⇒
