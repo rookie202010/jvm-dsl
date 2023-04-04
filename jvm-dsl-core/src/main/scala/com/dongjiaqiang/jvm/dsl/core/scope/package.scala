@@ -38,22 +38,20 @@ package object scope {
         clazzName match {
           case "Array" ⇒ ArrayType(toDslType(context.`type`().head,programScope))
           case "Some"⇒SomeType(toDslType(context.`type`().head,programScope))
-          case "Left"⇒{
+          case "Left"⇒
             if(context.`type`.size()==1) {
               LeftType( leftParameterType = toDslType( context.`type`( ).head, programScope ) )
             }else{
               LeftType( leftParameterType = toDslType( context.`type`( ).head, programScope ),
                 rightParameterType = toDslType( context.`type`( ).last, programScope ) )
             }
-          }
-          case "Right"⇒{
+          case "Right"⇒
             if(context.`type`.size()==1) {
               RightType( rightParameterType = toDslType( context.`type`( ).head, programScope ) )
             }else{
               RightType( leftParameterType = toDslType( context.`type`( ).head, programScope ),
                 rightParameterType = toDslType( context.`type`( ).last, programScope ) )
             }
-          }
           case "None"⇒NoneType
           case _⇒  new ClazzType( clazzName, context.`type`( ).map( t⇒toDslType(t,programScope) ).toArray )
         }

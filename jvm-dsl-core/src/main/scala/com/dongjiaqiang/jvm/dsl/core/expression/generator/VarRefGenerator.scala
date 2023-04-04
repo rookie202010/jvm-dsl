@@ -15,7 +15,6 @@ import scala.language.postfixOps
 
 object VarRefGenerator extends IExpressionGenerator[VariableContext, VarRef,VarGeneratorContext] {
   override def generate(exprContext: ExprContext, ruleContext: VariableContext,generatorContext: VarGeneratorContext = VarGeneratorContext(false)): VarRef = {
-
     val arrayRefIndexExpressions = MutableMap[Int,List[ValueExpression]]()
     val refs = ruleContext.localVarOrArrayVar().zipWithIndex.map {
       case (variableContext, index) ⇒

@@ -26,10 +26,21 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
   }
 
   override def visit(forCollection: ForCollection, visitor: ExpressionVisitor[String]): String = {
-    s"""
-       |for(${visitor.visit( forCollection.localVarDef )}:${visitor.visit( forCollection.looped )})
-       |  ${visitor.visit( forCollection.body )}
-       |""".stripMargin
+    if (javaTranslatorContext.genericErasure()) {
+      val sysVar = s"_sys_element_${javaTranslatorContext.systemVarIndex.incrementAndGet()}"
+      val elementDef = forCollection.localVarDef.copy(assigned = Some(Cast(JavaCode(sysVar,forCollection.localVarDef.dslType),
+        forCollection.localVarDef.dslType,1)))
+      forCollection.body.expressions.insert(0,elementDef)
+      s"""
+         |for(Object $sysVar:${visitor.visit(forCollection.looped)})
+         |  ${visitor.visit(forCollection.body)}
+         |""".stripMargin
+    } else {
+      s"""
+         |for(${visitor.visit(forCollection.localVarDef)}:${visitor.visit(forCollection.looped)})
+         |  ${visitor.visit(forCollection.body)}
+         |""".stripMargin
+      }
   }
 
   override def visit(forMap: ForMap, visitor: ExpressionVisitor[String]): String = {

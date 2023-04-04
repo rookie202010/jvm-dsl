@@ -22,6 +22,19 @@ object BasicTranslator{
           s"($typeName)(${javaTranslator.visit( callee )})"
       }
   }
+  def toCharType(javaTranslator: JavaTranslator,callee:ValueExpression,typeName:String):String={
+    callee match {
+      case Cast(_,_,1)⇒
+        typeName match {
+          case "char"⇒
+            s"(${javaTranslator.visit( callee )}.charValue())"
+          case _⇒
+            s"($typeName)(${javaTranslator.visit( callee )}.charValue())"
+        }
+      case _⇒
+        s"($typeName)(${javaTranslator.visit( callee )})"
+    }
+  }
 }
 
 class IntMethodJavaTranslator(override val programScope: ProgramScope,
@@ -101,22 +114,22 @@ class CharMethodJavaTranslator(override val programScope: ProgramScope,
        |""".stripMargin
 
   override def toInt(calleeType:DslType,callee: ValueExpression): String = {
-    BasicTranslator.toBasicType(javaTranslator,callee,"int")
+    BasicTranslator.toCharType(javaTranslator,callee,"int")
   }
   override def toLong(calleeType:DslType,callee: ValueExpression): String =  {
-    BasicTranslator.toBasicType(javaTranslator,callee,"long")
+    BasicTranslator.toCharType(javaTranslator,callee,"long")
   }
   override def toFloat(calleeType:DslType,callee: ValueExpression): String = {
-    BasicTranslator.toBasicType(javaTranslator,callee,"float")
+    BasicTranslator.toCharType(javaTranslator,callee,"float")
   }
   override def toDouble(calleeType:DslType,callee: ValueExpression): String = {
-    BasicTranslator.toBasicType(javaTranslator,callee,"double")
+    BasicTranslator.toCharType(javaTranslator,callee,"double")
   }
   override def toChar(calleeType:DslType,callee: ValueExpression): String = {
-    BasicTranslator.toBasicType(javaTranslator,callee,"char")
+    BasicTranslator.toCharType(javaTranslator,callee,"char")
   }
   override def toByte(calleeType:DslType,callee: ValueExpression): String = {
-    BasicTranslator.toBasicType(javaTranslator,callee,"byte")
+    BasicTranslator.toCharType(javaTranslator,callee,"byte")
   }
 }
 
