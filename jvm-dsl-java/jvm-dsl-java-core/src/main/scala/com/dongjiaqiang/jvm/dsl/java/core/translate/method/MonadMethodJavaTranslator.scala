@@ -85,7 +85,12 @@ trait MonadMethodJavaTranslator extends MonadMethodVisitor[String]{
                         params: ValueExpression*): String = {
     MonadMethodJavaTranslator.transform(programScope,javaTranslator,monadPath,methodName,calleeType,callee,params:_*)
   }
-  
+
+
+  override def mapValue(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): String = {
+    throw new UnsupportedOperationException("unsupported")
+  }
+
   override def map(calleeType:MonadDslType,
                    callee: ValueExpression,
                    param: ValueExpression): String = {

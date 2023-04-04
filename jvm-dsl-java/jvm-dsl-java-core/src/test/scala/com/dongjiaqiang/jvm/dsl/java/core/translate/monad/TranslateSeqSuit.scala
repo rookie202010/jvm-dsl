@@ -155,4 +155,25 @@ class TranslateSeqSuit extends AnyFunSuite{
 //      println( method.invoke( instance, a ) )
 //    } )
   }
+
+  test( "test seq 5" ) {
+    val code =
+      """
+        |program{
+        |   def eval(List[Long] a)=Int throws Exception{
+        |       return a.map(i=>{ return i.toInt(); }).sum();
+        |  }
+        |}
+        |""".stripMargin
+    val clazz = compile( code )
+    val instance = clazz.getConstructors.head.newInstance( )
+    val method = clazz.getMethod( "eval", classOf[java.util.List[_]] )
+    (0 until 10).foreach( _ ⇒ {
+      val a = new util.ArrayList[Long]( )
+      a.add( Random.nextLong() )
+      a.add( Random.nextLong() )
+      a.add( Random.nextLong() )
+      println( method.invoke( instance, a ) )
+    } )
+  }
 }

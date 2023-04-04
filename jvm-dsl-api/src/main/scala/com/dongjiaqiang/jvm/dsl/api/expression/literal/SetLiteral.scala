@@ -24,11 +24,11 @@ class SetLiteral(literal: Array[ValueExpression],
       new SetLiteral(literal,dslType.asSeq())
   }
 
-  def asSort():SetLiteral={
+  def asSorted():SetLiteral={
       new SetLiteral(literal,dslType.asSorted())
   }
 
-  def asSort(sorter:Lambda):SetLiteral={
+  def asSorted(sorter:Lambda):SetLiteral={
       new SetLiteral(literal,dslType.asSorted(sorter))
   }
 

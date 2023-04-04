@@ -4,6 +4,7 @@ import com.dongjiaqiang.jvm.dsl.api.`type`._
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MonadMethodVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
+import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
 trait MonadMrt extends MonadMethodVisitor[DslType] {
   override def map(calleeType:MonadDslType,
@@ -12,6 +13,12 @@ trait MonadMrt extends MonadMethodVisitor[DslType] {
     val lambdaType = param.getValueType( programScope ).asInstanceOf[LambdaType]
     calleeType.transform( lambdaType.outputType )
   }
+
+  override def mapValue(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): DslType = {
+      throw new UnsupportedOperationException("unsupported")
+  }
+
+
   override def flatMap(calleeType:MonadDslType,
                        callee: ValueExpression,
                        param: ValueExpression): DslType = {

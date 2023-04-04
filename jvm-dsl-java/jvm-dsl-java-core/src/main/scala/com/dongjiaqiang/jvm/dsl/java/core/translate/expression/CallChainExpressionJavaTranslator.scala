@@ -4,8 +4,9 @@ import com.dongjiaqiang.jvm.dsl.api.`type`.DslType
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MethodVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.expression.`var`.VarRef
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.api.expression.call._
-import com.dongjiaqiang.jvm.dsl.api.expression.literal.SetLiteral
+import com.dongjiaqiang.jvm.dsl.api.expression.literal.{MapLiteral, SetLiteral}
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.callchain.CallChainExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaCode
@@ -85,7 +86,20 @@ trait CallChainExpressionJavaTranslator extends CallChainExpressionVisitor[Strin
   }
 
   override def visit(literalCallChain: MapLiteralCallChain, visitor: ExpressionVisitor[String]): String = {
-    translate(literalCallChain.head,literalCallChain.tails,literalCallChain.tailDslTypes,visitor)
+    val (newTails, newTailDslTypes, calleeType) = literalCallChain.tails.head match {
+      case MethodCall( _, MethodVisitor.TO_SEQ_MAP, _ ) ⇒
+        (literalCallChain.tails.tail, literalCallChain.tailDslTypes.tail, literalCallChain.head.dslType.asSeq())
+      case MethodCall( _, MethodVisitor.TO_SORTED_MAP, params ) ⇒
+        val dslType = if(params.isEmpty){
+          literalCallChain.head.dslType.asSorted()
+        }else{
+          literalCallChain.head.dslType.asSorted(params.head.asInstanceOf[Lambda])
+        }
+        (literalCallChain.tails.tail, literalCallChain.tailDslTypes.tail, dslType)
+      case _ ⇒
+        (literalCallChain.tails, literalCallChain.tailDslTypes, literalCallChain.head.dslType)
+    }
+    translate( new MapLiteral( literalCallChain.head.literal, calleeType ), newTails, newTailDslTypes, visitor )
   }
 
   override def visit(literalCallChain: SetLiteralCallChain, visitor: ExpressionVisitor[String]): String = {
@@ -93,8 +107,13 @@ trait CallChainExpressionJavaTranslator extends CallChainExpressionVisitor[Strin
       case MethodCall(_, MethodVisitor.TO_SEQ_SET, _)⇒
           literalCallChain.head.dslType.copy(seq = true)
         (literalCallChain.tails.tail,literalCallChain.tailDslTypes.tail,literalCallChain.head.dslType.copy(seq = true))
-      case MethodCall(_,MethodVisitor.TO_SORTED_SET,_)⇒
-        (literalCallChain.tails.tail,literalCallChain.tailDslTypes.tail,literalCallChain.head.dslType.copy(sorted = true))
+      case MethodCall(_,MethodVisitor.TO_SORTED_SET,params)⇒
+        val dslType = if(params.nonEmpty){
+          literalCallChain.head.dslType.asSorted(params.head.asInstanceOf[Lambda])
+        }else{
+          literalCallChain.head.dslType.asSorted()
+        }
+        (literalCallChain.tails.tail,literalCallChain.tailDslTypes.tail,dslType)
       case _⇒
         (literalCallChain.tails,literalCallChain.tailDslTypes,literalCallChain.head.dslType)
     }
