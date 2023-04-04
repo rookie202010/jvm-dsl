@@ -2,6 +2,7 @@ package com.dongjiaqiang.jvm.dsl.api.expression.literal
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.{DslType, MapType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
+import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 
 /**
@@ -19,6 +20,19 @@ class MapLiteral(literal: Array[(ValueExpression, ValueExpression)],
                  override val dslType: MapType)
   extends Literal[Array[(ValueExpression, ValueExpression)], MapType]( literal ) {
   override def toString: String = s"{${literal.map( kv ⇒ kv._1.toString + ":" + kv._2.toString ).mkString( "," )}}"
+
+
+  def asSeq():MapLiteral={
+      new MapLiteral(literal,dslType.asSeq())
+  }
+
+  def asSorted():MapLiteral={
+      new MapLiteral(literal, dslType.asSorted())
+  }
+
+  def asSorted(sorter:Lambda):MapLiteral={
+      new MapLiteral(literal, dslType.asSorted(sorter))
+  }
 
   override def equals(obj: Any): Boolean = {
     obj match {

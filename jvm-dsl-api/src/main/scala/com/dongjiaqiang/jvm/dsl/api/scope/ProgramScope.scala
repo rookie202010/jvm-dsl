@@ -25,7 +25,7 @@ class ProgramScope(val fields: MutableMap[String, FieldScope],
       case Some( dslType ) ⇒ {
         dslType
       }
-      case None ⇒ throw ExpressionParseException( s"method $name in expression $valueExpression doest not accept " +
+      case None ⇒ throw ExpressionParseException( s"method $name in expression $valueExpression does not accept " +
         s"params ${params.map( _.getValueType( this ).toString ).mkString( "Array(", ", ", ")" )}" )
     }
   }

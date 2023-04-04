@@ -35,7 +35,7 @@ public class _SYS_MAP_CODES {
         return list;
     }
 
-    public static <K,V> Map<K,V> map(Map<K,V> map,Map<K,V> newMap,
+    public static <K,V> Map<K,V> filter(Map<K,V> map,Map<K,V> newMap,
                                      _1_Predicate<Tuple2<? super K,? super V>> mapper) throws Exception {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             if (mapper.test(new Tuple2<>(entry.getKey(), entry.getValue()))) {
@@ -45,7 +45,8 @@ public class _SYS_MAP_CODES {
         return newMap;
     }
 
-    public static <K,V> Map<K,V> map(Map<K,V> map,Map<K,V> newMap,
+
+    public static <K,V> Map<K,V> filter(Map<K,V> map,Map<K,V> newMap,
                                      _2_Predicate<? super K,? super V> mapper) throws Exception {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             if (mapper.test(entry.getKey(), entry.getValue())) {
@@ -60,12 +61,13 @@ public class _SYS_MAP_CODES {
     public static <K,V> List<V> values(Map<K,V> map){
         return new ArrayList<>(map.values());
     }
+
     /**
      * a.mapValue(v=> { return v+1;});
      */
     public static <K,V,NV> Map<K,NV> mapValue(Map<K,V> map,
-                                      _1_Function<? super V,? extends NV> mapper,
-                                              Map<K,NV> newMap) throws Exception {
+                                              Map<K,NV> newMap,
+                                      _1_Function<? super V,? extends NV> mapper) throws Exception {
         for(Map.Entry<K,V> entry:map.entrySet()){
             newMap.put(entry.getKey(),mapper.apply(entry.getValue()));
         }
@@ -154,6 +156,10 @@ public class _SYS_MAP_CODES {
         return map;
     }
 
+    public static <K, V> Map<K, V> toSeqMap(Map<K,V> oldMap) {
+        return new LinkedHashMap<>(oldMap);
+    }
+
     @SafeVarargs
     public static <K extends Comparable<K>, V> Map<K, V> ofSortMap(Tuple2<K, V>... ts) {
         Map<K,V> map = new TreeMap<>();
@@ -172,4 +178,12 @@ public class _SYS_MAP_CODES {
         return map;
     }
 
+
+    public static <K,V> List<Tuple2<K,V>> toList(Map<K,V> map){
+        List<Tuple2<K,V>> list = new ArrayList<>();
+        for(Map.Entry<K,V> entry:map.entrySet()){
+            list.add(new Tuple2<>(entry.getKey(),entry.getValue()));
+        }
+        return list;
+    }
 }

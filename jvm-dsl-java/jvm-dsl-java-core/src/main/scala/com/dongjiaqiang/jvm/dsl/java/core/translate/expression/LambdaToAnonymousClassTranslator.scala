@@ -435,7 +435,7 @@ object LambdaToAnonymousClassTranslator {
             val inputs = generateTupleParams( tupleType, lambda, javaTranslatorContext, genericErasure )
             val typeStr = generateType(outputType,javaTranslatorContext, genericErasure)
             s"""
-               |new $functionClazzName<${generateTupleTypes( tupleType, javaTranslatorContext, genericErasure )}>(){
+               |new $functionClazzName<${generateTupleTypes(  TupleType(tupleType.parameterTypes:+outputType), javaTranslatorContext, genericErasure )}>(){
                |    @Override
                |    public $typeStr apply($inputs) throws Exception
                |       ${visitor.visit( lambda )}

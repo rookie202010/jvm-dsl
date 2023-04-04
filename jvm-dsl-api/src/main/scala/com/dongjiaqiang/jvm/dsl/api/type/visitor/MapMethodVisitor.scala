@@ -33,6 +33,8 @@ trait MapMethodVisitor[T] extends MonadMethodVisitor[T] {
            get( mapType, callee, params.head )
           }
         })
+      case MAP_VALUE⇒
+        Some(mapValue(mapType,callee,params.head))
       case PUT ⇒
         generate(Array(mapType.keyParameterType,mapType.valueParameterType),params,()⇒ put( mapType, callee, params.head, params.last ) )
       case _ ⇒

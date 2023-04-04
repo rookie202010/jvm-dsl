@@ -80,7 +80,7 @@ trait LiteralExpressionJavaTranslator extends LiteralExpressionVisitor[String] {
 
   override def visit(literal: TupleLiteral, visitor: ExpressionVisitor[String]): String = {
     val list = literal.literal
-    s"new com.dongjiaqiang.jvm.dsl.java.core.tuple.Tuple${list.length}<>(${list.map( visitor.visit ).mkString( "," )})"
+    s"new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple${list.length}<>(${list.map( visitor.visit ).mkString( "," )})"
   }
 
   override def visit(literal: ClazzLiteral, visitor: ExpressionVisitor[String]): String = {

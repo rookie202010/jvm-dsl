@@ -50,6 +50,7 @@ object MethodVisitor{
     val SUM = "sum"
 
     //map method names
+    val MAP_VALUE = "mapValue"
     val KEYS = "keys"
     val VALUES = "values"
     val PUT = "put"

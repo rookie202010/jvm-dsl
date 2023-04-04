@@ -8,6 +8,8 @@ import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 trait MonadMethodVisitor[T] extends MethodVisitor[T] {
   def map(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): T
 
+  def mapValue(calleeType:MonadDslType,callee:ValueExpression,param:ValueExpression):T
+
   def flatten(calleeType: MonadDslType, callee: ValueExpression): T
 
   def flatMap(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): T
@@ -81,6 +83,7 @@ trait MonadMethodVisitor[T] extends MethodVisitor[T] {
 
     val generator = () ⇒ {
       name match {
+        case MAP_VALUE⇒mapValue(calleeDslType,callee,params.head)
         case MAP ⇒ map( calleeDslType, callee, params.head )
         case FLAT_MAP ⇒ flatMap( calleeDslType, callee, params.head )
         case FILTER_NOT ⇒ filterNot( calleeDslType, callee, params.head )
@@ -92,7 +95,7 @@ trait MonadMethodVisitor[T] extends MethodVisitor[T] {
     }
 
     (name match {
-      case MAP | FLAT_MAP | FILTER | FILTER_NOT | FOREACH | EXIST | FIND ⇒
+      case MAP_VALUE | MAP | FLAT_MAP | FILTER | FILTER_NOT | FOREACH | EXIST | FIND ⇒
         if(paramsChecker) {
           generate( Array( carryDslType ), params, (_, actualTypes) ⇒ {
             actualTypes.head match {

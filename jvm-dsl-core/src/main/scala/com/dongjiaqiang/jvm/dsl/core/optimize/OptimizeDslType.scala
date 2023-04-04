@@ -227,12 +227,25 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
               newParams match {
                 case Some(ps)⇒
                     if(ps.isEmpty){
-                      setLiteral.asSort()
+                      setLiteral.asSorted()
                     }else {
-                      setLiteral.asSort( ps.head.asInstanceOf[Lambda] )
+                      setLiteral.asSorted( ps.head.asInstanceOf[Lambda] )
                     }
                 case None⇒
-                    setLiteral.asSort()
+                    setLiteral.asSorted()
+              }
+          case _⇒
+            new LiteralCall( newLiteral, literalCall.name, newParams.get )
+        }
+      case mapLiteral: MapLiteral⇒
+        literalCall.name match {
+          case MethodVisitor.TO_SEQ_MAP⇒
+              mapLiteral.asSeq()
+          case MethodVisitor.TO_SORTED_MAP⇒
+              if(newParams.isDefined && newParams.get.nonEmpty){
+                  mapLiteral.asSorted(newParams.get.head.asInstanceOf[Lambda])
+              }else{
+                  mapLiteral.asSorted()
               }
           case _⇒
             new LiteralCall( newLiteral, literalCall.name, newParams.get )
@@ -406,9 +419,9 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
           }
       case MethodCall(_,MethodVisitor.TO_SORTED_SET,params)⇒
           val newExpression = if(params.isEmpty){
-              expression.asSort()
+              expression.asSorted()
           }else{
-              expression.asSort(params.head.asInstanceOf[Lambda])
+              expression.asSorted(params.head.asInstanceOf[Lambda])
           }
           if(newParts.tail.isEmpty){
               newExpression

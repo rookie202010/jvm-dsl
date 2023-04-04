@@ -3,23 +3,54 @@ package com.dongjiaqiang.jvm.dsl.java.core;
 
 import com.dongjiaqiang.jvm.dsl.java.api.codes.*;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
+import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 class A<T> {
-    public static String foo() throws Exception {
-        String[] keys = new String[]{"xx", "11"};
-        Integer[] values = new Integer[]{1, 2};
-        //Map<String,Integer> map = CodeUtils.ofMap(keys,values);
-        // System.out.println(map.size());
-        return "";
+    public static int foo() throws Exception {
+
+        return 10;
+
+
     }
 
 
     public static void foo(_1_Function<Integer, Integer> function) {
 
+//        int s =
+//                _SYS_LIST_CODES.map(
+//                        _SYS_MAP_CODES.toList(
+//                                _SYS_MAP_CODES.map(_SYS_MAP_CODES.ofMap(new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2(12,11),new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2(21,22)),
+//                                        new
+//                                                com.dongjiaqiang.jvm.dsl.java.api.lambda.function._2_Function
+//                                                        <Object,Object,Object>(){
+//                                                    @Override
+//                                                    public Object apply(Object i,Object j) throws Exception
+//
+//                                                    {
+//                                                        return new com.dongjiaqiang.jvm.dsl.java.core.tuple.Tuple2<>(((Integer)(i)),((Integer)(j)));
+//                                                    }
+//
+//                                                }
+//                                )
+//                        )
+//                        ,
+//                        new
+//                                com.dongjiaqiang.jvm.dsl.java.api.lambda.function._2_Function
+//                                        <Object,Object,Object>(){
+//                                    @Override
+//                                    public Object apply(Object i,Object j) throws Exception
+//
+//                                    {
+//                                        return ((Integer)(i)) + ((Integer)(j));
+//                                    }
+//
+//                                }
+//                )
+//                ;
     }
 
     public static void bar(List<List<A<Integer>>> xx) {

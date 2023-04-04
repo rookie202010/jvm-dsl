@@ -72,9 +72,14 @@ class MonadOptimize(override val programScope: ProgramScope,val optimizeDslType:
                       init: ValueExpression,
                       param: ValueExpression): Array[ValueExpression] = Array(optimizeDslType.visit(init).asInstanceOf[ValueExpression],
     transform(calleeType,param))
+
   override def map(calleeType:MonadDslType,
                    callee: ValueExpression,
                    param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+
+
+  override def mapValue(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): Array[ValueExpression] = Array(transform(calleeType, param))
+
   override def flatten(calleeType:MonadDslType,
                        callee: ValueExpression): Array[ValueExpression] = Array()
   override def flatMap(calleeType:MonadDslType,
