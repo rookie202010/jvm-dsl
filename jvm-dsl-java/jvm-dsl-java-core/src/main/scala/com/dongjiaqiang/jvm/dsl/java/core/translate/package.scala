@@ -9,6 +9,7 @@ import com.dongjiaqiang.jvm.dsl.java.api.codes.{_SYS_ARRAY_CODES, _SYS_COL_CODES
 import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaTranslatorContext
 import com.dongjiaqiang.jvm.dsl.java.core.translate.expression.JavaTranslator
 import com.dongjiaqiang.jvm.dsl.java.core.translate.method.MultiMethodJavaTranslator
+import com.typesafe.config.ConfigFactory
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 
@@ -73,6 +74,9 @@ package object translate {
          |""".stripMargin
     }
 
+    def translate(packageName:String):JavaProgram={
+        translate(JavaTranslatorContext( packageName = packageName, javaTranslateConfig = ConfigFactory.empty( ) ) )
+    }
 
     def translate(javaTranslatorContext: JavaTranslatorContext):JavaProgram= {
 

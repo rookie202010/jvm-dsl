@@ -21,6 +21,7 @@
         <module>jvm-dsl-java-core</module>
         <module>jvm-dsl-java-json</module>
         <module>jvm-dsl-java-http</module>
+        <module>jvm-dsl-java-example</module>
     </modules>
 
     <dependencies>
