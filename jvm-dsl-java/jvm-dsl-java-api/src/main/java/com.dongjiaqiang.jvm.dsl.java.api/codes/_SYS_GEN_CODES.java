@@ -18,12 +18,6 @@ public class _SYS_GEN_CODES {
 
     public static final String CLAZZ_NAME = " _SYS_GEN_CODES";
 
-    @SafeVarargs
-    public static <V> V[] ofArray(V... vs) {
-        return vs;
-    }
-
-
     public static <T> CompletableFuture<T> supplyAsync(_1_Supplier<T> supplier, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             try {

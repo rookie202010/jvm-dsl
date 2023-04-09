@@ -1,7 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.api
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{ClazzType, DefinitionClazzType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{AnyType, ArrayType, ClazzType, DefinitionClazzType, DslType, TupleType, UnResolvedType}
 
+import scala.annotation.tailrec
 import scala.language.postfixOps
 
 package object scope {
@@ -12,6 +13,19 @@ package object scope {
     val FIELD, CLAZZ, METHOD, UNDEFINED = Value
   }
 
+
+  @tailrec
+  def resolveArrayVarRefs(dimension:Int, dslType: DslType):Option[DslType]={
+      if(dimension==0){
+        Some(dslType)
+      }else{
+        dslType match {
+          case arrayType: ArrayType⇒
+            resolveArrayVarRefs(dimension-1,arrayType.carryDslType)
+          case _⇒None
+        }
+      }
+  }
   /**
    * resolve refs like i, a.b in current scope
    *
@@ -25,34 +39,26 @@ package object scope {
    */
   def resolveVarRefs(index: Int,
                      refs: List[String],
-                     arrayRefsIndex:Set[Int],
+                     arrayRefsIndex:Map[Int,Int],
                      currentScope: Scope,
                      params: MutableMap[String, FieldScope],
                      skipCurrentScope: Boolean,
                      backRef: Boolean,
                      parentScope: Option[Scope]): Option[FieldScope] = {
 
-    def resolve(index:Int,clazzType: ClazzType,fieldScope: FieldScope,childRef:List[(String,Int)]):Option[FieldScope]={
-      if (arrayRefsIndex.contains(index) && clazzType.clazzName == "Array") {
-        val parameterType = clazzType.parameterTypes.head
-        parameterType match {
-          case parameterClazzType: ClazzType ⇒
-            fieldScope.resolve( childRef,arrayRefsIndex, parameterClazzType ).map( _ ⇒ fieldScope )
-          case _ ⇒
-            fieldScope.resolve( childRef,arrayRefsIndex, clazzType ).map( _ ⇒ fieldScope )
+    def resolve(fieldScope: FieldScope,supplier:()⇒Option[FieldScope]):Option[FieldScope]={
+      if (!backRef) {
+        if (index >= fieldScope.outerScopeIndex) {
+          supplier.apply()
+        } else {
+          None
         }
       } else {
-        fieldScope.resolve( childRef,arrayRefsIndex, clazzType ).map( _ ⇒ fieldScope )
+        supplier.apply()
       }
     }
 
-    def resolveDefinitionClazzType(index: Int,
-                                   clazzType: DefinitionClazzType,
-                                   fieldScope: FieldScope,
-                                   childRef: List[(String, Int)]): Option[FieldScope] = {
-        fieldScope.resolve( childRef, arrayRefsIndex, clazzType ).map( _ ⇒ fieldScope )
-    }
-
+    //skip current scope and resolve in parent scope
     if (skipCurrentScope) {
       return parentScope.flatMap( _.resolveVarRefs( currentScope.outerScopeIndex, refs,arrayRefsIndex ) )
     }
@@ -76,25 +82,23 @@ package object scope {
           case Some( fieldScope ) ⇒
             fieldScope.dslType match {
               case clazzType: ClazzType ⇒
-                if (!backRef) {
-                  if (index >= fieldScope.outerScopeIndex) {
-                    resolve(refIndex,clazzType, fieldScope, childRef)
-                  } else {
-                    None
-                  }
-                } else {
-                  resolve(refIndex,clazzType, fieldScope, childRef)
-                }
+                  resolve(fieldScope,()⇒{
+                    fieldScope.resolve( childRef,arrayRefsIndex, clazzType )
+                  })
+              case arrayType: ArrayType⇒
+                  resolve(fieldScope,()⇒{
+                    fieldScope.resolve(childRef,arrayRefsIndex,arrayType,refIndex)
+                  })
+              case tupleType: TupleType⇒
+                  resolve(fieldScope,()⇒{
+                    fieldScope.resolve(childRef,arrayRefsIndex,tupleType)
+                  })
               case definitionClazzType: DefinitionClazzType⇒
-                if (!backRef) {
-                  if (index >= fieldScope.outerScopeIndex) {
-                    resolveDefinitionClazzType( refIndex, definitionClazzType, fieldScope, childRef )
-                  } else {
-                    None
-                  }
-                } else {
-                  resolveDefinitionClazzType( refIndex, definitionClazzType, fieldScope, childRef )
-                }
+                  resolve(fieldScope,()⇒{
+                    fieldScope.resolve( childRef, arrayRefsIndex, definitionClazzType )
+                  })
+              case UnResolvedType | AnyType⇒
+                  Some(fieldScope)
               case _ ⇒ None
             }
           case None ⇒

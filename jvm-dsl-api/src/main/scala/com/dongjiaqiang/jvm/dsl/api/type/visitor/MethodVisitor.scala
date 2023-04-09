@@ -8,7 +8,10 @@ object MethodVisitor{
     //monad method name
     val MAP = "map"
     val FLATTEN = "flatten"
+
     val FLAT_MAP = "flatMap"
+
+
     val FILTER = "filter"
     val FILTER_NOT = "filterNot"
     val FOREACH = "foreach"
@@ -45,6 +48,8 @@ object MethodVisitor{
     val HEAD_OPTION = "headOption"
     val TAIL = "tail"
     val TAIL_OPTION = "tailOption"
+    val LAST = "last"
+    val LAST_OPTION = "lastOption"
     val MAX = "max"
     val MIN = "min"
     val SUM = "sum"
@@ -77,6 +82,8 @@ object MethodVisitor{
     val GET_BYTES = "getBytes"
     val SUB_STRING = "subString"
     val IS_NUMERIC = "isNumeric"
+    val STARTS_WITH = "startsWith"
+    val ENDS_WITH = "endsWith"
 
     //range method names
     val TO = "to"

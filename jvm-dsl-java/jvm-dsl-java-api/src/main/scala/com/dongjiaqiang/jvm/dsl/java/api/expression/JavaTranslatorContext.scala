@@ -19,6 +19,7 @@ import com.dongjiaqiang.jvm.dsl.java.api.config._
 case class JavaTranslatorContext(customBlockExpressionJavaTranslators: MMap[String,CustomBlockExpressionTranslator]  = MMap(),
                                  customDslTypeTranslator:MMap[DslType,JavaTypeTranslator] = MMap() ,
                                  packageName: String,
+                                 clazzName:String,
                                  javaTranslateConfig: Config,
                                  systemGenerateMethods: MMap[String, ArrayBuffer[String]] = MMap( ),
                                  systemGenerateProgramMethods: ArrayBuffer[String] = ArrayBuffer( ),

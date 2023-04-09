@@ -66,7 +66,7 @@ case class VarRef(refs: List[String],
     fieldScope match {
       case None ⇒ UnResolvedType
       case Some( scope ) ⇒
-        VarRef.getValueType(refs,arrayRefIndexExpressions,scope.dslType,scope.programScope,this)
+        VarRef.getValueType(refs.zipWithIndex,arrayRefIndexExpressions,scope.dslType,scope.programScope,this)
     }
   }
 
@@ -75,9 +75,10 @@ case class VarRef(refs: List[String],
 
 object VarRef {
 
+  @tailrec
   def getDslType(arrayRefIndexExpressions: MutableMap[Int, List[ValueExpression]],
-                 index:Int,calleeType:DslType,
-                 tail:List[(String,Int)],programScope: ProgramScope,varRef: VarRef):DslType={
+                 index:Int, calleeType:DslType,
+                 tail:List[(String,Int)], programScope: ProgramScope, varRef: VarRef):DslType={
     val arrayRefIndexExpression = arrayRefIndexExpressions.get( index )
     calleeType match {
       case clazzType: ClazzType ⇒
@@ -100,7 +101,8 @@ object VarRef {
         }
       case arrayType: ArrayType ⇒
         if (arrayRefIndexExpression.isDefined) {
-          getArrayValueType( arrayType, arrayRefIndexExpression.get, programScope )
+          val dslType = getArrayValueType( arrayType, arrayRefIndexExpression.get, programScope )
+          getDslType(arrayRefIndexExpressions,index+1,dslType,tail,programScope,varRef)
         } else {
           throw ExpressionParseException( s"ref has array ref but have not index expression: $toString" )
         }
@@ -177,7 +179,7 @@ object VarRef {
     refs match {
       case (ref,index)::Nil⇒
           val fieldIndex = ref.drop(1).toInt
-          tupleParameterTypes.get(fieldIndex) match {
+          tupleParameterTypes.get(fieldIndex-1) match {
             case Some(dslType)⇒
               varRef.castIndex.put(index,dslType)
               if(!arrayRefIndexExpressions.contains(index)){
@@ -193,9 +195,8 @@ object VarRef {
               throw ExpressionParseException( s"$tupleType can't find ref: $ref" )
           }
       case (ref,index)::tail⇒
-        println(ref)
         val fieldIndex = ref.drop(1).toInt
-        tupleParameterTypes.get(fieldIndex) match {
+        tupleParameterTypes.get(fieldIndex-1) match {
           case Some(dslType)⇒
             varRef.castIndex.put(index,dslType)
             getDslType(arrayRefIndexExpressions,index,dslType,tail,programScope,varRef)
@@ -236,7 +237,7 @@ object VarRef {
     }
   }
 
-  def getValueType(refs: List[String],
+  def getValueType(refs: List[(String,Int)],
                    arrayRefIndexExpressions: MutableMap[Int, List[ValueExpression]],
                    calleeType: DslType,
                    programScope: ProgramScope,varRef: VarRef): DslType = {
@@ -258,24 +259,24 @@ object VarRef {
           calleeType match {
             //a.b a must be class type
             case clazzType: ClazzType ⇒
-              getDslType( refs.tail.zipWithIndex, arrayRefIndexExpressions, clazzType, programScope,varRef )
+              getDslType( refs.tail, arrayRefIndexExpressions, clazzType, programScope,varRef )
             case definitionClazzType: DefinitionClazzType ⇒
-              getDslType( refs.tail.zipWithIndex, arrayRefIndexExpressions, definitionClazzType, programScope,varRef)
+              getDslType( refs.tail, arrayRefIndexExpressions, definitionClazzType, programScope,varRef)
             case tupleType: TupleType⇒
-              getDslType(refs.tail.zipWithIndex,arrayRefIndexExpressions,tupleType,programScope,varRef)
+              getDslType(refs.tail,arrayRefIndexExpressions,tupleType,programScope,varRef)
             case _ ⇒
-              throw ExpressionParseException( s"dot separator work for clazzType : $toString" )
+              throw ExpressionParseException( s"dot separator work for clazzType $calleeType : $varRef" )
           }
         case Some( arrayRefIndexExpression ) ⇒
           calleeType match {
             case arrayType: ArrayType ⇒
               getArrayValueType( arrayType, arrayRefIndexExpression, programScope ) match {
                 case clazzType: ClazzType ⇒
-                  getDslType( refs.tail.zipWithIndex, arrayRefIndexExpressions, clazzType, programScope,varRef )
+                  getDslType( refs.tail, arrayRefIndexExpressions, clazzType, programScope,varRef )
                 case definitionClazzType: DefinitionClazzType ⇒
-                  getDslType( refs.tail.zipWithIndex, arrayRefIndexExpressions, definitionClazzType, programScope,varRef)
+                  getDslType( refs.tail, arrayRefIndexExpressions, definitionClazzType, programScope,varRef)
                 case tupleType: TupleType⇒
-                  getDslType(refs.tail.zipWithIndex,arrayRefIndexExpressions,tupleType,programScope,varRef)
+                  getDslType(refs.tail,arrayRefIndexExpressions,tupleType,programScope,varRef)
                 case dslType: DslType ⇒
                   throw ExpressionParseException( s"dot separator work for clazzType : $dslType" )
               }

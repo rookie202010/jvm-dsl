@@ -24,6 +24,9 @@ trait StringMethodVisitor[T] extends MonadMethodVisitor[T] with ConvertTypeMetho
   def getBytes(callee: ValueExpression, param: ValueExpression): T
   def subString(callee: ValueExpression, startIndex: ValueExpression, endIndex: ValueExpression): T
   def isNumeric(callee:ValueExpression):T
+  def startsWith(callee:ValueExpression,param:ValueExpression):T
+  def startsWith(callee:ValueExpression,param:ValueExpression,offset:ValueExpression):T
+  def endsWith(callee:ValueExpression,param:ValueExpression):T
   override def visit(calleeType: DslType, callee: ValueExpression, name: String, params: Array[ValueExpression]): Option[T] = {
     (name match {
       case CHAR_AT ⇒
@@ -66,6 +69,16 @@ trait StringMethodVisitor[T] extends MonadMethodVisitor[T] with ConvertTypeMetho
         } )
       case SUB_STRING ⇒
         generate( Array( IntType, IntType ), params, () ⇒ subString( callee, params.head, params.last ) )
+      case STARTS_WITH⇒
+        generateOverload(Array(Array(StringType),Array(StringType,IntType)),params,()⇒{
+          if(params.length==1){
+            startsWith(callee,params.head)
+          }else{
+            startsWith(callee,params.head,params.last)
+          }
+        })
+      case ENDS_WITH⇒
+        generate(Array(StringType),params,()⇒endsWith(callee,params.head))
       case _ ⇒
         None
     }).orElse( super.visit( calleeType, callee, name, params ) )

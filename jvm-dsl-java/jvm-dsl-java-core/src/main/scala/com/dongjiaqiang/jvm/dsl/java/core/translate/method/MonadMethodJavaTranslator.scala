@@ -2,7 +2,7 @@ package com.dongjiaqiang.jvm.dsl.java.core.translate.method
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MethodVisitor._
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.{MethodVisitor, MonadMethodVisitor}
-import com.dongjiaqiang.jvm.dsl.api.`type`.{MonadDslType, SetType, StringType, TupleType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ArrayType, DslType, EitherType, LambdaType, ListType, MonadDslType, OptionType, SetType, StringType, TryType, TupleType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.expression.block.Lambda
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
@@ -39,14 +39,14 @@ object MonadMethodJavaTranslator{
               javaTranslator, genericErasure = true )
           case _ ⇒
             methodName match {
-              case MethodVisitor.SORT⇒
+              case MethodVisitor.SORT | MethodVisitor.TO_SORTED_SET⇒
                 s"""
-                   |new ${classOf[Comparator[_]].getCanonicalName}<Object>(){
-                   |    @Override
-                   |    public int compare(Object ${lambda.inputs.head},Object ${lambda.inputs.last})
-                   |        ${javaTranslator.visit( lambda )}
-                   |}
-                   |""".stripMargin
+                   new ${classOf[Comparator[_]].getCanonicalName}<Object>(){
+                       @Override
+                       public int compare(Object ${lambda.inputs.head},Object ${lambda.inputs.last})
+                           ${javaTranslator.visit( lambda )}
+                   }
+                """
               case _⇒
                 MonadLambdaToAnonymousClassTranslator.translate( newLambdaType,
                   lambda,
@@ -65,12 +65,12 @@ object MonadMethodJavaTranslator{
           s",$input"
         }
         s"""
-           |$p.$methodName(${javaTranslator.visit( callee )}$newInput)
-           |""".stripMargin
+          $p.$methodName(${javaTranslator.visit( callee )}$newInput)
+        """
       case None ⇒
         s"""
-           |${javaTranslator.visit( callee )}.$methodName($input)
-           |""".stripMargin
+          ${javaTranslator.visit( callee )}.$methodName($input)
+        """
     }
   }
 
@@ -123,12 +123,40 @@ trait MonadMethodJavaTranslator extends MonadMethodVisitor[String]{
   }
   override def flatten(calleeType:MonadDslType,
                        callee: ValueExpression): String = {
-    transform(FLATTEN,calleeType,callee)
+    val calleeFlag = flag(calleeType)
+    val carryFlag = flag(calleeType.carryDslType)
+    val inputFlag = s"$carryFlag$calleeFlag"
+    transform(s"${FLATTEN}_$inputFlag",calleeType,callee)
   }
+
+  def flag(calleeType: DslType): String = {
+    calleeType match {
+      case _: ArrayType ⇒ "A"
+      case _: EitherType ⇒ "E"
+      case _: OptionType ⇒ "O"
+      case _: TryType ⇒ "T"
+      case _: SetType ⇒ "C"
+      case _: ListType ⇒ "C"
+      case _ ⇒ ""
+    }
+  }
+
   override def flatMap(calleeType:MonadDslType
                        ,callee: ValueExpression,
                        param: ValueExpression): String = {
-    transform(FLAT_MAP,calleeType,callee,param)
+    val calleeFlag = flag(calleeType)
+    val carryFlag = flag(calleeType.carryDslType)
+    val lambdaType = param.getValueType( programScope ).asInstanceOf[LambdaType]
+    val outFlag = flag(lambdaType.outputType)
+    val inputFlag = if(lambdaType.mayInputType.isDefined &&
+      lambdaType.mayInputType.get.isInstanceOf[TupleType] &&
+      lambdaType.mayInputType.get.asInstanceOf[TupleType].parameterTypes.length>0 && carryFlag!=""){
+        val size = lambdaType.mayInputType.get.asInstanceOf[TupleType].parameterTypes.length
+        s"T${size}_$calleeFlag"
+    }else{
+        s"${carryFlag}$calleeFlag"
+    }
+    transform( s"${FLAT_MAP}_${inputFlag}_$outFlag",calleeType,callee,param)
   }
   override def contains(calleeType:MonadDslType,
                         callee: ValueExpression,
@@ -235,8 +263,8 @@ trait MonadMethodJavaTranslator extends MonadMethodVisitor[String]{
     javaTranslator.specifyDslType(code,calleeType.carryDslType)
   }
 
-  override def tail(calleeType: MonadDslType, callee: ValueExpression): String = {
-    val code = transform(TAIL,calleeType,callee)
+  override def last(calleeType: MonadDslType, callee: ValueExpression): String = {
+    val code = transform(LAST,calleeType,callee)
     javaTranslator.specifyDslType(code,calleeType.carryDslType)
   }
 
@@ -244,7 +272,7 @@ trait MonadMethodJavaTranslator extends MonadMethodVisitor[String]{
     transform(HEAD_OPTION,calleeType,callee)
   }
 
-  override def tailOption(calleeType: MonadDslType, callee: ValueExpression): String = {
-    transform(TAIL_OPTION,calleeType,callee)
+  override def lastOption(calleeType: MonadDslType, callee: ValueExpression): String = {
+    transform(LAST_OPTION,calleeType,callee)
   }
 }

@@ -16,7 +16,7 @@ object MatchCaseExpressionGenerator extends IExpressionGenerator[MatchCaseExpres
                         ruleContext: MatchCaseExpressionContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): ValueExpression = {
     val fieldScope = exprContext.getContextScope.resolveVarRefs( exprContext.getCurrentExpressionIndex,
-      List( ruleContext.localVariable( ).IDENTIFIER( ).getText ),Set() )
+      List( ruleContext.localVariable( ).IDENTIFIER( ).getText ),Map() )
 
     //todo
     val matched = VarRef( List( ruleContext.localVariable( ).IDENTIFIER( ).getText ),MutableMap(),fieldScope)

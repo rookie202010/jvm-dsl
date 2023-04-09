@@ -1,6 +1,7 @@
 package com.dongjiaqiang.jvm.dsl.java.api.codes;
 
 import com.dongjiaqiang.jvm.dsl.java.api.extend.Either;
+import com.dongjiaqiang.jvm.dsl.java.api.extend.Success;
 import com.dongjiaqiang.jvm.dsl.java.api.extend.Try;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.consumer._1_Consumer;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function.*;
@@ -72,208 +73,263 @@ public class _SYS_SET_CODES {
     /**
      * arr.flatten()
      */
-    public static <V> Set<V> flatten(Set<Collection<V>> list,Set<V> newList){
+    public static <V> Set<V> flatten_CC(Set<Collection<V>> list,Set<V> newList){
         _SYS_COL_CODES.flatten(list,newList);
         return newList;
     }
-    public static <V> Set<V> flattenArray(Set<V[]> list,Set<V> newList){
+    public static <V> Set<V> flatten_AC(Set<V[]> list,Set<V> newList){
         _SYS_COL_CODES.flattenArray(list,newList);
         return newList;
     }
-    public static <V> Set<V> flattenTry(Set<Try<V>> list,Set<V> newList){
+    public static <V> Set<V> flatten_TC(Set<Try<V>> list,Set<V> newList){
         _SYS_COL_CODES.flattenTry(list,newList);
         return newList;
     }
-    public static <V,K> Set<K> flattenEither(Set<Either<V,K>> list,Set<K> newList){
+    public static <V,K> Set<K> flatten_EC(Set<Either<V,K>> list,Set<K> newList){
         _SYS_COL_CODES.flattenEither(list,newList);
         return newList;
     }
-    public static <V> Set<V> flattenOptional(Set<Optional<V>> list,Set<V> newList){
+    public static <V> Set<V> flatten_OC(Set<Optional<V>> list,Set<V> newList){
         _SYS_COL_CODES.flattenOptional(list, newList);
         return newList;
     }
 
     //flatMap
-    public static <V,K> Set<K> flatMap(Set<V> list,
+    public static <V,K> Set<K> flatMap_C_C(Set<V> list,
                                        Set<K> newList,
                                        _1_Function<? super V,? extends Collection<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMap(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_C_C(list,newList,mapper);
         return newList;
     }
-    public static <V,K> Set<K> flatMapArray(Set<V> list,
+    public static <V,K> Set<K> flatMap_C_A(Set<V> list,
                                        Set<K> newList,
                                        _1_Function<? super V,? extends K[]> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapArray(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_C_A(list,newList,mapper);
         return newList;
     }
-    public static <V, K> Set<K> flatMapTry(Set<V> list, Set<K> newList, _1_Function<? super V, ? extends Try<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapTry(list,newList,mapper);
-        return newList;
-    }
-
-    public static <V, K> Set<K> flatMapOptional(Set<V> list, Set<K> newList, _1_Function<? super V, ? extends Optional<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapOptional(list,newList,mapper);
+    public static <V, K> Set<K> flatMap_C_T(Set<V> list, Set<K> newList, _1_Function<? super V, ? extends Try<K>> mapper) throws Exception {
+        _SYS_COL_CODES.flatMap_C_T(list,newList,mapper);
         return newList;
     }
 
-    public static <V, L, R> Set<R> flatMapEither(Set<V> list, Set<R> newList, _1_Function<? super V, ? extends Either<L, R>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapEither(list,newList,mapper);
+    public static <V, K> Set<K> flatMap_C_O(Set<V> list, Set<K> newList, _1_Function<? super V, ? extends Optional<K>> mapper) throws Exception {
+        _SYS_COL_CODES.flatMap_C_O(list,newList,mapper);
+        return newList;
+    }
+
+    public static <V, L, R> Set<R> flatMap_C_E(Set<V> list, Set<R> newList, _1_Function<? super V, ? extends Either<L, R>> mapper) throws Exception {
+        _SYS_COL_CODES.flatMap_C_E(list,newList,mapper);
         return newList;
     }
 
 
-    public static <V1,V2,K> Set<K> flatMap(Set<Tuple2<V1,V2>> list,
+    public static <V, K> Set<K> flatMap_OC_C(Set<Optional<V>> list,
+                                           Set<K> newList, _1_Function<? super Optional<V>, ? extends Collection<K>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            for (K k : mapper.apply(v)) {
+                newList.add(k);
+            }
+        }
+        return newList;
+    }
+
+    public static <V, K> Set<K> flatMap_OC_A(Set<Optional<V>> list,
+                                           Set<K> newList, _1_Function<? super Optional<V>, ? extends K[]> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            for (K k : mapper.apply(v)) {
+                newList.add(k);
+            }
+        }
+        return newList;
+    }
+
+    public static <V, K> Set<K> flatMap_OC_T(Set<Optional<V>> list,
+                                           Set<K> newList, _1_Function<? super Optional<V>, ? extends Try<K>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            Try<K> vtry = mapper.apply(v);
+            if (vtry.failure()) {
+                continue;
+            }
+            newList.add(((Success<K>) vtry).getValue());
+        }
+        return newList;
+    }
+
+    public static <V, K> Set<K> flatMap_OC_O(Set<Optional<V>> list,
+                                           Set<K> newList, _1_Function<? super Optional<V>, ? extends Optional<K>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            Optional<K> optional = mapper.apply(v);
+            if (!optional.isPresent()) {
+                continue;
+            }
+            newList.add((optional.get()));
+        }
+        return newList;
+    }
+
+    public static <V, L, R> Set<R> flatMap_OC_E(Set<Optional<V>> list,
+                                              Set<R> newList, _1_Function<? super Optional<V>, ? extends Either<L, R>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            Either<L, R> either = mapper.apply(v);
+            if (either.isLeft()) {
+                continue;
+            }
+            newList.add(either.right());
+        }
+        return newList;
+    }
+
+    public static <V1,V2,K> Set<K> flatMap_T2_C_C(Set<Tuple2<V1,V2>> list,
                                                      Set<K> newList,
                                                      _2_Function<? super V1,? super V2,? extends Collection<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMap(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T2_C_C(list,newList,mapper);
         return newList;
     }
-    public static <V1,V2,K> Set<K> flatMapArray(Set<Tuple2<V1,V2>> list,
+    public static <V1,V2,K> Set<K> flatMap_T2_C_A(Set<Tuple2<V1,V2>> list,
                                            Set<K> newList,
                                            _2_Function<? super V1,? super V2,? extends K[]> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapArray(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T2_C_A(list,newList,mapper);
         return newList;
     }
-    public static <V1, V2, K> Set<K> flatMapTry(Set<Tuple2<V1, V2>> list,
+    public static <V1, V2, K> Set<K> flatMap_T2_C_T(Set<Tuple2<V1, V2>> list,
                                               Set<K> newList,
                                               _2_Function<? super V1, ? super V2, ? extends Try<K>> mapper) throws Exception {
-       _SYS_COL_CODES.flatMapTry(list,newList,mapper);
+       _SYS_COL_CODES.flatMap_T2_C_T(list,newList,mapper);
        return newList;
     }
 
-    public static <V1, V2, K> Set<K> flatMapOptional(Set<Tuple2<V1, V2>> list,
+    public static <V1, V2, K> Set<K> flatMap_T2_C_O(Set<Tuple2<V1, V2>> list,
                                                    Set<K> newList,
                                                      _2_Function<? super V1, ? super V2, ? extends Optional<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapOptional(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T2_C_O(list,newList,mapper);
         return newList;
     }
 
-    public static <V1, V2, L, R> Set<R> flatMapEither(Set<Tuple2<V1, V2>> list, Set<R> newList,
+    public static <V1, V2, L, R> Set<R> flatMap_T2_C_E(Set<Tuple2<V1, V2>> list, Set<R> newList,
                                                     _2_Function<? super V1, ? super V2, ? extends Either<L, R>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapEither(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T2_C_E(list,newList,mapper);
         return newList;
     }
 
-    public static <V1,V2,V3,K> Set<K> flatMap(Set<Tuple3<V1,V2,V3>> list,
+    public static <V1,V2,V3,K> Set<K> flatMap_T3_C_C(Set<Tuple3<V1,V2,V3>> list,
                                                         Set<K> newList,
                                                         _3_Function<? super V1,? super V2,? super V3,? extends Collection<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMap(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T3_C_C(list,newList,mapper);
         return newList;
     }
-    public static <V1,V2,V3,K> Set<K> flatMapArray(Set<Tuple3<V1,V2,V3>> list,
+    public static <V1,V2,V3,K> Set<K> flatMap_T3_C_A(Set<Tuple3<V1,V2,V3>> list,
                                                         Set<K> newList,
                                                         _3_Function<? super V1,? super V2,? super V3,? extends K[]> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapArray(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T3_C_A(list,newList,mapper);
         return newList;
     }
-    public static <V1, V2, V3, K> Set<K> flatMapTry(Set<Tuple3<V1, V2, V3>> list, Set<K> newList,
+    public static <V1, V2, V3, K> Set<K> flatMap_T3_C_T(Set<Tuple3<V1, V2, V3>> list, Set<K> newList,
                                                   _3_Function<? super V1, ? super V2, ? super V3, ? extends Try<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapTry(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T3_C_T(list,newList,mapper);
         return newList;
     }
 
-    public static <V1, V2, V3, K> Set<K> flatMapOptional(Set<Tuple3<V1, V2, V3>> list, Set<K> newList,
+    public static <V1, V2, V3, K> Set<K> flatMap_T3_C_O(Set<Tuple3<V1, V2, V3>> list, Set<K> newList,
                                                        _3_Function<? super V1, ? super V2, ? super V3, ? extends Optional<K>> mapper) throws Exception {
-       _SYS_COL_CODES.flatMapOptional(list,newList,mapper);
+       _SYS_COL_CODES.flatMap_T3_C_O(list,newList,mapper);
        return newList;
     }
 
-    public static <V1, V2, V3, L, R> Set<R> flatMapEither(Set<Tuple3<V1, V2, V3>> list, Set<R> newList,
+    public static <V1, V2, V3, L, R> Set<R> flatMap_T3_C_E(Set<Tuple3<V1, V2, V3>> list, Set<R> newList,
                                                         _3_Function<? super V1, ? super V2, ? super V3, ? extends Either<L, R>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapEither(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T3_C_E(list,newList,mapper);
         return newList;
     }
 
-    public static <V1,V2,V3,V4,K> Set<K> flatMap(Set<Tuple4<V1,V2,V3,V4>> list,
+    public static <V1,V2,V3,V4,K> Set<K> flatMap_T4_C_C(Set<Tuple4<V1,V2,V3,V4>> list,
                                                            Set<K> newList,
                                                          _4_Function<? super V1,? super V2,? super V3,? super V4,? extends Collection<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMap(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T4_C_C(list,newList,mapper);
         return newList;
     }
-    public static <V1,V2,V3,V4,K> Set<K> flatMapArray(Set<Tuple4<V1,V2,V3,V4>> list,
+    public static <V1,V2,V3,V4,K> Set<K> flatMap_T4_C_A(Set<Tuple4<V1,V2,V3,V4>> list,
                                                  Set<K> newList,
                                                  _4_Function<? super V1,? super V2,? super V3,? super V4,? extends K[]> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapArray(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T4_C_A(list,newList,mapper);
         return newList;
     }
-    public static <V1, V2, V3, V4, K> Set<K> flatMapTry(Set<Tuple4<V1, V2, V3, V4>> list, Set<K> newList,
+    public static <V1, V2, V3, V4, K> Set<K> flatMap_T4_C_T(Set<Tuple4<V1, V2, V3, V4>> list, Set<K> newList,
                                                       _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends Try<K>> mapper) throws Exception {
-       _SYS_COL_CODES.flatMapTry(list,newList,mapper);
+       _SYS_COL_CODES.flatMap_T4_C_T(list,newList,mapper);
        return newList;
     }
 
-    public static <V1, V2, V3, V4, K> Set<K> flatMapOptional(Set<Tuple4<V1, V2, V3, V4>> list, Set<K> newList,
+    public static <V1, V2, V3, V4, K> Set<K> flatMap_T4_C_O(Set<Tuple4<V1, V2, V3, V4>> list, Set<K> newList,
                                                            _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends Optional<K>> mapper) throws Exception {
-       _SYS_COL_CODES.flatMapOptional(list,newList,mapper);
+       _SYS_COL_CODES.flatMap_T4_C_O(list,newList,mapper);
        return newList;
     }
 
-    public static <V1, V2, V3, V4, L, R> Set<R> flatMapEither(Set<Tuple4<V1, V2, V3, V4>> list, Set<R> newList,
+    public static <V1, V2, V3, V4, L, R> Set<R> flatMap_T4_C_E(Set<Tuple4<V1, V2, V3, V4>> list, Set<R> newList,
                                                             _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends Either<L, R>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapEither(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T4_C_E(list,newList,mapper);
         return newList;
     }
 
-    public static <V1,V2,V3,V4,V5,K> Set<K> flatMap(Set<Tuple5<V1,V2,V3,V4,V5>> list,
+    public static <V1,V2,V3,V4,V5,K> Set<K> flatMap_T5_C_C(Set<Tuple5<V1,V2,V3,V4,V5>> list,
                                                     Set<K> newList,
                                                     _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends Collection<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMap(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T5_C_C(list,newList,mapper);
         return newList;
     }
-    public static <V1,V2,V3,V4,V5,K> Set<K> flatMapArray(Set<Tuple5<V1,V2,V3,V4,V5>> list,
+    public static <V1,V2,V3,V4,V5,K> Set<K> flatMap_T5_C_A(Set<Tuple5<V1,V2,V3,V4,V5>> list,
                                                     Set<K> newList,
                                                     _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends K[]> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapArray(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T5_C_A(list,newList,mapper);
         return newList;
     }
 
-    public static <V1, V2, V3, V4, V5, K> Set<K> flatMapTry(Set<Tuple5<V1, V2, V3, V4, V5>> list, Set<K> newList,
+    public static <V1, V2, V3, V4, V5, K> Set<K> flatMap_T5_C_T(Set<Tuple5<V1, V2, V3, V4, V5>> list, Set<K> newList,
                                                           _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends Try<K>> mapper) throws Exception {
-       _SYS_COL_CODES.flatMapTry(list,newList,mapper);
+       _SYS_COL_CODES.flatMap_T5_C_T(list,newList,mapper);
        return newList;
     }
 
-    public static <V1, V2, V3, V4, V5, K> Set<K> flatMapOptional(Set<Tuple5<V1, V2, V3, V4, V5>> list, Set<K> newList,
+    public static <V1, V2, V3, V4, V5, K> Set<K> flatMap_T5_C_O(Set<Tuple5<V1, V2, V3, V4, V5>> list, Set<K> newList,
                                                                _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends Optional<K>> mapper) throws Exception {
-       _SYS_COL_CODES.flatMapOptional(list,newList,mapper);
+       _SYS_COL_CODES.flatMap_T5_C_O(list,newList,mapper);
        return newList;
     }
 
-    public static <V1, V2, V3, V4, V5, L, R> Set<R> flatMapEither(Set<Tuple5<V1, V2, V3, V4, V5>> list, Set<R> newList,
+    public static <V1, V2, V3, V4, V5, L, R> Set<R> flatMap_T5_C_E(Set<Tuple5<V1, V2, V3, V4, V5>> list, Set<R> newList,
                                                                 _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends Either<L, R>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapEither(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T5_C_E(list,newList,mapper);
         return newList;
     }
 
-    public static <V1,V2,V3,V4,V5,V6,K> Set<K> flatMap(Set<Tuple6<V1,V2,V3,V4,V5,V6>> list,
+    public static <V1,V2,V3,V4,V5,V6,K> Set<K> flatMap_T6_C_C(Set<Tuple6<V1,V2,V3,V4,V5,V6>> list,
                                                        Set<K> newList,
                                                        _6_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? super V6,? extends Collection<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMap(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T6_C_C(list,newList,mapper);
         return newList;
     }
-    public static <V1,V2,V3,V4,V5,V6,K> Set<K> flatMapArray(Set<Tuple6<V1,V2,V3,V4,V5,V6>> list,
+    public static <V1,V2,V3,V4,V5,V6,K> Set<K> flatMap_T6_C_A(Set<Tuple6<V1,V2,V3,V4,V5,V6>> list,
                                                        Set<K> newList,
                                                        _6_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? super V6,? extends K[]> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapArray(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T6_C_A(list,newList,mapper);
         return newList;
     }
-    public static <V1, V2, V3, V4, V5, V6, K> Set<K> flatMapTry(Set<Tuple6<V1, V2, V3, V4, V5, V6>> list, Set<K> newList,
+    public static <V1, V2, V3, V4, V5, V6, K> Set<K> flatMap_T6_C_T(Set<Tuple6<V1, V2, V3, V4, V5, V6>> list, Set<K> newList,
                                                               _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends Try<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapTry(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T6_C_T(list,newList,mapper);
         return newList;
     }
 
-    public static <V1, V2, V3, V4, V5, V6, K> Set<K> flatMapOptional(Set<Tuple6<V1, V2, V3, V4, V5, V6>> list, Set<K> newList,
+    public static <V1, V2, V3, V4, V5, V6, K> Set<K> flatMap_T6_C_O(Set<Tuple6<V1, V2, V3, V4, V5, V6>> list, Set<K> newList,
                                                                    _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends Optional<K>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapOptional(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T6_C_O(list,newList,mapper);
         return newList;
     }
-    public static <V1, V2, V3, V4, V5, V6, L, R> Set<R> flatMapEither(Set<Tuple6<V1, V2, V3, V4, V5, V6>> list, Set<R> newList,
+    public static <V1, V2, V3, V4, V5, V6, L, R> Set<R> flatMap_T6_C_E(Set<Tuple6<V1, V2, V3, V4, V5, V6>> list, Set<R> newList,
                                                                     _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends Either<L, R>> mapper) throws Exception {
-        _SYS_COL_CODES.flatMapEither(list,newList,mapper);
+        _SYS_COL_CODES.flatMap_T6_C_E(list,newList,mapper);
         return newList;
     }
-
 
     //filter functions
     public static <V> Set<V> filter(Set<V> list, Set<V> newSet,
@@ -331,12 +387,12 @@ public class _SYS_SET_CODES {
         return _SYS_COL_CODES.headOption(set);
     }
 
-    //tail
-    public static <V> V tail(Set<V> set){
-        return _SYS_COL_CODES.tail(set);
+    //last
+    public static <V> V last(Set<V> set){
+        return _SYS_COL_CODES.last(set);
     }
-    public static <V> Optional<V> tailOption(Set<V> set){
-        return _SYS_COL_CODES.tailOption(set);
+    public static <V> Optional<V> lastOption(Set<V> set){
+        return _SYS_COL_CODES.lastOption(set);
     }
 
     //mkString

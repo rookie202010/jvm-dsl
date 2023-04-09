@@ -7,13 +7,14 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.util
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 class TranslateMapSuit extends AnyFunSuite {
   def compile(code: String): Class[_] = {
-    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example", javaTranslateConfig = ConfigFactory.empty( ) ) )
+    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example",clazzName = "Program",  javaTranslateConfig = ConfigFactory.empty( ) ) )
     val javaCompile = new JaninoCompiler( this.getClass.getClassLoader )
-    javaCompile.compile( javaProgram, "com.example" )
+    javaCompile.load( javaProgram )
   }
 
   test( "test map 1" ) {
@@ -109,6 +110,44 @@ class TranslateMapSuit extends AnyFunSuite {
    //   import scala.collection.convert.ImplicitConversionsToScala._
    //   assert(method.invoke(instance,map,map1).equals(func(map.map(kv⇒(kv._1.toInt,kv._2)).toMap,map1.map(kv⇒(kv._1.toInt,kv._2.toLong)).toMap)))
     } )
+  }
+
+  test("test map 4"){
+    val code =
+      """
+        |program{
+        |   class ComplexNumber(Double real,Double image){
+        |        def plus(ComplexNumber c)=ComplexNumber{
+        |            return new ComplexNumber(c.real+real,c.image+image);
+        |        }
+        |        def sub(ComplexNumber c)=ComplexNumber{
+        |            return new ComplexNumber(real-c.real,image-c.image);
+        |        }
+        |        def multi(ComplexNumber c)=ComplexNumber{
+        |             return new ComplexNumber(real*c.real-image*c.image,image*c.real+real*c.image);
+        |        }
+        |        def toTuple()=(Double,Double){
+        |           return (real,image);
+        |        }
+        |    }
+        |    def eval(Array[(Double,Double)] a)=(Double,Double) throws Exception{
+        |       ComplexNumber complexNumber = a.map((i,j)=>{
+        |           return new ComplexNumber(i,j);
+        |       }).reduce((i,j)=>{
+        |         return i.multi(j);
+        |       });
+        |       return complexNumber.toTuple();
+        |    }
+        |}
+        |""".stripMargin
+    val clazz = compile( code )
+    val instance = clazz.getConstructors.head.newInstance( )
+    val a = ArrayBuffer[com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2[Double,Double]]()
+    a.append(new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2[Double,Double](1d,1d))
+    a.append(new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2[Double,Double](122.1d,111.2d))
+    a.append(new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2[Double,Double](-11.1d,-13.2d))
+    val method = clazz.getMethod( "eval", classOf[Array[com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2[Double,Double]]] )
+   println(method.invoke(instance,a.toArray))
   }
 
 }

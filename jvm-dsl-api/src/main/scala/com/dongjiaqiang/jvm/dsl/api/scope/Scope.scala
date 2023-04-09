@@ -26,7 +26,7 @@ trait Scope {
    * @param arrayRefsIndex array refs index
    * @param refs  ref names
    */
-  def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope]
+  def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Map[Int,Int]): Option[FieldScope]
 
   /**
    * resolve method in current scope

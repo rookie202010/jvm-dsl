@@ -24,14 +24,14 @@ object FuncCallChain {
       case head :: tail ⇒
         head match {
           case varRef: VarRef ⇒
-            getValueType( programScope, VarRef.getValueType( varRef.refs, varRef.arrayRefIndexExpressions, calleeType, programScope,varRef ), tail )
+            getValueType( programScope, VarRef.getValueType( varRef.refs.zipWithIndex, varRef.arrayRefIndexExpressions, calleeType, programScope,varRef ), tail )
           case methodCall: MethodCall ⇒
             val dslType = programScope.multiMrt.visit( calleeType, WrapValueTypeExpression( calleeType ), methodCall.name, methodCall.params )
             getValueType( programScope, dslType.get, tail )
         }
       case head :: Nil ⇒
         head match {
-          case varRef: VarRef ⇒ VarRef.getValueType( varRef.refs, varRef.arrayRefIndexExpressions, calleeType, programScope,varRef )
+          case varRef: VarRef ⇒ VarRef.getValueType( varRef.refs.zipWithIndex, varRef.arrayRefIndexExpressions, calleeType, programScope,varRef )
           case methodCall: MethodCall ⇒
             programScope.multiMrt.visit( calleeType, WrapValueTypeExpression( calleeType ), methodCall.name, methodCall.params ).get
         }

@@ -1277,6 +1277,18 @@ public class JvmDslParserBaseListener implements JvmDslParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAddUnaryExpr(JvmDslParserParser.AddUnaryExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAddUnaryExpr(JvmDslParserParser.AddUnaryExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterLiteralAndFuncCallExpr(JvmDslParserParser.LiteralAndFuncCallExprContext ctx) { }
 	/**
 	 * {@inheritDoc}

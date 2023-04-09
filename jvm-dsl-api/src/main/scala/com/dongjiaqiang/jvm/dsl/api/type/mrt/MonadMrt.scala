@@ -120,9 +120,9 @@ trait MonadMrt extends MonadMethodVisitor[DslType] {
 
   override def head(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
 
-  override def tail(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
+  override def last(calleeType: MonadDslType, callee: ValueExpression): DslType = calleeType.carryDslType
 
   override def headOption(calleeType: MonadDslType, callee: ValueExpression): DslType = OptionType(calleeType.carryDslType)
 
-  override def tailOption(calleeType: MonadDslType, callee: ValueExpression): DslType = OptionType(calleeType.carryDslType)
+  override def lastOption(calleeType: MonadDslType, callee: ValueExpression): DslType = OptionType(calleeType.carryDslType)
 }

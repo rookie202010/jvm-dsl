@@ -508,8 +508,8 @@ case class TryCatch(tryBlock:Block,catches:Array[((String,DslType),Block)],final
 
     override def equals(obj: Any): Boolean = obj match {
         case tryCatch: TryCatch ⇒
-            tryCatch.tryBlock == tryCatch.tryBlock &&
-              tryCatch.catches.sameElements( tryCatch.catches ) &&
+            tryCatch.tryBlock == tryBlock &&
+              tryCatch.catches.sameElements( catches ) &&
               tryCatch.finallyBlock == finallyBlock
         case _ ⇒ false
     }

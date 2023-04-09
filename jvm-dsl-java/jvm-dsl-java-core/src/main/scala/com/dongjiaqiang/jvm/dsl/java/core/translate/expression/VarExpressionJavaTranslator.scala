@@ -3,10 +3,13 @@ package com.dongjiaqiang.jvm.dsl.java.core.translate.expression
 import com.dongjiaqiang.jvm.dsl.api.`type`.{FutureType, LambdaType, NumberDslType, TryType}
 import com.dongjiaqiang.jvm.dsl.api.expression.`var`.{LocalVarDef, VarRef}
 import com.dongjiaqiang.jvm.dsl.api.expression.block._
+import com.dongjiaqiang.jvm.dsl.api.expression.unary.Cast
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.`var`.VarExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.expression._
+
+import scala.annotation.tailrec
 
 trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
 
@@ -50,18 +53,27 @@ trait VarExpressionJavaTranslator extends VarExpressionVisitor[String] {
 
 
   override def visit(varRef: VarRef, visitor: ExpressionVisitor[String]): String = {
-    //todo no call here
+    //todo call here just query tuple cast type
     varRef.getValueType(visitor.programScope)
-    varRef.refs.zipWithIndex.map {
-      case (n, index) ⇒
-        if (varRef.arrayRefIndexExpressions.contains( index )) {
-          varRef.arrayRefIndexExpressions( index ).map( expr ⇒ s"[${visitor.visit(expr)}]" ).mkString( s"$n", "", "" )
-        } else {
-          n
-        }
-    }.mkString( "." )
+    var code:String = null
+    varRef.refs.zipWithIndex.foreach{
+      case (ref,index)⇒
+          if(varRef.castIndex.contains(index)){
+            val castType = varRef.castIndex( index )
+            code = visitor.visit( Cast( JavaCode( s"$code.$ref", castType ), castType, 1 ) )
+          }else{
+            if(code==null){
+              code = ref
+            }else {
+              code = s"$code.$ref"
+            }
+          }
+          if(varRef.arrayRefIndexExpressions.contains(index)){
+              code = varRef.arrayRefIndexExpressions( index ).map( expr ⇒ s"[${visitor.visit( expr )}]" ).mkString( code, "", "" )
+          }
+    }
+    code
   }
-
 
   override def visit(lambda: Lambda, visitor: ExpressionVisitor[String]): String = {
     visitor.visit(lambda.body)

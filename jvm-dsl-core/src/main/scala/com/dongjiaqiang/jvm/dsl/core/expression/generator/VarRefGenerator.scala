@@ -36,7 +36,10 @@ object VarRefGenerator extends IExpressionGenerator[VariableContext, VarRef,VarG
         VarRef(refs,arrayRefIndexExpressions,None)
     }else {
       val scope = if(exprContext.getContextScope!=null) exprContext.getContextScope else exprContext.getProgramScope
-      scope.resolveVarRefs(exprContext.getCurrentExpressionIndex, refs,arrayRefIndexExpressions.keySet.toSet) match {
+      val arrayRefsIndex = arrayRefIndexExpressions.map{
+        case (k,v)⇒(k,v.length-1)
+      }.toMap
+      scope.resolveVarRefs(exprContext.getCurrentExpressionIndex, refs,arrayRefsIndex) match {
         case fieldScope: Some[FieldScope] ⇒ VarRef(refs,arrayRefIndexExpressions, fieldScope)
         case None ⇒
             val ref = refs.head

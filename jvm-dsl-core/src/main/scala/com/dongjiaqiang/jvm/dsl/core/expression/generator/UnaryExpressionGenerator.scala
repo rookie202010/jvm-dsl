@@ -12,6 +12,15 @@ object UnaryExpressionGenerator extends IExpressionGenerator[UnaryExpressionCont
                         ruleContext: UnaryExpressionContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): ValueExpression = {
     ruleContext match {
+      case c:AddUnaryExprContext⇒
+        val signed = if(c.additiveOperation().ADD()!=null){
+          "+"
+        }else if(c.additiveOperation().SUB()!=null){
+          "-"
+        }else{
+          throw new IllegalArgumentException("")
+        }
+        SignedNumber(signed,generate(exprContext,c.unaryExpression()))
       case c: CastExprContext ⇒
         val dslType = toDslType( c.`type`( ),exprContext.getProgramScope )
         Cast( generate( exprContext, c.unaryExpression( ) ), dslType )

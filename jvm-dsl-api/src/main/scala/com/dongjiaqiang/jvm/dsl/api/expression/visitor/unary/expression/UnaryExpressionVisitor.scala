@@ -24,4 +24,8 @@ trait UnaryExpressionVisitor[T] {
   def visit(paren: Paren, visitor: ExpressionVisitor[T]): T = {
     throw new UnsupportedOperationException( "not supported" )
   }
+
+  def visit(signedNumber: SignedNumber,visitor: ExpressionVisitor[T]):T={
+    throw new UnsupportedOperationException( "not supported" )
+  }
 }

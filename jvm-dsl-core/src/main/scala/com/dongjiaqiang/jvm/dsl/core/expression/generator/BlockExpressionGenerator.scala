@@ -15,22 +15,11 @@ object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionCont
                         ruleContext: BlockExpressionContext,
                         generatorContext: GeneratorContext = NoneGeneratorContext): ValueExpression = {
     val blockType = ruleContext.IDENTIFIER( ).getText
-    val fieldScope = Option.apply( ruleContext.variable( ) ).map( v ⇒ {
 
-      val arrayVarRefs = scala.collection.mutable.Set[Int]( )
-      val varRefs = v.localVarOrArrayVar( ).zipWithIndex.map {
-        case (context, index) ⇒
-          if (context.localVariable( ) != null) {
-            context.localVariable( ).IDENTIFIER( ).getText
-          } else {
-            arrayVarRefs.add( index )
-            context.localArrayVariable( ).localVariable( ).getText
-          }
-      }.toList
+    val varRef = Option.apply(ruleContext.variable()).map(v⇒ {
+      VarRefGenerator.generate( exprContext, v, VarGeneratorContext( false ) )
+    }).flatMap(_.fieldScope)
 
-      (varRefs, arrayVarRefs)
-    } )
-      .flatMap( v ⇒ exprContext.getContextScope.resolveVarRefs( exprContext.getCurrentExpressionIndex, v._1, v._2.toSet ) )
     val block = LambdaBlockGenerator.generate( exprContext, ruleContext.lambdaBlock( ) )
     blockType match {
       case "Try" ⇒
@@ -40,10 +29,10 @@ object BlockExpressionGenerator extends IExpressionGenerator[BlockExpressionCont
           Try( block, new TryType( UnResolvedType ) )
         }
       case "Async" ⇒
-        Async( block, fieldScope, FutureType( UnResolvedType ) )
+        Async( block, varRef, FutureType( UnResolvedType ) )
       case _ ⇒
         block.ignoreVarRefResolved = true
-        CustomBlockExpression( blockType, block, fieldScope )
+        CustomBlockExpression( blockType, block, varRef )
     }
   }
 }

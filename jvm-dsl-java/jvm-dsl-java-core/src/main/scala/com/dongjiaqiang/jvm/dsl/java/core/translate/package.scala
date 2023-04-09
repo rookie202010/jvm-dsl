@@ -8,7 +8,6 @@ import com.dongjiaqiang.jvm.dsl.java.api
 import com.dongjiaqiang.jvm.dsl.java.api.codes.{_SYS_ARRAY_CODES, _SYS_COL_CODES, _SYS_GEN_CODES, _SYS_LIST_CODES, _SYS_MAP_CODES, _SYS_OPTION_CODES, _SYS_SET_CODES, _SYS_STR_CODES}
 import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaTranslatorContext
 import com.dongjiaqiang.jvm.dsl.java.core.translate.expression.JavaTranslator
-import com.dongjiaqiang.jvm.dsl.java.core.translate.method.MultiMethodJavaTranslator
 import com.typesafe.config.ConfigFactory
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
@@ -16,7 +15,11 @@ import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import java.io.StringReader
 import scala.collection.mutable.{LinkedHashMap ⇒ MutableMap}
 
-case class JavaProgram(mainClass:String,definitionClasses:Map[String,String],importClass:Set[String])
+case class JavaProgram(packageName:String,
+                       clazzName:String,
+                        mainClass:String,
+                       definitionClasses:Map[String,String],
+                       importClass:Set[String])
 package object translate {
 
   implicit class ProgramTranslator(dsl:String){
@@ -37,9 +40,9 @@ package object translate {
             ""
         }
         s"""
-         |public $sync $returnType ${methodScope.name}(${params.mkString(",")}) $throws
-         |        $body
-         |""".stripMargin
+         public $sync $returnType ${methodScope.name}(${params.mkString(",")}) $throws
+                 $body
+         """
     }
 
     /**
@@ -63,19 +66,19 @@ package object translate {
       }).mkString("\n")
 
       s"""
-         |package ${javaTranslatorContext.packageName};
-         |public class ${clazzScope.name}{
-         |    $clazzFields
-         |    public ${clazzScope.name}($constructorParams) {
-         |          $constructBody
-         |    }
-         |    $methods
-         |}
-         |""".stripMargin
+         package ${javaTranslatorContext.packageName};
+         public class ${clazzScope.name}{
+             $clazzFields
+             public ${clazzScope.name}($constructorParams) {
+                   $constructBody
+             }
+             $methods
+         }
+         """
     }
 
-    def translate(packageName:String):JavaProgram={
-        translate(JavaTranslatorContext( packageName = packageName, javaTranslateConfig = ConfigFactory.empty( ) ) )
+    def translate(packageName:String,clazzName:String):JavaProgram={
+        translate(JavaTranslatorContext( packageName = packageName,clazzName=clazzName, javaTranslateConfig = ConfigFactory.empty( ) ) )
     }
 
     def translate(javaTranslatorContext: JavaTranslatorContext):JavaProgram= {
@@ -124,9 +127,9 @@ package object translate {
       val importDefinitionClasses = (if(definitionClasses.isEmpty){
         ""
       }else {
-        definitionClasses.keys.map( name ⇒ {
+        definitionClasses.keys.map( definitionClazzName ⇒ {
           s"""
-             |import ${javaTranslator.javaTranslatorContext.packageName}.$name
+             |import ${javaTranslator.javaTranslatorContext.packageName}.$definitionClazzName
              |""".stripMargin
         } ).mkString( "", ";\n", ";" )
       }).addString(
@@ -144,18 +147,16 @@ package object translate {
 
       val mainClazz =
         s"""
-           |package ${javaTranslatorContext.packageName};
-           |
-           |$importDefinitionClasses
-           |
-           |public class Program{
-           |
-           |    public Program(){}
-           |    $mainFields
-           |    $mainMethods
-           |}
-           |""".stripMargin
-      JavaProgram(mainClazz,definitionClasses,Set())
+           package ${javaTranslatorContext.packageName};
+           $importDefinitionClasses
+
+           public class ${javaTranslatorContext.clazzName}{
+               public ${javaTranslatorContext.clazzName}(){}
+               $mainFields
+               $mainMethods
+           }
+           """
+      JavaProgram(javaTranslatorContext.packageName,javaTranslatorContext.clazzName,mainClazz,definitionClasses,Set())
     }
   }
 

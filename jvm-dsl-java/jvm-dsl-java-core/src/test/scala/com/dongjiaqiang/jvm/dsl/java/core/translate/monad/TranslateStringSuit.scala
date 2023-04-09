@@ -11,9 +11,9 @@ import scala.util.Random
 
 class TranslateStringSuit extends AnyFunSuite {
   def compile(code: String): Class[_] = {
-    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example", javaTranslateConfig = ConfigFactory.empty( ) ) )
+    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example",clazzName = "Program",  javaTranslateConfig = ConfigFactory.empty( ) ) )
     val javaCompile = new JaninoCompiler( this.getClass.getClassLoader )
-    javaCompile.compile( javaProgram, "com.example" )
+    javaCompile.load( javaProgram )
   }
 
   test( "test string 1" ) {

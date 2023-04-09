@@ -5,16 +5,34 @@ import com.dongjiaqiang.jvm.dsl.java.api.codes.*;
 import com.dongjiaqiang.jvm.dsl.java.api.lambda.function._1_Function;
 import com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class A<T> {
+
+
+    public static void main(String[] args) {
+
+        List<Long> list = new ArrayList<Long>();
+        list.toArray(new Long[]{});
+        Object[] objects = new Integer[]{1,2,3};
+        System.out.println(((Integer[])objects).length);
+    }
     public static int foo() throws Exception {
 
-        return 10;
+        int i =10;
+        long j= 1;
 
 
+      //  com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>[]> tuple1 = new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>[]>(i,_SYS_ARRAY_CODES.ofArray(new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>(i,j)));
+     //   return ((Integer)(((com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>[])(tuple1._2))[0]._1));
+      //  com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>[]> tuple1 = new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>[]>(i,com.dongjiaqiang.jvm.dsl.java.api.ofArray(new com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>(i,j)));
+
+       // return ((Integer)(((com.dongjiaqiang.jvm.dsl.java.api.tuple.Tuple2<Integer,Long>[])(tuple1._2[0]))._1));
+        //return 10;
+
+//        return 10;
+        Integer[] integers = new Integer[3];
+        return 1;
     }
 
 
@@ -118,7 +136,6 @@ public class Example {
     public  static int method(int x,int y) throws Exception
 
     {
-
         Long l = 10L;
         byte b = 1;
         l = l+b;

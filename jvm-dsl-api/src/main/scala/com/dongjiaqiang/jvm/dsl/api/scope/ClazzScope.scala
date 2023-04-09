@@ -78,7 +78,7 @@ class ClazzScope(val outerScopeIndex: Int, val name: String,
    * @param index ref index
    * @param refs   ref names
    */
-  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope] = {
+  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Map[Int,Int]): Option[FieldScope] = {
       scope.resolveVarRefs(index, refs,arrayRefsIndex,this, fields, skipCurrentScope = false, backRef = true, None)
   }
 

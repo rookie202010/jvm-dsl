@@ -37,4 +37,8 @@ trait UnaryExpressionReviser extends UnaryExpressionVisitor[Expression] {
   override def visit(paren: Paren,visitor: ExpressionVisitor[Expression]):Expression={
     revise(paren,visitor,e⇒Paren(e))
   }
+
+  override def visit(signedNumber: SignedNumber, visitor: ExpressionVisitor[Expression]): Expression = {
+    revise(signedNumber,visitor,e⇒SignedNumber(signedNumber.signed,e))
+  }
 }

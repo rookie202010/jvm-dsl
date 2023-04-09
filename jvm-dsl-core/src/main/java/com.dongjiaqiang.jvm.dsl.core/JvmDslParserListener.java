@@ -1200,6 +1200,18 @@ public interface JvmDslParserListener extends ParseTreeListener {
 	 */
 	void exitUnaryExpr(JvmDslParserParser.UnaryExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code AddUnaryExpr}
+	 * labeled alternative in {@link JvmDslParserParser#unaryExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAddUnaryExpr(JvmDslParserParser.AddUnaryExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AddUnaryExpr}
+	 * labeled alternative in {@link JvmDslParserParser#unaryExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAddUnaryExpr(JvmDslParserParser.AddUnaryExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code LiteralAndFuncCallExpr}
 	 * labeled alternative in {@link JvmDslParserParser#unaryExpression}.
 	 * @param ctx the parse tree

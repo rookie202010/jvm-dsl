@@ -13,18 +13,18 @@ import org.scalatest.funsuite.AnyFunSuite
  * */
 class TranslateTupleSuit  extends AnyFunSuite {
   def compile(code: String): Class[_] = {
-    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example", javaTranslateConfig = ConfigFactory.empty( ) ) )
+    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example",clazzName = "Program",  javaTranslateConfig = ConfigFactory.empty( ) ) )
     val javaCompile = new JaninoCompiler( this.getClass.getClassLoader )
-    javaCompile.compile( javaProgram, "com.example" )
+    javaCompile.load( javaProgram )
   }
 
   test("test tuple 1"){
     val code =
       """
         |program{
-        |     def eval(Int i,Long j)=Int{
-        |         Array[(Int,Array[Array[(Long,Int)]])] t = null;
-        |         return t[1]._1[0][1]._1;
+        |     def eval(Int i,Long j)=Long{
+        |       (Int,List[Long]) tuple1 = (i,[j,j]);
+        |       return tuple1._2.get(0);
         |     }
         |}
         |""".stripMargin

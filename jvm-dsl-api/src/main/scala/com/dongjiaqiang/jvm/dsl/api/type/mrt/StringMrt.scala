@@ -41,4 +41,10 @@ class StringMrt(override val programScope: ProgramScope) extends StringMethodVis
   override def tail(callee: ValueExpression): DslType = CharType
 
   override def tailOption(callee: ValueExpression): DslType = OptionType(CharType)
+
+  override def startsWith(callee: ValueExpression, param: ValueExpression): DslType = BoolType
+
+  override def startsWith(callee: ValueExpression, param: ValueExpression,offset:ValueExpression): DslType = BoolType
+
+  override def endsWith(callee: ValueExpression, param: ValueExpression): DslType = BoolType
 }

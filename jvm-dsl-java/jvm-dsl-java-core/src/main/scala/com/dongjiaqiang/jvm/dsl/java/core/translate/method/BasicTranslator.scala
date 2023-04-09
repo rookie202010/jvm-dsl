@@ -59,24 +59,17 @@ class IntMethodJavaTranslator(override val programScope: ProgramScope,
   }
 
   override def to(callee: ValueExpression, end: ValueExpression): String =
-    s"""
-      |${_SYS_GEN_CODES.CLAZZ_NAME}.to(${javaTranslator.visit(callee)},${javaTranslator.visit(end)})
-      |""".stripMargin
+    s"${_SYS_GEN_CODES.CLAZZ_NAME}.to(${javaTranslator.visit(callee)},${javaTranslator.visit(end)})"
 
   override def to(callee: ValueExpression, end: ValueExpression, step: ValueExpression): String =
-    s"""
-       |${_SYS_GEN_CODES.CLAZZ_NAME}.to(${javaTranslator.visit( callee )},${javaTranslator.visit( end )},${javaTranslator.visit(step)})
-       |""".stripMargin
+    s"${_SYS_GEN_CODES.CLAZZ_NAME}.to(${javaTranslator.visit( callee )},${javaTranslator.visit( end )},${javaTranslator.visit(step)})"
+
 
   override def until(callee: ValueExpression, end: ValueExpression): String =
-    s"""
-       |${_SYS_GEN_CODES.CLAZZ_NAME}.until(${javaTranslator.visit( callee )},${javaTranslator.visit( end )})
-       |""".stripMargin
+    s"${_SYS_GEN_CODES.CLAZZ_NAME}.until(${javaTranslator.visit( callee )},${javaTranslator.visit( end )})"
 
   override def until(callee: ValueExpression, end: ValueExpression, step: ValueExpression): String =
-    s"""
-       |${_SYS_GEN_CODES.CLAZZ_NAME}.until(${javaTranslator.visit( callee )},${javaTranslator.visit( end )},${javaTranslator.visit(step)})
-       |""".stripMargin
+    s"${_SYS_GEN_CODES.CLAZZ_NAME}.until(${javaTranslator.visit( callee )},${javaTranslator.visit( end )},${javaTranslator.visit(step)})"
 }
 
 class FloatMethodJavaTranslator(override val programScope: ProgramScope,
@@ -104,14 +97,10 @@ class FloatMethodJavaTranslator(override val programScope: ProgramScope,
 class CharMethodJavaTranslator(override val programScope: ProgramScope,
                                val javaTranslator: JavaTranslator) extends CharMethodVisitor[String]{
   override def toLowerCase(callee: ValueExpression): String =
-    s"""
-       |Character.toLowerCase(${javaTranslator.visit( callee )})
-       |""".stripMargin
+    s"Character.toLowerCase(${javaTranslator.visit( callee )})"
 
   override def toUpperCase(callee: ValueExpression): String =
-    s"""
-       |Character.toUpperCase(${javaTranslator.visit(callee)})
-       |""".stripMargin
+    s"Character.toUpperCase(${javaTranslator.visit(callee)})"
 
   override def toInt(calleeType:DslType,callee: ValueExpression): String = {
     BasicTranslator.toCharType(javaTranslator,callee,"int")

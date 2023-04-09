@@ -73,11 +73,11 @@ class JavaTranslatorTestLoopSuit extends AnyFunSuite {
         |}
         |""".stripMargin
 
-    val javaProgram = input.translate(JavaTranslatorContext(packageName = "xx",javaTranslateConfig = ConfigFactory.empty()))
+    val javaProgram = input.translate(JavaTranslatorContext(packageName = "xx",clazzName = "Program", javaTranslateConfig = ConfigFactory.empty()))
 
     val javaCompile = new JaninoCompiler(this.getClass.getClassLoader)
 
-    val clazz = javaCompile.compile(javaProgram,"xx")
+    val clazz = javaCompile.load(javaProgram)
     val instance = clazz.getConstructors.head.newInstance()
 
     println(instance)

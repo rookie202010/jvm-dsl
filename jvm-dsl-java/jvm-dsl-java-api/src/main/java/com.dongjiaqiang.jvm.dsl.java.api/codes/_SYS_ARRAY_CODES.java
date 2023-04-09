@@ -19,98 +19,90 @@ public class _SYS_ARRAY_CODES {
     /*
       arr.map(i=> { return i+1;});
      */
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] map(V[] arr,
+    public static <V,K> K[] map(V[] arr,K[] newArr,
                                              _1_Function<? super V,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
+      //  Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]);
         }
-        return (K[])newArr;
+        return newArr;
     }
     /**
      * arr.map((i,j)=>{ return i+j;});
      */
     @SuppressWarnings("unchecked")
-    public static <V1,V2,K> K[] map(Tuple2<V1,V2>[] arr,
+    public static <V1,V2,K> K[] map(Tuple2<V1,V2>[] arr,K[] newArr,
                                         _2_Function<? super V1,? super V2,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]._1,arr[i]._2);
         }
-        return (K[])newArr;
+        return newArr;
     }
     /**
      * arr.map((i1,i2,i3)=>{ return i1+i2+i3;});
      */
     @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,K> K[] map(Tuple3<V1,V2,V3>[] arr,
+    public static <V1,V2,V3,K> K[] map(Tuple3<V1,V2,V3>[] arr,K[] newArr,
                                         _3_Function<? super V1,? super V2,? super V3,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]._1,arr[i]._2,arr[i]._3);
         }
-        return (K[])newArr;
+        return newArr;
     }
     /**
      * arr.map((i1,i2,i3,i4)=>{ return i1+i2+i3+i4;});
      */
     @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,K> K[] map(Tuple4<V1,V2,V3,V4>[] arr,
+    public static <V1,V2,V3,V4,K> K[] map(Tuple4<V1,V2,V3,V4>[] arr,K[] newArr,
                                            _4_Function<? super V1,? super V2,? super V3,? super V4,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]._1,arr[i]._2,arr[i]._3,arr[i]._4);
         }
-        return (K[])newArr;
+        return newArr;
     }
     /**
      * arr.map((i1,i2,i3,i4,i5)=>{ return i1+i2+i3+i4+i5;});
      */
     @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,K> K[] map(Tuple5<V1,V2,V3,V4,V5>[] arr,
+    public static <V1,V2,V3,V4,V5,K> K[] map(Tuple5<V1,V2,V3,V4,V5>[] arr,K[] newArr,
                                               _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]._1,arr[i]._2,arr[i]._3,arr[i]._4,arr[i]._5);
         }
-        return (K[])newArr;
+        return newArr;
     }
     /**
      * arr.map((i1,i2,i3,i4,i5,i6)=>{ return i1+i2+i3+i4+i5+i6;});
      */
     @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,V6,K> K[] map(Tuple6<V1,V2,V3,V4,V5,V6>[] arr,
+    public static <V1,V2,V3,V4,V5,V6,K> K[] map(Tuple6<V1,V2,V3,V4,V5,V6>[] arr,K[] newArr,
                                                  _6_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? super V6,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]._1,arr[i]._2,arr[i]._3,arr[i]._4,arr[i]._5,arr[i]._6);
         }
-        return (K[])newArr;
+        return newArr;
     }
     /**
      * arr.map((i1,i2,i3,i4,i5,i6,i7)=>{ return i1+i2+i3+i4+i5+i6+i7;});
      */
     @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,V6,V7,K> K[] map(Tuple7<V1,V2,V3,V4,V5,V6,V7>[] arr,
+    public static <V1,V2,V3,V4,V5,V6,V7,K> K[] map(Tuple7<V1,V2,V3,V4,V5,V6,V7>[] arr,K[] newArr,
                                                  _7_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? super V6,? super V7,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]._1,arr[i]._2,arr[i]._3,arr[i]._4,arr[i]._5,arr[i]._6,arr[i]._7);
         }
-        return (K[])newArr;
+        return newArr;
     }
     /**
      * arr.map((i1,i2,i3,i4,i5,i6,i7,i8)=>{ return i1+i2+i3+i4+i5+i6+i7+i8;});
      */
     @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,V6,V7,V8,K> K[] map(Tuple8<V1,V2,V3,V4,V5,V6,V7,V8>[] arr,
+    public static <V1,V2,V3,V4,V5,V6,V7,V8,K> K[] map(Tuple8<V1,V2,V3,V4,V5,V6,V7,V8>[] arr,K[] newArr,
                                                     _8_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? super V6,? super V7,? super V8,? extends K> mapper) throws Exception {
-        Object[] newArr = new Object[arr.length];
         for(int i=0;i<arr.length;i++){
             newArr[i] = mapper.apply(arr[i]._1,arr[i]._2,arr[i]._3,arr[i]._4,arr[i]._5,arr[i]._6,arr[i]._7,arr[i]._8);
         }
-        return (K[])newArr;
+        return newArr;
     }
 
     //flatten functions
@@ -201,11 +193,8 @@ public class _SYS_ARRAY_CODES {
     }
 
     //flatMap functions
-    /**
-     * arr.flatMap(a=>{ return [1,2,a] ; });
-     */
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMap(V[] arr,
+
+    public static <V,K> List<K> flatMap_A_C(V[] arr,
                                  _1_Function<? super V,? extends Collection<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (V v : arr) {
@@ -213,13 +202,10 @@ public class _SYS_ARRAY_CODES {
                 list.add(k);
             }
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    /**
-     * arr.flatMap(a=> { return new Array(1,2,3) ; });
-     */
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapArray(V[] arr,
+
+    public static <V,K> List<K> flatMap_A_A(V[] arr,
                                 _1_Function<? super V,? extends K[]> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (V v : arr) {
@@ -227,13 +213,10 @@ public class _SYS_ARRAY_CODES {
                 list.add(k);
             }
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    /**
-     * arr.flatMap(a=> { return Some(a) ; });
-     */
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapOptional(V[] arr,
+
+    public static <V,K> List<K> flatMap_A_O(V[] arr,
                                          _1_Function<? super V,? extends Optional<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (V v : arr) {
@@ -243,13 +226,12 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(optional.get());
         }
-        return (K[])(list.toArray());
+        return list;
     }
     /**
      * arr.flatMap(a=> { return Success(a) ; });
      */
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapTry(V[] arr,
+    public static <V,K> List<K> flatMap_A_T(V[] arr,
                                             _1_Function<? super V,? extends Try<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (V v : arr) {
@@ -259,13 +241,10 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(((Success<K>)vtry).getValue());
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    /**
-     * arr.flatMap(a=> { return Left(a) ; });
-     */
-    @SuppressWarnings("unchecked")
-    public static <V,L,R> R[] flatMapEither(V[] arr,
+
+    public static <V,L,R> List<R> flatMap_A_E(V[] arr,
                                             _1_Function<? super V,? extends Either<L,R>> mapper) throws Exception {
         List<R> list = new ArrayList<>();
         for (V v : arr) {
@@ -275,12 +254,10 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(either.right());
         }
-        return (R[])(list.toArray());
+        return list;
     }
 
-
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,K> K[] flatMap(Tuple2<V1,V2>[] oldArr,
+    public static <V1,V2,K> List<K> flatMap_T2_A_C(Tuple2<V1,V2>[] oldArr,
                                                       _2_Function<? super V1,? super V2,? extends Collection<K>> mapper) throws Exception {
         List<K> list;
         list = new ArrayList<>();
@@ -289,10 +266,10 @@ public class _SYS_ARRAY_CODES {
                 list.add(k);
             }
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,K> K[] flatMapArray(Tuple2<V1,V2>[] oldArr,
+
+    public static <V1,V2,K> List<K> flatMap_T2_A_A(Tuple2<V1,V2>[] oldArr,
                                         _2_Function<? super V1,? super V2,? extends K[]> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (Tuple2<V1,V2> v : oldArr) {
@@ -300,10 +277,10 @@ public class _SYS_ARRAY_CODES {
                 list.add(k);
             }
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,K> K[] flatMapOptional(Tuple2<V1,V2>[] oldArr,
+
+    public static <V1,V2,K> List<K> flatMap_T2_A_O(Tuple2<V1,V2>[] oldArr,
                                              _2_Function<? super V1,? super V2,? extends Optional<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (Tuple2<V1,V2> v : oldArr) {
@@ -313,10 +290,10 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(optional.get());
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,L,R> R[] flatMapEither(Tuple2<V1,V2>[] oldArr,
+
+    public static <V1,V2,L,R> List<R> flatMap_T2_A_E(Tuple2<V1,V2>[] oldArr,
                                                 _2_Function<? super V1,? super V2,? extends Either<L,R>> mapper) throws Exception {
         List<R> list = new ArrayList<>();
         for (Tuple2<V1,V2> v : oldArr) {
@@ -326,12 +303,12 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(either.right());
         }
-        return (R[])(list.toArray());
+        return list;
     }
 
 
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,K> K[] flatMap(Tuple3<V1,V2,V3>[] oldArr,
+
+    public static <V1,V2,V3,K> List<K> flatMap_T3_A_C(Tuple3<V1,V2,V3>[] oldArr,
                                          _3_Function<? super V1,? super V2,? super V3,? extends Collection<K>> mapper) throws Exception {
         List<K> list;
         list= new ArrayList<>();
@@ -339,20 +316,21 @@ public class _SYS_ARRAY_CODES {
             for (K k : mapper.apply(v._1,v._2,v._3)) {
                 list.add(k);
             }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,K> K[] flatMapArray(Tuple3<V1,V2,V3>[] oldArr,
+
+
+    public static <V1,V2,V3,K> List<K> flatMap_T3_A_A(Tuple3<V1,V2,V3>[] oldArr,
                                            _3_Function<? super V1,? super V2,? super V3,? extends K[]> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (Tuple3<V1,V2,V3> v : oldArr)
             for (K k : mapper.apply(v._1,v._2,v._3)) {
                 list.add(k);
             }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,K> K[] flatMapOptional(Tuple3<V1,V2,V3>[] oldArr,
+
+    public static <V1,V2,V3,K> List<K> flatMap_T3_A_O(Tuple3<V1,V2,V3>[] oldArr,
                                                 _3_Function<? super V1,? super V2,? super V3,? extends Optional<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (Tuple3<V1,V2,V3> v : oldArr) {
@@ -362,10 +340,10 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(optional.get());
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,L,R> R[] flatMapEither(Tuple3<V1,V2,V3>[] oldArr,
+
+    public static <V1,V2,V3,L,R> List<R> flatMap_T3_A_E(Tuple3<V1,V2,V3>[] oldArr,
                                                 _3_Function<? super V1,? super V2,? super V3,? extends Either<L,R>> mapper) throws Exception {
         List<R> list = new ArrayList<>();
         for (Tuple3<V1,V2,V3> v : oldArr) {
@@ -375,22 +353,21 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(either.right());
         }
-        return (R[])(list.toArray());
+        return list;
     }
 
 
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,K> K[] flatMap(Tuple4<V1,V2,V3,V4>[] oldArr,
+    public static <V1,V2,V3,V4,K> List<K> flatMap_T4_A_C(Tuple4<V1,V2,V3,V4>[] oldArr,
                                                             _4_Function<? super V1,? super V2,? super V3,? super V4,? extends Collection<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (Tuple4<V1,V2,V3,V4> v : oldArr)
             for (K k : mapper.apply(v._1,v._2,v._3,v._4)) {
                 list.add(k);
             }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,K> K[] flatMapArray(Tuple4<V1,V2,V3,V4>[] oldArr,
+
+    public static <V1,V2,V3,V4,K> List<K> flatMap_T4_A_A(Tuple4<V1,V2,V3,V4>[] oldArr,
                                               _4_Function<? super V1,? super V2,? super V3,? super V4,? extends K[]> mapper) throws Exception {
         List<K> list;
         list = new ArrayList<>();
@@ -398,10 +375,10 @@ public class _SYS_ARRAY_CODES {
             for (K k : mapper.apply(v._1,v._2,v._3,v._4)) {
                 list.add(k);
             }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,K> K[] flatMapOptional(Tuple4<V1,V2,V3,V4>[] oldArr,
+
+    public static <V1,V2,V3,V4,K> List<K> flatMap_T4_A_O(Tuple4<V1,V2,V3,V4>[] oldArr,
                                                    _4_Function<? super V1,? super V2,? super V3,? super V4,? extends Optional<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (Tuple4<V1,V2,V3,V4> v : oldArr) {
@@ -411,10 +388,10 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(optional.get());
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,L,R> R[] flatMapEither(Tuple4<V1,V2,V3,V4>[] oldArr,
+
+    public static <V1,V2,V3,V4,L,R> List<R> flatMap_T4_A_E(Tuple4<V1,V2,V3,V4>[] oldArr,
                                                    _4_Function<? super V1,? super V2,? super V3,? super V4,? extends Either<L,R>> mapper) throws Exception {
         List<R> list = new ArrayList<>();
         for (Tuple4<V1,V2,V3,V4> v : oldArr) {
@@ -424,12 +401,11 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(either.right());
         }
-        return (R[])(list.toArray());
+        return list;
     }
 
 
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,K> K[] flatMap(Tuple5<V1,V2,V3,V4,V5>[] oldArr,
+    public static <V1,V2,V3,V4,V5,K> List<K> flatMap_T5_A_C(Tuple5<V1,V2,V3,V4,V5>[] oldArr,
                                                                _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends Collection<K>> mapper
                                                               ) throws Exception {
         List<K> list;
@@ -438,10 +414,10 @@ public class _SYS_ARRAY_CODES {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4, v._5)) {
                 list.add(k);
             }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,K> K[] flatMapArray(Tuple5<V1,V2,V3,V4,V5>[] arr,
+
+    public static <V1,V2,V3,V4,V5,K> List<K> flatMap_T5_A_A(Tuple5<V1,V2,V3,V4,V5>[] arr,
                                                  _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends K[]> mapper
     ) throws Exception {
         List<K> list = new ArrayList<>();
@@ -449,10 +425,10 @@ public class _SYS_ARRAY_CODES {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4, v._5)) {
                 list.add(k);
             }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,K> K[] flatMapOptional(Tuple5<V1,V2,V3,V4,V5>[] arr,
+
+    public static <V1,V2,V3,V4,V5,K> List<K> flatMap_T5_A_O(Tuple5<V1,V2,V3,V4,V5>[] arr,
                                                       _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends Optional<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (Tuple5<V1,V2,V3,V4,V5> v : arr) {
@@ -462,10 +438,10 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(optional.get());
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V1,V2,V3,V4,V5,L,R> R[] flatMapEither(Tuple5<V1,V2,V3,V4,V5>[] arr,
+
+    public static <V1,V2,V3,V4,V5,L,R> List<R> flatMap_T5_A_E(Tuple5<V1,V2,V3,V4,V5>[] arr,
                                                       _5_Function<? super V1,? super V2,? super V3,? super V4,? super V5,? extends Either<L,R>> mapper) throws Exception {
         List<R> list = new ArrayList<>();
         for (Tuple5<V1,V2,V3,V4,V5> v : arr) {
@@ -475,205 +451,178 @@ public class _SYS_ARRAY_CODES {
             }
             list.add(either.right());
         }
-        return (R[])(list.toArray());
+        return list;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMap(V[][] oldArr, _1_Function<? super V,? extends Collection<K>> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_AA_C(V[][] oldArr,
+                                             _1_Function<? super V[],? extends Collection<K>> mapper) throws Exception {
         List<K> list;
         list = new ArrayList<>();
         for (V[] vs : oldArr)
-            for(V v:vs){
-                for (K k : mapper.apply(v)) {
-                    list.add(k);
-                }
+            for (K k : mapper.apply(vs)) {
+                list.add(k);
+
             }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapArray(V[][] oldArr,
-                                         _1_Function<? super V,? extends K[]> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_AA_A(V[][] oldArr,
+                                         _1_Function<? super V[],? extends K[]> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (V[] vs : oldArr)
-            for(V v:vs){
-                for (K k : mapper.apply(v)) {
-                    list.add(k);
-                }
+            for (K k : mapper.apply(vs)) {
+                list.add(k);
             }
-        return (K[])(list.toArray());
+
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapOptional(V[][] oldArr,
-                                            _1_Function<? super V,? extends Optional<K>> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_AA_O(V[][] oldArr,
+                                            _1_Function<? super V[],? extends Optional<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for (V[] vs : oldArr) {
-            for(V v:vs) {
-                Optional<K> optional = mapper.apply(v);
-                if (!optional.isPresent()) {
-                    continue;
-                }
-                list.add(optional.get());
+            Optional<K> optional = mapper.apply(vs);
+            if (!optional.isPresent()) {
+                continue;
             }
+            list.add(optional.get());
+
         }
-        return (K[])(list.toArray());
-    }
-    @SuppressWarnings("unchecked")
-    public static <V,L,R> R[] flatMapEither(V[][] arr,
-                                            _1_Function<? super V,? extends Either<L,R>> mapper) throws Exception {
-        List<R> list = new ArrayList<>();
-        for( V[] vs : arr) {
-            for(V v:vs) {
-                Either<L, R> either = mapper.apply(v);
-                if (either.isLeft()) {
-                    continue;
-                }
-                list.add(either.right());
-            }
-        }
-        return (R[])(list.toArray());
+        return list;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapOptional(Optional<V>[] oldArr, _1_Function<? super V,? extends Collection<K>> mapper) throws Exception {
+    public static <V,L,R> List<R> flatMap_AA_E(V[][] arr,
+                                            _1_Function<? super V[],? extends Either<L,R>> mapper) throws Exception {
+        List<R> list = new ArrayList<>();
+        for (V[] vs : arr) {
+            Either<L, R> either = mapper.apply(vs);
+            if (either.isLeft()) {
+                continue;
+            }
+            list.add(either.right());
+
+        }
+        return list;
+    }
+
+
+    public static <V,K> List<K> flatMap_OA_C(Optional<V>[] oldArr,
+                                             _1_Function<? super Optional<V>,? extends Collection<K>> mapper) throws Exception {
         List<K> list = new ArrayList<>();
         for(Optional<V> optional:oldArr){
-            if(!optional.isPresent()){
-                continue;
-            }
-            for(K k:mapper.apply(optional.get())){
+            for(K k:mapper.apply(optional)){
                 list.add(k);
             }
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapArrayOptional(Optional<V>[] arr, _1_Function<? super V,? extends K[]> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_OA_A(Optional<V>[] arr,
+                                             _1_Function<? super Optional<V>,? extends K[]> mapper) throws Exception {
         List<K> list;
         list = new ArrayList<>();
         for (Optional<V> optional : arr) {
-            if (!optional.isPresent()) {
-                continue;
-            }
-            for (K k : mapper.apply(optional.get())) {
+            for (K k : mapper.apply(optional)) {
                 list.add(k);
             }
         }
-        return (K[])(list.toArray());
+        return list;
     }
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapOptionalOptional(Optional<V>[] arr, _1_Function<? super V,? extends Optional<K>> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_OA_O(Optional<V>[] arr,
+                                             _1_Function<? super Optional<V>,? extends Optional<K>> mapper) throws Exception {
         List<K> list;
         list = new ArrayList<>();
         for (Optional<V> optional : arr) {
-            if (!optional.isPresent()) {
-                continue;
-            }
-            Optional<K> optionalOptional = mapper.apply(optional.get());
+            Optional<K> optionalOptional = mapper.apply(optional);
             if (!optionalOptional.isPresent()) {
                 continue;
             }
             list.add(optionalOptional.get());
         }
-        return (K[])(list.toArray());
+        return list;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapTry(Try<V>[] list, _1_Function<? super V,? extends Collection<K>> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_TA_C(Try<V>[] list,
+                                             _1_Function<? super Try<V>,? extends Collection<K>> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Try<V> vTry:list){
-            if(vTry.failure()){
-                continue;
-            }
-            for(K k:mapper.apply((((Success<V>)vTry).get()))){
+            for(K k:mapper.apply(vTry)){
                 newList.add(k);
             }
         }
-        return (K[])(newList.toArray());
+        return newList;
     }
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapArrayTry(Try<V>[] list, _1_Function<? super V,? extends K[]> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_TA_A(Try<V>[] list,
+                                             _1_Function<? super Try<V>,? extends K[]> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Try<V> vTry:list){
-            if(vTry.failure()){
-                continue;
-            }
-            for(K k:mapper.apply((((Success<V>)vTry).get()))){
+            for(K k:mapper.apply(vTry)){
                 newList.add(k);
             }
         }
-        return (K[])(newList.toArray());
+        return newList;
     }
-    @SuppressWarnings("unchecked")
-    public static <V,K> K[] flatMapTryTry(Try<V>[] list, _1_Function<? super V,? extends Try<K>> mapper) throws Exception {
+
+    public static <V,K> List<K> flatMap_TA_T(Try<V>[] list,
+                                             _1_Function<? super Try<V>,? extends Try<K>> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Try<V> vTry:list){
-            if(vTry.failure()){
-                continue;
-            }
-            Try<K> kTry = mapper.apply((((Success<V>)vTry).get()));
+            Try<K> kTry = mapper.apply(vTry);
             if(kTry.success()){
-                newList.add((((Success<K>)kTry).get()));
+                newList.add(((Success<K>)kTry).getValue());
             }
         }
-        return (K[])(newList.toArray());
+        return newList;
     }
 
-
-    @SuppressWarnings("unchecked")
-    public static <K,L,R> K[] flatMapEither(Either<L,R>[] list, _1_Function<? super R,? extends Collection<K>> mapper) throws Exception {
+    public static <K,L,R> List<K> flatMap_EA_C(Either<L,R>[] list, _1_Function<? super Either<L,R>,? extends Collection<K>> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Either<L,R> either:list){
-            if(either.isLeft()){
-                continue;
-            }
-            for(K k:mapper.apply(either.right())){
+            for(K k:mapper.apply(either)){
                 newList.add(k);
             }
         }
-        return (K[])(newList.toArray());
+        return newList;
     }
-    @SuppressWarnings("unchecked")
-    public static <K,L,R> K[] flatMapArrayEither(Either<L,R>[] list, _1_Function<? super R,? extends K[]> mapper) throws Exception {
+
+    public static <K,L,R> List<K> flatMap_EA_A(Either<L,R>[] list, _1_Function<? super Either<L,R>,? extends K[]> mapper) throws Exception {
         List<K> newList = new ArrayList<>();
         for(Either<L,R> either:list){
-            if(either.isLeft()){
-                continue;
-            }
-            for(K k:mapper.apply(either.right())){
+            for(K k:mapper.apply(either)){
                 newList.add(k);
             }
         }
-        return (K[])(newList.toArray());
+        return newList;
     }
-    @SuppressWarnings("unchecked")
-    public static <K,L,R> R[] flatMapEitherEither(Either<L,R>[] list, _1_Function<? super R,? extends Either<L,R>> mapper) throws Exception {
+
+    public static <L,R> List<R> flatMap_EA_E(Either<L,R>[] list, _1_Function<? super Either<L,R>,? extends Either<L,R>> mapper) throws Exception {
         List<R> newList = new ArrayList<>();
         for(Either<L,R> either:list){
-            if(either.isLeft()){
-                continue;
-            }
-            Either<L, R> eitherEither= mapper.apply(either.right());
+            Either<L, R> eitherEither= mapper.apply(either);
             if (eitherEither.isLeft()) {
                 continue;
             }
             newList.add(eitherEither.right());
         }
-        return (R[])(newList.toArray());
+        return newList;
     }
 
     //filter functions
     /**
      *arr.filter(a=>{ return a!=1;});
      */
-    @SuppressWarnings("unchecked")
-    public static <V> V[] filter(V[] arr, _1_Predicate<V> filter) throws Exception{
+    public static <V> List<V> filter(V[] arr, _1_Predicate<V> filter) throws Exception{
         List<V> newList = new ArrayList<>();
         for(V v:arr){
             if(filter.test(v)){
                 newList.add(v);
             }
         }
-        return (V[])newList.toArray();
+        return newList;
     }
 
     //foreach functions
@@ -739,13 +688,12 @@ public class _SYS_ARRAY_CODES {
     /**
      * arr.zipWithIndex();
      */
-    @SuppressWarnings("unchecked")
-    public static <V> Tuple2<V,Integer>[] zipWithIndex(V[] arr){
-        Object[]  newList = new Object[arr.length];
+    public static <V> List<Tuple2<V,Integer>> zipWithIndex(V[] arr){
+        List<Tuple2<V,Integer>> list = new ArrayList<>();
         for(int i=0;i<arr.length;i++){
-            newList[i]=new Tuple2<>(arr[i],i);
+            list.add(new Tuple2<>(arr[i],i));
         }
-        return (Tuple2<V, Integer>[]) newList;
+        return list;
     }
 
     //reduce functions
@@ -755,7 +703,7 @@ public class _SYS_ARRAY_CODES {
     public static <V> V reduce(V[] arr, _2_Function<? super V,? super V,? extends V> reducer) throws Exception {
         V v = arr[0];
         for(int i=1;i<arr.length;i++){
-            reducer.apply(v,arr[i]);
+            v = reducer.apply(v,arr[i]);
         }
         return v;
     }
@@ -802,7 +750,7 @@ public class _SYS_ARRAY_CODES {
         return set;
     }
 
-    public static <V> Set<V> toSortSet(V[] arr,Comparator<V> comparator){
+    public static <V> Set<V> toSortedSet(V[] arr, Comparator<V> comparator){
         Set<V> set = new TreeSet<>(comparator);
         Collections.addAll(set,arr);
         return set;
@@ -968,6 +916,12 @@ public class _SYS_ARRAY_CODES {
             }
         }
         return min;
+    }
+
+    @SafeVarargs
+    public static <V> V[] ofArray(V[] newVs,V... vs) {
+        System.arraycopy(vs, 0, newVs, 0, vs.length);
+       return newVs;
     }
 
 }

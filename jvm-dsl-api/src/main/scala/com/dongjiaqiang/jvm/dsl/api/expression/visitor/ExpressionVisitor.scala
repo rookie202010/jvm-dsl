@@ -149,6 +149,7 @@ trait ExpressionVisitor[T] extends LiteralExpressionVisitor[T]
       case v: Cast ⇒ visit( v, this )
       case v: Instanceof ⇒ visit( v, this )
       case v: Paren ⇒ visit( v, this )
+      case v: SignedNumber ⇒ visit(v,this)
 
       //visit var expression
       case v: LocalVarDef ⇒

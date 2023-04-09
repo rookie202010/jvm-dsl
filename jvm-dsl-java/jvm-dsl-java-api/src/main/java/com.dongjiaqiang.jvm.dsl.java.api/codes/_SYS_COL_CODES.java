@@ -123,7 +123,7 @@ public class _SYS_COL_CODES {
     /**
      * arr.flatMap(a=>{ return [1,2,a] ; });
      */
-    public static <V, K> void flatMap(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends Collection<K>> mapper) throws Exception {
+    public static <V, K> void flatMap_C_C(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends Collection<K>> mapper) throws Exception {
         for (V v : list) {
             for (K k : mapper.apply(v)) {
                 newList.add(k);
@@ -131,7 +131,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V, K> void flatMapArray(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends K[]> mapper) throws Exception {
+    public static <V, K> void flatMap_C_A(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends K[]> mapper) throws Exception {
         for (V v : list) {
             for (K k : mapper.apply(v)) {
                 newList.add(k);
@@ -139,7 +139,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V, K> void flatMapTry(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends Try<K>> mapper) throws Exception {
+    public static <V, K> void flatMap_C_T(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends Try<K>> mapper) throws Exception {
         for (V v : list) {
             Try<K> vtry = mapper.apply(v);
             if (vtry.failure()) {
@@ -149,7 +149,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V, K> void flatMapOptional(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends Optional<K>> mapper) throws Exception {
+    public static <V, K> void flatMap_C_O(Collection<V> list, Collection<K> newList, _1_Function<? super V, ? extends Optional<K>> mapper) throws Exception {
         for (V v : list) {
             Optional<K> optional = mapper.apply(v);
             if (!optional.isPresent()) {
@@ -159,7 +159,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V, L, R> void flatMapEither(Collection<V> list, Collection<R> newList, _1_Function<? super V, ? extends Either<L, R>> mapper) throws Exception {
+    public static <V, L, R> void flatMap_C_E(Collection<V> list, Collection<R> newList, _1_Function<? super V, ? extends Either<L, R>> mapper) throws Exception {
         for (V v : list) {
             Either<L, R> either = mapper.apply(v);
             if (either.isLeft()) {
@@ -169,7 +169,58 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, K> void flatMap(Collection<Tuple2<V1, V2>> list, Collection<K> newList,
+    public static <V, K> void flatMap_OC_C(Collection<Optional<V>> list,
+                                           Collection<K> newList, _1_Function<? super Optional<V>, ? extends Collection<K>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            for (K k : mapper.apply(v)) {
+                newList.add(k);
+            }
+        }
+    }
+
+    public static <V, K> void flatMap_OC_A(Collection<Optional<V>> list,
+                                           Collection<K> newList, _1_Function<? super Optional<V>, ? extends K[]> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            for (K k : mapper.apply(v)) {
+                newList.add(k);
+            }
+        }
+    }
+
+    public static <V, K> void flatMap_OC_T(Collection<Optional<V>> list,
+                                           Collection<K> newList, _1_Function<? super Optional<V>, ? extends Try<K>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            Try<K> vtry = mapper.apply(v);
+            if (vtry.failure()) {
+                continue;
+            }
+            newList.add(((Success<K>) vtry).getValue());
+        }
+    }
+
+    public static <V, K> void flatMap_OC_O(Collection<Optional<V>> list,
+                                           Collection<K> newList, _1_Function<? super Optional<V>, ? extends Optional<K>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            Optional<K> optional = mapper.apply(v);
+            if (!optional.isPresent()) {
+                continue;
+            }
+            newList.add((optional.get()));
+        }
+    }
+
+    public static <V, L, R> void flatMap_OC_E(Collection<Optional<V>> list,
+                                              Collection<R> newList, _1_Function<? super Optional<V>, ? extends Either<L, R>> mapper) throws Exception {
+        for (Optional<V> v : list) {
+            Either<L, R> either = mapper.apply(v);
+            if (either.isLeft()) {
+                continue;
+            }
+            newList.add(either.right());
+        }
+    }
+
+    public static <V1, V2, K> void flatMap_T2_C_C(Collection<Tuple2<V1, V2>> list, Collection<K> newList,
                                            _2_Function<? super V1, ? super V2, ? extends Collection<K>> mapper) throws Exception {
         for (Tuple2<V1, V2> v : list) {
             for (K k : mapper.apply(v._1, v._2)) {
@@ -178,7 +229,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, K> void flatMapArray(Collection<Tuple2<V1, V2>> list, Collection<K> newList,
+    public static <V1, V2, K> void flatMap_T2_C_A(Collection<Tuple2<V1, V2>> list, Collection<K> newList,
                                                 _2_Function<? super V1, ? super V2, ? extends K[]> mapper) throws Exception {
         for (Tuple2<V1, V2> v : list) {
             for (K k : mapper.apply(v._1, v._2)) {
@@ -187,7 +238,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, K> void flatMapTry(Collection<Tuple2<V1, V2>> list,
+    public static <V1, V2, K> void flatMap_T2_C_T(Collection<Tuple2<V1, V2>> list,
                                               Collection<K> newList,
                                               _2_Function<? super V1, ? super V2, ? extends Try<K>> mapper) throws Exception {
         for (Tuple2<V1, V2> v : list) {
@@ -199,7 +250,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, K> void flatMapOptional(Collection<Tuple2<V1, V2>> list,
+    public static <V1, V2, K> void flatMap_T2_C_O(Collection<Tuple2<V1, V2>> list,
                                                    Collection<K> newList, _2_Function<? super V1, ? super V2, ? extends Optional<K>> mapper) throws Exception {
         for (Tuple2<V1, V2> v : list) {
             Optional<K> optional = mapper.apply(v._1, v._2);
@@ -210,7 +261,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, L, R> void flatMapEither(Collection<Tuple2<V1, V2>> list, Collection<R> newList,
+    public static <V1, V2, L, R> void flatMap_T2_C_E(Collection<Tuple2<V1, V2>> list, Collection<R> newList,
                                                     _2_Function<? super V1, ? super V2, ? extends Either<L, R>> mapper) throws Exception {
         for (Tuple2<V1, V2> v : list) {
             Either<L, R> either = mapper.apply(v._1, v._2);
@@ -221,7 +272,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, K> void flatMap(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
+    public static <V1, V2, V3, K> void flatMap_T3_C_C(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
                                                _3_Function<? super V1, ? super V2, ? super V3, ? extends Collection<K>> mapper) throws Exception {
         for (Tuple3<V1, V2, V3> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3)) {
@@ -230,7 +281,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, K> void flatMapArray(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
+    public static <V1, V2, V3, K> void flatMap_T3_C_A(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
                                                     _3_Function<? super V1, ? super V2, ? super V3, ? extends K[]> mapper) throws Exception {
         for (Tuple3<V1, V2, V3> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3)) {
@@ -239,7 +290,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, K> void flatMapTry(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
+    public static <V1, V2, V3, K> void flatMap_T3_C_T(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
                                                   _3_Function<? super V1, ? super V2, ? super V3, ? extends Try<K>> mapper) throws Exception {
         for (Tuple3<V1, V2, V3> v : list) {
             Try<K> vtry = mapper.apply(v._1, v._2, v._3);
@@ -250,7 +301,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, K> void flatMapOptional(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
+    public static <V1, V2, V3, K> void flatMap_T3_C_O(Collection<Tuple3<V1, V2, V3>> list, Collection<K> newList,
                                                        _3_Function<? super V1, ? super V2, ? super V3, ? extends Optional<K>> mapper) throws Exception {
         for (Tuple3<V1, V2, V3> v : list) {
             Optional<K> optional = mapper.apply(v._1, v._2, v._3);
@@ -261,7 +312,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, L, R> void flatMapEither(Collection<Tuple3<V1, V2, V3>> list, Collection<R> newList,
+    public static <V1, V2, V3, L, R> void flatMap_T3_C_E(Collection<Tuple3<V1, V2, V3>> list, Collection<R> newList,
                                                         _3_Function<? super V1, ? super V2, ? super V3, ? extends Either<L, R>> mapper) throws Exception {
         for (Tuple3<V1, V2, V3> v : list) {
             Either<L, R> either = mapper.apply(v._1, v._2, v._3);
@@ -272,7 +323,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, K> void flatMap(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, K> void flatMap_T4_C_C(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
                                                    _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends Collection<K>> mapper) throws Exception {
         for (Tuple4<V1, V2, V3, V4> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4)) {
@@ -281,7 +332,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, K> void flatMapArray(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, K> void flatMap_T4_C_A(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
                                                         _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends K[]> mapper) throws Exception {
         for (Tuple4<V1, V2, V3, V4> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4)) {
@@ -290,7 +341,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, K> void flatMapTry(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, K> void flatMap_T4_C_T(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
                                                       _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends Try<K>> mapper) throws Exception {
         for (Tuple4<V1, V2, V3, V4> v : list) {
             Try<K> vtry = mapper.apply(v._1, v._2, v._3, v._4);
@@ -301,7 +352,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, K> void flatMapOptional(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, K> void flatMap_T4_C_O(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<K> newList,
                                                            _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends Optional<K>> mapper) throws Exception {
         for (Tuple4<V1, V2, V3, V4> v : list) {
             Optional<K> optional = mapper.apply(v._1, v._2, v._3, v._4);
@@ -312,7 +363,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, L, R> void flatMapEither(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<R> newList,
+    public static <V1, V2, V3, V4, L, R> void flatMap_T4_C_E(Collection<Tuple4<V1, V2, V3, V4>> list, Collection<R> newList,
                                                             _4_Function<? super V1, ? super V2, ? super V3, ? super V4, ? extends Either<L, R>> mapper) throws Exception {
         for (Tuple4<V1, V2, V3, V4> v : list) {
             Either<L, R> either = mapper.apply(v._1, v._2, v._3, v._4);
@@ -323,7 +374,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, K> void flatMap(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, K> void flatMap_T5_C_C(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
                                                        _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends Collection<K>> mapper) throws Exception {
         for (Tuple5<V1, V2, V3, V4, V5> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4, v._5)) {
@@ -332,7 +383,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, K> void flatMapArray(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, K> void flatMap_T5_C_A(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
                                                             _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends K[]> mapper) throws Exception {
         for (Tuple5<V1, V2, V3, V4, V5> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4, v._5)) {
@@ -341,7 +392,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, K> void flatMapTry(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, K> void flatMap_T5_C_T(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
                                                           _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends Try<K>> mapper) throws Exception {
         for (Tuple5<V1, V2, V3, V4, V5> v : list) {
             Try<K> vtry = mapper.apply(v._1, v._2, v._3, v._4, v._5);
@@ -352,7 +403,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, K> void flatMapOptional(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, K> void flatMap_T5_C_O(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<K> newList,
                                                                _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends Optional<K>> mapper) throws Exception {
         for (Tuple5<V1, V2, V3, V4, V5> v : list) {
             Optional<K> optional = mapper.apply(v._1, v._2, v._3, v._4, v._5);
@@ -363,7 +414,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, L, R> void flatMapEither(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<R> newList,
+    public static <V1, V2, V3, V4, V5, L, R> void flatMap_T5_C_E(Collection<Tuple5<V1, V2, V3, V4, V5>> list, Collection<R> newList,
                                                                 _5_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? extends Either<L, R>> mapper) throws Exception {
         for (Tuple5<V1, V2, V3, V4, V5> v : list) {
             Either<L, R> either = mapper.apply(v._1, v._2, v._3, v._4, v._5);
@@ -374,7 +425,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, V6, K> void flatMap(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, V6, K> void flatMap_T6_C_C(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
                                                            _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends Collection<K>> mapper) throws Exception {
         for (Tuple6<V1, V2, V3, V4, V5, V6> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4, v._5, v._6)) {
@@ -383,7 +434,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, V6, K> void flatMapArray(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, V6, K> void flatMap_T6_C_A(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
                                                                 _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends K[]> mapper) throws Exception {
         for (Tuple6<V1, V2, V3, V4, V5, V6> v : list) {
             for (K k : mapper.apply(v._1, v._2, v._3, v._4, v._5, v._6)) {
@@ -391,7 +442,7 @@ public class _SYS_COL_CODES {
             }
         }
     }
-    public static <V1, V2, V3, V4, V5, V6, K> void flatMapTry(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, V6, K> void flatMap_T6_C_T(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
                                                               _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends Try<K>> mapper) throws Exception {
         for (Tuple6<V1, V2, V3, V4, V5, V6> v : list) {
             Try<K> vtry = mapper.apply(v._1, v._2, v._3, v._4, v._5, v._6);
@@ -402,7 +453,7 @@ public class _SYS_COL_CODES {
         }
     }
 
-    public static <V1, V2, V3, V4, V5, V6, K> void flatMapOptional(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
+    public static <V1, V2, V3, V4, V5, V6, K> void flatMap_T6_C_O(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<K> newList,
                                                                    _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends Optional<K>> mapper) throws Exception {
         for (Tuple6<V1, V2, V3, V4, V5, V6> v : list) {
             Optional<K> optional = mapper.apply(v._1, v._2, v._3, v._4, v._5, v._6);
@@ -412,7 +463,7 @@ public class _SYS_COL_CODES {
             newList.add((optional.get()));
         }
     }
-    public static <V1, V2, V3, V4, V5, V6, L, R> void flatMapEither(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<R> newList,
+    public static <V1, V2, V3, V4, V5, V6, L, R> void flatMap_T6_C_E(Collection<Tuple6<V1, V2, V3, V4, V5, V6>> list, Collection<R> newList,
                                                                     _6_Function<? super V1, ? super V2, ? super V3, ? super V4, ? super V5, ? super V6, ? extends Either<L, R>> mapper) throws Exception {
         for (Tuple6<V1, V2, V3, V4, V5, V6> v : list) {
             Either<L, R> either = mapper.apply(v._1, v._2, v._3, v._4, v._5, v._6);
@@ -529,8 +580,8 @@ public class _SYS_COL_CODES {
         }
     }
 
-    //tail
-    public static <V> V tail(Collection<V> collection){
+    //last
+    public static <V> V last(Collection<V> collection){
         Iterator<V> iterator = collection.iterator();
         V v = iterator.next();
         while (iterator.hasNext()){
@@ -539,12 +590,12 @@ public class _SYS_COL_CODES {
         return v;
     }
 
-    //tailOption
-    public static <V> Optional<V> tailOption(Collection<V> collection){
+    //lastOption
+    public static <V> Optional<V> lastOption(Collection<V> collection){
         if(collection.isEmpty()){
             return Optional.empty();
         }else{
-            return Optional.of(tail(collection));
+            return Optional.of(last(collection));
         }
     }
 
@@ -638,108 +689,112 @@ public class _SYS_COL_CODES {
 
     //max
     public static int maxInt(Collection<Integer> collection){
-        int max = Integer.MIN_VALUE;
-        for(int i:collection){
-            max = Integer.max(max,i);
+        Iterator<Integer> iterator =  collection.iterator();
+        int max = iterator.next();
+        while (iterator.hasNext()){
+            max = Integer.max(max,iterator.next());
         }
         return max;
     }
 
     public static double maxDouble(Collection<Double> collection){
-        double max = Double.MIN_VALUE;
-        for(double i:collection){
-            max = Double.max(max,i);
+        Iterator<Double> iterator = collection.iterator();
+        double max = iterator.next();
+        while (iterator.hasNext()){
+            max = Double.max(max,iterator.next());
         }
         return max;
     }
 
     public static float maxFloat(Collection<Float> collection){
-        float max = Float.MIN_VALUE;
-        for(float i:collection){
-            max = Float.max(max,i);
+        Iterator<Float> iterator = collection.iterator();
+        float max = iterator.next();
+        while (iterator.hasNext()){
+            max = Float.max(max,iterator.next());
         }
         return max;
     }
 
     public static long maxLong(Collection<Long> collection){
-        long max = Long.MIN_VALUE;
-        for(long i:collection){
-            max = Long.max(max,i);
+        Iterator<Long> iterator = collection.iterator();
+        long max = iterator.next();
+        while (iterator.hasNext()){
+            max = Long.max(max,iterator.next());
         }
         return max;
     }
 
     public static char maxChar(Collection<Character> collection){
-        char max = Character.MIN_VALUE;
-        for(char i:collection){
-           if(max < i){
-               i = max;
-           }
+        Iterator<Character> iterator = collection.iterator();
+        int max = iterator.next();
+        while (iterator.hasNext()){
+            max = Integer.max(max,iterator.next());
         }
-        return max;
+        return (char) max;
     }
 
     public static byte maxByte(Collection<Byte> collection){
-        byte max = Byte.MIN_VALUE;
+        Iterator<Byte> iterator = collection.iterator();
+        int max = iterator.next();
         for(byte i:collection){
-            if(max < i){
-                i = max;
-            }
+            max = Integer.max(max,i);
         }
-        return max;
+        return (byte)max;
     }
 
     //min
     public static int minInt(Collection<Integer> collection){
-        int min = Integer.MAX_VALUE;
-        for(int i:collection){
-            min = Integer.min(min,i);
+        Iterator<Integer> iterator =  collection.iterator();
+        int max = iterator.next();
+        while (iterator.hasNext()){
+            max = Integer.min(max,iterator.next());
         }
-        return min;
+        return max;
     }
 
     public static double minDouble(Collection<Double> collection){
-        double min = Double.MAX_VALUE;
-        for(double i:collection){
-            min = Double.min(min,i);
+        Iterator<Double> iterator = collection.iterator();
+        double max = iterator.next();
+        while (iterator.hasNext()){
+            max = Double.min(max,iterator.next());
         }
-        return min;
+        return max;
     }
 
     public static float minFloat(Collection<Float> collection){
-        float min = Float.MAX_VALUE;
-        for(float i:collection){
-            min = Float.min(min,i);
+        Iterator<Float> iterator = collection.iterator();
+        float max = iterator.next();
+        while (iterator.hasNext()){
+            max = Float.min(max,iterator.next());
         }
-        return min;
+        return max;
     }
 
     public static long minLong(Collection<Long> collection){
-        long min = Long.MAX_VALUE;
-        for(long i:collection){
-            min = Long.min(min,i);
+        Iterator<Long> iterator = collection.iterator();
+        long max = iterator.next();
+        while (iterator.hasNext()){
+            max = Long.min(max,iterator.next());
         }
-        return min;
+        return max;
     }
 
     public static char minChar(Collection<Character> collection){
-        char min = Character.MAX_VALUE;
-        for(char i:collection){
-            if(i < min){
-                min = i;
-            }
+        Iterator<Character> iterator = collection.iterator();
+        int max = iterator.next();
+        while (iterator.hasNext()){
+            max = Integer.min(max,iterator.next());
         }
-        return min;
+        return (char) max;
     }
 
     public static byte minByte(Collection<Byte> collection){
-        byte min = Byte.MAX_VALUE;
+        Iterator<Byte> iterator = collection.iterator();
+        int max = iterator.next();
         for(byte i:collection){
-            if(i < min){
-                min = i;
-            }
+            max = Integer.min(max,i);
         }
-        return min;
+        return (byte)max;
     }
 
 }

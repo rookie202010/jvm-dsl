@@ -712,6 +712,13 @@ public interface JvmDslParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitUnaryExpr(JvmDslParserParser.UnaryExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code AddUnaryExpr}
+	 * labeled alternative in {@link JvmDslParserParser#unaryExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAddUnaryExpr(JvmDslParserParser.AddUnaryExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code LiteralAndFuncCallExpr}
 	 * labeled alternative in {@link JvmDslParserParser#unaryExpression}.
 	 * @param ctx the parse tree

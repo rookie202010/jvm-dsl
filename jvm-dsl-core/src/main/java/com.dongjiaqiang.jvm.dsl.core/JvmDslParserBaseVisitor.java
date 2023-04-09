@@ -753,6 +753,13 @@ public class JvmDslParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitAddUnaryExpr(JvmDslParserParser.AddUnaryExprContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitLiteralAndFuncCallExpr(JvmDslParserParser.LiteralAndFuncCallExprContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

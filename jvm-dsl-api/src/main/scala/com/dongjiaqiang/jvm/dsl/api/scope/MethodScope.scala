@@ -138,7 +138,7 @@ class MethodScope(val name: String,
    * @param index ref index
    * @param refs  ref names
    */
-  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Set[Int]): Option[FieldScope]= {
+  override def resolveVarRefs(index: Int, refs: List[String], arrayRefsIndex:Map[Int,Int]): Option[FieldScope]= {
       refs match {
         case "this" :: refs ⇒
           scope.resolveVarRefs( index, refs,arrayRefsIndex, this, params, skipCurrentScope = true, backRef = true, Some( parentScope ) )

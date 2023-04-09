@@ -114,7 +114,6 @@ trait BlockExpressionReviser extends BlockExpressionVisitor[Expression] {
                      visitor: ExpressionVisitor[Expression]): Expression = {
       val newTryBlock = visit(tryCatch.tryBlock,visitor)
       val reviseFinallyBlock = ExpressionReviser.revise[Expression,Block](tryCatch.finallyBlock,visitor)
-
       val blocks = tryCatch.catches.map(_._2)
       val newBlocks = ExpressionReviser.revise[Block,Block](blocks,visitor)
       if(newTryBlock!=tryCatch.tryBlock || reviseFinallyBlock.isDefined || newBlocks.isDefined){

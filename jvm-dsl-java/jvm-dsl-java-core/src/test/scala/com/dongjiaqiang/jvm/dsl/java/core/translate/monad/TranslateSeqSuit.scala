@@ -7,14 +7,15 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.util
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 class TranslateSeqSuit extends AnyFunSuite{
 
   def compile(code: String): Class[_] = {
-    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example", javaTranslateConfig = ConfigFactory.empty( ) ) )
+    val javaProgram = code.translate( JavaTranslatorContext( packageName = "com.example",clazzName = "Program",  javaTranslateConfig = ConfigFactory.empty( ) ) )
     val javaCompile = new JaninoCompiler( this.getClass.getClassLoader )
-    javaCompile.compile( javaProgram, "com.example" )
+    javaCompile.load( javaProgram )
   }
 
   test( "test seq 1" ) {
@@ -110,6 +111,9 @@ class TranslateSeqSuit extends AnyFunSuite{
   }
 
   test( "test seq 3" ) {
+    def func(a:List[String]):Long={
+        a.map(i⇒i.toInt).sum.toLong
+    }
     val code =
       """
         |program{
@@ -126,11 +130,16 @@ class TranslateSeqSuit extends AnyFunSuite{
       a.add(  Random.nextInt( 20 ).toString)
       a.add( Random.nextInt( 30  ).toString )
       a.add(  Random.nextInt( 100 ).toString )
-      println( method.invoke( instance,a ))
+      import scala.collection.convert.ImplicitConversionsToScala._
+      assert( method.invoke( instance,a ).equals(func(a.toList)))
     } )
   }
 
   test( "test seq 4" ) {
+    def func():Long={
+        val a = Set(3,2,3)
+        a.last.toLong+Set(3,12,3,11,1).map(i⇒i+10).filter(j⇒j>10).sum.toLong
+    }
     val code =
       """
         |program{
@@ -139,41 +148,59 @@ class TranslateSeqSuit extends AnyFunSuite{
         |           return j-i;
         |           });
         |
-        |       return a.tail().toLong() + {3,12,3,11,1}.toSortedSet().map(i=>{ return i+10;}).filter(j=> { return j>10;}).toSet().sum().toLong();
+        |       return a.last().toLong() + {3,12,3,11,1}.toSortedSet().map(i=>{ return i+10;}).filter(j=> { return j>10;}).toSet().sum().toLong();
         |  }
         |}
         |""".stripMargin
     val clazz = compile( code )
     val instance = clazz.getConstructors.head.newInstance( )
     val method = clazz.getMethod( "eval" )
-    println( method.invoke( instance ) )
-//    (0 until 10).foreach( _ ⇒ {
-//      val a = new util.ArrayList[String]( )
-//      a.add( Random.nextInt( 20 ).toString )
-//      a.add( Random.nextInt( 30 ).toString )
-//      a.add( Random.nextInt( 100 ).toString )
-//      println( method.invoke( instance, a ) )
-//    } )
+    assert( method.invoke( instance ).equals(func()) )
   }
 
   test( "test seq 5" ) {
+    def func(a: List[Long], b: Set[Option[Long]]): Int = {
+      val s1 = a.map( _.toInt ).sum
+      val s2 = b.flatten
+      val min = if(s2.isEmpty) 10 else s2.min
+      val sum = s2.sum
+      s1 + sum.toInt+ min.toInt
+    }
     val code =
       """
         |program{
-        |   def eval(List[Long] a)=Int throws Exception{
-        |       return a.map(i=>{ return i.toInt(); }).sum();
+        |   def eval(List[Long] a,Set[Option[Long]] b)=Int throws Exception{
+        |       Set[Long] bb = b.flatten();
+        |       Long min = 10;
+        |       if(bb.nonEmpty()){
+        |           min = bb.min();
+        |       }
+        |
+        |       return a.map(i=>{ return i.toInt(); }).sum()+b.flatMap(i=> { return i; }).sum().toInt() + min.toInt();
         |  }
         |}
         |""".stripMargin
     val clazz = compile( code )
     val instance = clazz.getConstructors.head.newInstance( )
-    val method = clazz.getMethod( "eval", classOf[java.util.List[_]] )
+    val method = clazz.getMethod( "eval", classOf[java.util.List[_]],
+      classOf[java.util.Set[java.util.Optional[java.lang.Long]]] )
     (0 until 10).foreach( _ ⇒ {
       val a = new util.ArrayList[Long]( )
-      a.add( Random.nextLong() )
-      a.add( Random.nextLong() )
-      a.add( Random.nextLong() )
-      println( method.invoke( instance, a ) )
+      a.add( Random.nextLong( ) )
+      a.add( Random.nextLong( ) )
+      a.add( Random.nextLong( ) )
+      val b = new util.HashSet[java.util.Optional[Long]]( )
+      val b1 = ArrayBuffer[Option[Long]]( )
+      if (Random.nextBoolean( )) {
+        b.add( java.util.Optional.empty( ) )
+        b1.append( None )
+      } else {
+        val i = Random.nextLong( )
+        b.add( java.util.Optional.of( i ) )
+        b1.append( Some( i ) )
+      }
+      import scala.collection.convert.ImplicitConversionsToScala._
+      assert( method.invoke( instance, a, b ).equals( func( a.toList, b1.toSet ) ) )
     } )
   }
 }

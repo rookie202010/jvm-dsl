@@ -29,7 +29,7 @@ class MonadOptimize(override val programScope: ProgramScope,val optimizeDslType:
       case lambda: Lambda⇒
         if (lambda.inputs.nonEmpty) {
           calleeType.carryDslType match {
-            case TupleType( parameterTypes ) ⇒
+            case TupleType( parameterTypes ) if lambda.inputs.length>1 ⇒
               optimizeDslType.push( lambda.inputs.zip( parameterTypes ).toMap )
               val newParam = optimizeDslType.visit( param )
               optimizeDslType.pop( )
@@ -162,9 +162,9 @@ class MonadOptimize(override val programScope: ProgramScope,val optimizeDslType:
 
   override def head(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
 
-  override def tail(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
+  override def last(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
 
   override def headOption(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
 
-  override def tailOption(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
+  override def lastOption(calleeType: MonadDslType, callee: ValueExpression): Array[ValueExpression] = Array()
 }

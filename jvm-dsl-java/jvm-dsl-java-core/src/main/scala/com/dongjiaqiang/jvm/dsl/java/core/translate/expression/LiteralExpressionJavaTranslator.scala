@@ -4,7 +4,7 @@ import com.dongjiaqiang.jvm.dsl.api.expression.`var`.Null
 import com.dongjiaqiang.jvm.dsl.api.expression.literal._
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.ExpressionVisitor
 import com.dongjiaqiang.jvm.dsl.api.expression.visitor.literal.LiteralExpressionVisitor
-import com.dongjiaqiang.jvm.dsl.java.api.codes.{_SYS_GEN_CODES, _SYS_LIST_CODES, _SYS_MAP_CODES, _SYS_SET_CODES}
+import com.dongjiaqiang.jvm.dsl.java.api.codes.{_SYS_ARRAY_CODES, _SYS_GEN_CODES, _SYS_LIST_CODES, _SYS_MAP_CODES, _SYS_SET_CODES}
 import com.dongjiaqiang.jvm.dsl.java.api.expression.JavaTranslatorContext
 
 import java.util.Comparator
@@ -107,21 +107,10 @@ trait LiteralExpressionJavaTranslator extends LiteralExpressionVisitor[String] {
   override def visit(literal: ArrayLiteral, visitor: ExpressionVisitor[String]): String = {
     val list = literal.literal
     val params = list.map( visitor.visit ).mkString( "," )
-    if (list.forall( _.isInstanceOf[IntLiteral] )) {
-      s"new int[]{$params}"
-    } else if (list.forall( _.isInstanceOf[FloatLiteral] )) {
-      s"new float[]{$params}"
-    } else if (list.forall( _.isInstanceOf[DoubleLiteral] )) {
-      s"new double[]{$params}"
-    } else if (list.forall( _.isInstanceOf[LongLiteral] )) {
-      s"new long[]{$params}"
-    } else if (list.forall( _.isInstanceOf[BoolLiteral] )) {
-      s"new boolean[]{$params}"
-    } else if (list.forall( _.isInstanceOf[CharLiteral] )) {
-      s"new char[]{$params}"
-    } else {
-      s"com.dongjiaqiang.jvm.dsl.java.core.ofArray($params)"
-    }
+    val carryDslType = literal.getValueType(visitor.programScope).carryDslType
+    val typeName = com.dongjiaqiang.jvm.dsl.java.api.toJavaType(carryDslType,javaTranslatorContext)
+    val newArray = s"new $typeName[${list.length}]"
+    s"${_SYS_ARRAY_CODES.CLAZZ_NAME}.ofArray($newArray,$params)"
   }
 
   override def visit(literal: EitherLiteral, visitor: ExpressionVisitor[String]): String = {

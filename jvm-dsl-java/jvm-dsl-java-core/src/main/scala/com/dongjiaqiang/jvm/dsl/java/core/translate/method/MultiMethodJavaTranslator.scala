@@ -1,6 +1,6 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate.method
 
-import com.dongjiaqiang.jvm.dsl.api.`type`.{ArrayType, ByteType, CharType, DoubleType, DslType, FloatType, IntType, ListType, LongType, MapType, OptionType, SetType, StringType, TryType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ArrayType, ByteType, CharType, DefinitionClazzType, DoubleType, DslType, FloatType, IntType, ListType, LongType, MapType, OptionType, SetType, StringType, TryType}
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.{AnyMethodVisitor, MethodVisitor, MultiMethodVisitor}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
@@ -11,7 +11,7 @@ class AnyMethodJavaTranslator(override val programScope: ProgramScope,
                               val javaTranslator: JavaTranslator) extends AnyMethodVisitor[String]{
   override def hashCode(callee: ValueExpression): String = s"${javaTranslator.visit(callee)}.hashCode()"
 
-  override def equals(callee: ValueExpression, param: ValueExpression): String =  s"${javaTranslator.visit(callee)}.equals()"
+  override def equals(callee: ValueExpression, param: ValueExpression): String =  s"${javaTranslator.visit(callee)}.equals(${javaTranslator.visit(param)})"
 
   override def toString(callee: ValueExpression): String =  s"${javaTranslator.visit(callee)}.toString()"
 }
@@ -33,6 +33,8 @@ class MultiMethodJavaTranslator(override val programScope: ProgramScope,
     registerSysVisitor(DoubleType.getClass.asSubclass(classOf[DslType]),new FloatMethodJavaTranslator(programScope, javaTranslator))
     registerSysVisitor(CharType.getClass.asSubclass(classOf[DslType]),new CharMethodJavaTranslator(programScope, javaTranslator))
     registerSysVisitor(ByteType.getClass.asSubclass(classOf[DslType]),new ByteMethodJavaTranslator(programScope, javaTranslator))
+
+    registerSysVisitor(classOf[DefinitionClazzType],new DefinitionClazzMethodJavaTranslator(programScope, javaTranslator))
 
   }
 

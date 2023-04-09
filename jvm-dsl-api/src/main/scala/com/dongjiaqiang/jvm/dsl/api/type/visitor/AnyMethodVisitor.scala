@@ -20,7 +20,7 @@ trait AnyMethodVisitor[T] extends MethodVisitor[T] {
       case MethodVisitor.HASH_CODE ⇒
         generate(params,()⇒ hashCode(callee))
       case MethodVisitor.EQUALS⇒
-        generate(params,()⇒equals(callee,params.head))
+        generate(Array(AnyType),params,()⇒equals(callee,params.head))
       case MethodVisitor.TO_STRING ⇒
         generate(params,()⇒toString(callee))
         Some(toString(callee))

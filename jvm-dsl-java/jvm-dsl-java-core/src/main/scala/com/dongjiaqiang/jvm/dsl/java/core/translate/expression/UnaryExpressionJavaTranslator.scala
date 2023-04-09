@@ -36,4 +36,7 @@ trait UnaryExpressionJavaTranslator extends UnaryExpressionVisitor[String] {
     s"(${visitor.visit( paren.child )})"
   }
 
+  override def visit(signedNumber: SignedNumber, visitor: ExpressionVisitor[String]): String = {
+    s"${signedNumber.signed}${visitor.visit( signedNumber.child )}"
+  }
 }

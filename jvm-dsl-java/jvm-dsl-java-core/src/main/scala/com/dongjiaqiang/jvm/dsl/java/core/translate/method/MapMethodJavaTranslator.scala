@@ -44,30 +44,18 @@ class MapMethodJavaTranslator(override val programScope: ProgramScope, val javaT
   override def filterNot(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): String = super.filterNot( calleeType, callee, param )
 
   override def keys(calleeType: MapType, callee: ValueExpression): String =
-    s"""
-       |${javaTranslator.visit( callee )}.keySet()
-       |""".stripMargin
+    s"${javaTranslator.visit( callee )}.keySet()"
 
   override def values(calleeType: MapType, callee: ValueExpression): String =
-    s"""
-       |${_SYS_MAP_CODES.CLAZZ_NAME}.values(${javaTranslator.visit( callee )})
-       |""".stripMargin
+    s"${_SYS_MAP_CODES.CLAZZ_NAME}.values(${javaTranslator.visit( callee )})"
 
   override def containKey(calleeType: MapType, callee: ValueExpression, key: ValueExpression): String =
-    s"""
-       |${javaTranslator.visit( callee )}.containsKey(${javaTranslator.visit( key )})
-       |""".stripMargin
+    s"${javaTranslator.visit( callee )}.containsKey(${javaTranslator.visit( key )})"
 
   override def get(calleeType: MapType, callee: ValueExpression, key: ValueExpression): String = {
-    val code =
-      s"""
-         |${javaTranslator.visit( callee )}.get(${javaTranslator.visit( key )})
-         |""".stripMargin
-    javaTranslator.specifyDslType( code, calleeType.valueParameterType )
+    javaTranslator.specifyDslType( s"${javaTranslator.visit( callee )}.get(${javaTranslator.visit( key )})", calleeType.valueParameterType )
   }
 
   override def put(calleeType: MapType, callee: ValueExpression, key: ValueExpression, value: ValueExpression): String =
-    s"""
-      |${javaTranslator.visit(callee)}.put(${javaTranslator.visit(key)},${javaTranslator.visit(value)})
-      |""".stripMargin
+    s"${javaTranslator.visit(callee)}.put(${javaTranslator.visit(key)},${javaTranslator.visit(value)})"
 }

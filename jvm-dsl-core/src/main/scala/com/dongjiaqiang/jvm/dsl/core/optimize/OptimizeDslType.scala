@@ -124,7 +124,8 @@ class OptimizeDslType(val programScope: ProgramScope) extends ExpressionReviser 
           case UnResolvedType ⇒
             val dslType = resolveSymbolType( fieldScope.symbolName, Math.abs( fieldScope.outerScopeIndex ) )
             if (dslType != UnResolvedType) {
-              super.visit( Cast(VarRef( varRef.refs, varRef.arrayRefIndexExpressions, Some( fieldScope.resolveDslType( dslType ) ) ) ,dslType,flag = 1))
+              val newVarRef = VarRef( varRef.refs, varRef.arrayRefIndexExpressions, Some( fieldScope.resolveDslType( dslType ) ) )
+              super.visit( Cast(newVarRef ,newVarRef.getValueType(programScope),flag = 1))
             } else {
               super.visit( varRef, visitor )
             }

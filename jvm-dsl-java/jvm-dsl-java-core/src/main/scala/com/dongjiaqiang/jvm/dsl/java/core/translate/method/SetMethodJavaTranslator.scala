@@ -1,8 +1,8 @@
 package com.dongjiaqiang.jvm.dsl.java.core.translate.method
 
 import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.MethodVisitor._
-import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.SetMethodVisitor
-import com.dongjiaqiang.jvm.dsl.api.`type`.{MonadDslType, SetType}
+import com.dongjiaqiang.jvm.dsl.api.`type`.visitor.{MethodVisitor, SetMethodVisitor}
+import com.dongjiaqiang.jvm.dsl.api.`type`.{ArrayType, DslType, LambdaType, MonadDslType, SetType}
 import com.dongjiaqiang.jvm.dsl.api.expression.ValueExpression
 import com.dongjiaqiang.jvm.dsl.api.scope.ProgramScope
 import com.dongjiaqiang.jvm.dsl.java.api.codes.{_SYS_COL_CODES, _SYS_SET_CODES}
@@ -16,38 +16,54 @@ class SetMethodJavaTranslator(override val programScope: ProgramScope,
   override val seqPath: String = _SYS_COL_CODES.CLAZZ_NAME
 
 
-  def transform(callee:ValueExpression,setType:SetType):ValueExpression={
+  def transform(callee:ValueExpression,setType:SetType,carryDslType:DslType):ValueExpression={
     if(setType.seq){
-        JavaCode(s"${javaTranslator.visit(callee)},new java.util.LinkedHashSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(setType.carryDslType,javaTranslator.javaTranslatorContext)}>()",setType)
+        JavaCode(s"${javaTranslator.visit(callee)},new java.util.LinkedHashSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(carryDslType,javaTranslator.javaTranslatorContext)}>()",setType)
     }else if(setType.sorted){
         setType.sorter match {
           case None⇒
-            JavaCode(s"${javaTranslator.visit(callee)},new java.util.TreeSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(setType.carryDslType,javaTranslator.javaTranslatorContext)}>()",setType)
+            JavaCode(s"${javaTranslator.visit(callee)},new java.util.TreeSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(carryDslType,javaTranslator.javaTranslatorContext)}>()",setType)
           case Some(lambda)⇒
             val comparator = LambdaToAnonymousClassTranslator.translateComparator(javaTranslator,javaTranslator.javaTranslatorContext,lambda)
-            JavaCode(s"${javaTranslator.visit(callee)},new java.util.TreeSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(setType.carryDslType,javaTranslator.javaTranslatorContext)}>($comparator)",setType)
+            JavaCode(s"${javaTranslator.visit(callee)},new java.util.TreeSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(carryDslType,javaTranslator.javaTranslatorContext)}>($comparator)",setType)
         }
     }else{
-        JavaCode(s"${javaTranslator.visit(callee)},new java.util.HashSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(setType.carryDslType,javaTranslator.javaTranslatorContext)}>()",setType)
+        JavaCode(s"${javaTranslator.visit(callee)},new java.util.HashSet<${com.dongjiaqiang.jvm.dsl.java.api.toJavaType(carryDslType,javaTranslator.javaTranslatorContext)}>()",setType)
     }
   }
   override def map(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): String = {
-    transform( MAP, calleeType, transform(callee, calleeType.asInstanceOf[SetType]), param )
+    val returnType = ArrayType(param.getValueType( programScope ).asInstanceOf[LambdaType].outputType )
+    transform( MAP, calleeType, transform(callee, calleeType.asInstanceOf[SetType],returnType), param )
   }
 
   override def filter(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): String = {
-    transform( FILTER, calleeType, transform(callee, calleeType.asInstanceOf[SetType]), param )
+    transform( FILTER, calleeType, transform(callee, calleeType.asInstanceOf[SetType],calleeType.carryDslType), param )
   }
 
   override def filterNot(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): String = {
-    transform( FILTER_NOT, calleeType, transform(callee, calleeType.asInstanceOf[SetType]), param )
+    transform( FILTER_NOT, calleeType, transform(callee, calleeType.asInstanceOf[SetType],calleeType.carryDslType), param )
   }
 
   override def flatten(calleeType: MonadDslType, callee: ValueExpression): String = {
-    transform( FLATTEN, calleeType, transform(callee, calleeType.asInstanceOf[SetType]) )
+    val newCallee = transform( callee, calleeType.asInstanceOf[SetType],
+      calleeType.carryDslType.asInstanceOf[MonadDslType].carryDslType )
+    super.flatten( calleeType, newCallee )
   }
 
   override def flatMap(calleeType: MonadDslType, callee: ValueExpression, param: ValueExpression): String = {
-    transform( FLAT_MAP, calleeType, transform(callee, calleeType.asInstanceOf[SetType]), param )
+    val lambdaType = param.getValueType( programScope ).asInstanceOf[LambdaType]
+    val outputType = lambdaType.outputType.asInstanceOf[MonadDslType].carryDslType
+
+    val newCallee = transform(callee, calleeType.asInstanceOf[SetType],outputType)
+    super.flatMap(  calleeType, newCallee, param )
+  }
+
+  override def isEmpty(calleeType: MonadDslType, callee: ValueExpression): String = {
+    MonadMethodJavaTranslator.transform(programScope,javaTranslator,None,MethodVisitor.IS_EMPTY,calleeType,callee)
+  }
+
+  override def nonEmpty(calleeType: MonadDslType, callee: ValueExpression): String = {
+    val code = MonadMethodJavaTranslator.transform(programScope,javaTranslator,None,MethodVisitor.IS_EMPTY,calleeType,callee)
+    s"!$code"
   }
 }

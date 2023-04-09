@@ -24,4 +24,8 @@ trait UnaryExpressionScanner extends UnaryExpressionVisitor[Unit] {
   override def visit(paren: Paren, visitor: ExpressionVisitor[Unit]): Unit = {
 
   }
+
+  override def visit(signedNumber: SignedNumber, visitor: ExpressionVisitor[Unit]): Unit = {
+
+  }
 }

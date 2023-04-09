@@ -70,11 +70,11 @@ trait MonadMethodVisitor[T] extends MethodVisitor[T] {
 
   def head(calleeType: MonadDslType, callee: ValueExpression): T
 
-  def tail(calleeType: MonadDslType, callee: ValueExpression): T
+  def last(calleeType: MonadDslType, callee: ValueExpression): T
 
   def headOption(calleeType: MonadDslType, callee: ValueExpression): T
 
-  def tailOption(calleeType: MonadDslType, callee: ValueExpression): T
+  def lastOption(calleeType: MonadDslType, callee: ValueExpression): T
 
 
   override def visit(calleeType: DslType, callee: ValueExpression, name: String, params: Array[ValueExpression]): Option[T] = {
@@ -101,8 +101,7 @@ trait MonadMethodVisitor[T] extends MethodVisitor[T] {
             actualTypes.head match {
               case LambdaType(mayInputType,_) ⇒
                 carryDslType match {
-                  case TupleType( parameterTypes ) ⇒
-                    mayInputType.isDefined && mayInputType.get.isInstanceOf[TupleType] &&
+                  case TupleType( parameterTypes ) if mayInputType.isDefined && mayInputType.get.isInstanceOf[TupleType]  ⇒
                       mayInputType.get.asInstanceOf[TupleType].parameterTypes.length == parameterTypes.length
                   case _ ⇒
                     mayInputType.isDefined
@@ -116,7 +115,7 @@ trait MonadMethodVisitor[T] extends MethodVisitor[T] {
         }
       case REVERSE | FLATTEN | TO_LIST | TO_ARRAY | TO_SET | TO_SORTED_SET
            | TO_SEQ_SET | TO_MAP | TO_SEQ_MAP | TO_SORTED_MAP |
-           ZIP_WITH_INDEX | IS_EMPTY | NON_EMPTY | LENGTH | HEAD | HEAD_OPTION | TAIL | TAIL_OPTION ⇒
+           ZIP_WITH_INDEX | IS_EMPTY | NON_EMPTY | LENGTH | HEAD | HEAD_OPTION | LAST | LAST_OPTION ⇒
         val generator = ()⇒ name match {
           case REVERSE ⇒ Some( reverse( calleeDslType, callee ) )
           case FLATTEN ⇒ Some( flatten( calleeDslType, callee ) )
@@ -148,8 +147,8 @@ trait MonadMethodVisitor[T] extends MethodVisitor[T] {
           case LENGTH ⇒ Some( length( calleeDslType, callee ) )
           case HEAD ⇒ Some(head(calleeDslType,callee))
           case HEAD_OPTION⇒Some(headOption(calleeDslType,callee))
-          case TAIL⇒Some(tail(calleeDslType,callee))
-          case TAIL_OPTION⇒Some(tailOption(calleeDslType,callee))
+          case LAST⇒Some(last(calleeDslType,callee))
+          case LAST_OPTION⇒Some(lastOption(calleeDslType,callee))
         }
         val result = if(paramsChecker) {
           generateOption( params, generator )

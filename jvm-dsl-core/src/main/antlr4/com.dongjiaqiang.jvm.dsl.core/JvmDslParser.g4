@@ -213,7 +213,8 @@ multiplicativeExpression    :   unaryExpression # UnaryExpr
                             ;
 
 //unary expr    func(a,b) a, (-a), (+a), (a), a instanceof Int, 1,[1,2],!a,(Int)a
-unaryExpression   :   literalAndCallChain # LiteralAndFuncCallExpr
+unaryExpression   :  additiveOperation unaryExpression # AddUnaryExpr
+                | literalAndCallChain # LiteralAndFuncCallExpr
                 |   LPAREN  additiveOperation  unaryExpression  RPAREN # OppositeExpr
                 |   BANG    unaryExpression # NegateExpr
                 |   LPAREN  type    RPAREN  unaryExpression # CastExpr

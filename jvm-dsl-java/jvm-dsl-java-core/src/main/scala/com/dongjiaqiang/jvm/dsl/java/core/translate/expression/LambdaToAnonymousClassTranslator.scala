@@ -44,40 +44,40 @@ object StringMonadLambdaToAnonymousClassTranslator extends LambdaToAnonymousClas
                     case BoolType ⇒
                         //translator predicate lambda expression
                         s"""
-                           |new ${classOf[_CharPredicate].getCanonicalName}(){
-                           |    @Override
-                           |    public boolean test(char ${lambda.inputs.head}) throws Exception
-                           |        ${visitor.visit( lambda )}
-                           |}
-                           |""".stripMargin
+                           new ${classOf[_CharPredicate].getCanonicalName}(){
+                               @Override
+                               public boolean test(char ${lambda.inputs.head}) throws Exception
+                                   ${visitor.visit( lambda )}
+                           }
+                        """
                     case UnitType ⇒
                         //translator consumer lambda expression
                         s"""
-                           |new ${classOf[_CharConsumer].getCanonicalName}(){
-                           |  @Override
-                           |  public void accept(char ${lambda.inputs.head}) throws Exception
-                           |      ${visitor.visit( lambda )}
-                           |}
-                           |""".stripMargin
+                           new ${classOf[_CharConsumer].getCanonicalName}(){
+                             @Override
+                             public void accept(char ${lambda.inputs.head}) throws Exception
+                                 ${visitor.visit( lambda )}
+                           }
+                        """
                     //translate function lambda expression
                     case CharType ⇒
                         inputDslType match {
                             case TupleType( _ ) ⇒
                                 s"""
-                                   |new ${classOf[_2_CharToCharFunction].getCanonicalName}(){
-                                   |    @Override
-                                   |    public char apply(char ${lambda.inputs.head},char ${lambda.inputs.last}) throws Exception
-                                   |         ${visitor.visit( lambda )}
-                                   |}
-                                   |"""
+                                   new ${classOf[_2_CharToCharFunction].getCanonicalName}(){
+                                       @Override
+                                       public char apply(char ${lambda.inputs.head},char ${lambda.inputs.last}) throws Exception
+                                            ${visitor.visit( lambda )}
+                                   }
+                                """
                             case _ ⇒
                                 s"""
-                                   |new ${classOf[_CharToCharFunction].getCanonicalName}(){
-                                   |    @Override
-                                   |    public char apply(char ${lambda.inputs.head}) throws Exception
-                                   |         ${visitor.visit( lambda )}
-                                   |}
-                                   |""".stripMargin
+                                   new ${classOf[_CharToCharFunction].getCanonicalName}(){
+                                       @Override
+                                       public char apply(char ${lambda.inputs.head}) throws Exception
+                                            ${visitor.visit( lambda )}
+                                   }
+                                """
                         }
                     //translate function lambda expression
                     case _ ⇒
@@ -87,12 +87,12 @@ object StringMonadLambdaToAnonymousClassTranslator extends LambdaToAnonymousClas
                             api.toJavaType( inputDslType, javaTranslatorContext )
                         }
                         s"""
-                           |new ${classOf[_CharToObjectFunction[_]].getCanonicalName}<$inputType>(){
-                           |    @Override
-                           |    public $inputType apply(char ${lambda.inputs.head}) throws Exception
-                           |         ${visitor.visit( lambda )}
-                           |}
-                           |""".stripMargin
+                           new ${classOf[_CharToObjectFunction[_]].getCanonicalName}<$inputType>(){
+                               @Override
+                               public $inputType apply(char ${lambda.inputs.head}) throws Exception
+                                    ${visitor.visit( lambda )}
+                           }
+                        """
 
                 }
         }
@@ -106,12 +106,12 @@ object LambdaToAnonymousClassTranslator {
                             lambda: Lambda,
                             calleeType: DslType = AnyType): String = {
         s"""
-           |new ${classOf[Comparator[_]].getCanonicalName}<Object>(){
-           |    @Override
-           |    public int compare(${api.toJavaType( calleeType, javaTranslatorContext )} ${lambda.inputs.head},${api.toJavaType( calleeType, javaTranslatorContext )} ${lambda.inputs.last})
-           |        ${visitor.visit( lambda )}
-           |}
-           |""".stripMargin
+           new ${classOf[Comparator[_]].getCanonicalName}<Object>(){
+               @Override
+               public int compare(${api.toJavaType( calleeType, javaTranslatorContext )} ${lambda.inputs.head},${api.toJavaType( calleeType, javaTranslatorContext )} ${lambda.inputs.last})
+                   ${visitor.visit( lambda )}
+           }
+        """
     }
 
     private def generateTupleParams(tupleType: TupleType, lambda: Lambda, javaTranslatorContext: JavaTranslatorContext, genericErasure: Boolean): String = {
@@ -150,57 +150,57 @@ object LambdaToAnonymousClassTranslator {
             outputType match {
                 case UnitType⇒
                     s"""
-                       |new ${classOf[_Runnable].getCanonicalName}(){
-                       |    @Override
-                       |    public void run() throws Exception
-                       |          ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_Runnable].getCanonicalName}(){
+                           @Override
+                           public void run() throws Exception
+                                 ${visitor.visit( lambda )}
+                       }
+                    """
                 case _⇒
                     val typeStr = generateType(outputType,javaTranslatorContext,genericErasure)
                     s"""
-                       |new ${classOf[_1_Supplier[_]].getCanonicalName}<$typeStr>(){
-                       |    @Override
-                       |    public $typeStr get() throws Exception
-                       |      ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_1_Supplier[_]].getCanonicalName}<$typeStr>(){
+                           @Override
+                           public $typeStr get() throws Exception
+                             ${visitor.visit( lambda )}
+                       }
+                    """
             }
         }
         if (unpack) {
             outputType match {
                 case IntType ⇒
                     s"""
-                       |new ${classOf[_IntSupplier].getCanonicalName}(){
-                       |    @Override
-                       |    public int getAsInt() throws Exception
-                       |        ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_IntSupplier].getCanonicalName}(){
+                           @Override
+                           public int getAsInt() throws Exception
+                               ${visitor.visit( lambda )}
+                       }
+                    """
                 case LongType ⇒
                     s"""
-                       |new ${classOf[_LongSupplier].getCanonicalName}(){
-                       |    @Override
-                       |    public long getAsLong() throws Exception
-                       |      ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_LongSupplier].getCanonicalName}(){
+                           @Override
+                           public long getAsLong() throws Exception
+                             ${visitor.visit( lambda )}
+                       }
+                    """
                 case DoubleType ⇒
                     s"""
-                       |new ${classOf[_DoubleSupplier].getCanonicalName}(){
-                       |  @Override
-                       |  public double getAsDouble() throws Exception
-                       |      ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_DoubleSupplier].getCanonicalName}(){
+                         @Override
+                         public double getAsDouble() throws Exception
+                             ${visitor.visit( lambda )}
+                       }
+                    """
                 case BoolType ⇒
                     s"""
-                       |new ${classOf[_BooleanSupplier].getCanonicalName}(){
-                       |    @Override
-                       |    public boolean getAsBoolean() throws Exception
-                       |      ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_BooleanSupplier].getCanonicalName}(){
+                           @Override
+                           public boolean getAsBoolean() throws Exception
+                             ${visitor.visit( lambda )}
+                       }
+                    """
                 case _ ⇒
                     translateGenericSupplier()
             }
@@ -224,49 +224,49 @@ object LambdaToAnonymousClassTranslator {
                            |""".stripMargin
                     val inputs = generateTupleParams( tupleType, lambda, javaTranslatorContext, genericErasure )
                     s"""
-                       |new $predicateClazzName<${generateTupleTypes( tupleType, javaTranslatorContext, genericErasure )}>(){
-                       |    @Override
-                       |    public boolean test($inputs) throws Exception
-                       |       ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new $predicateClazzName<${generateTupleTypes( tupleType, javaTranslatorContext, genericErasure )}>(){
+                          @Override
+                          public boolean test($inputs) throws Exception
+                              ${visitor.visit( lambda )}
+                       }
+                    """
                 case _ ⇒
                     val typeStr = generateType(inputType,javaTranslatorContext, genericErasure)
                     s"""
-                       |new ${classOf[_1_Predicate[_]].getCanonicalName}<$typeStr>(){
-                       |    @Override
-                       |    public boolean test($typeStr ${lambda.inputs.head}) throws Exception
-                       |      ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_1_Predicate[_]].getCanonicalName}<$typeStr>(){
+                           @Override
+                           public boolean test($typeStr ${lambda.inputs.head}) throws Exception
+                             ${visitor.visit( lambda )}
+                       }
+                    """
             }
         }
         if (unpack) {
             inputType match {
                 case IntType ⇒
                     s"""
-                       |new ${classOf[_IntPredicate].getCanonicalName}(){
-                       |    @Override
-                       |    public boolean test(int ${lambda.inputs.head}) throws Exception
-                       |        ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_IntPredicate].getCanonicalName}(){
+                          @Override
+                          public boolean test(int ${lambda.inputs.head}) throws Exception
+                               ${visitor.visit( lambda )}
+                       }
+                    """
                 case LongType ⇒
                     s"""
-                       |new ${classOf[_LongPredicate].getCanonicalName}(){
-                       |    @Override
-                       |    public boolean test(long ${lambda.inputs.head}) throws Exception
-                       |        ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_LongPredicate].getCanonicalName}(){
+                           @Override
+                           public boolean test(long ${lambda.inputs.head}) throws Exception
+                               ${visitor.visit( lambda )}
+                       }
+                    """
                 case DoubleType ⇒
                     s"""
-                       |new ${classOf[_DoublePredicate].getCanonicalName}(){
-                       |    @Override
-                       |    public boolean test(double ${lambda.inputs.head}) throws Exception
-                       |        ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_DoublePredicate].getCanonicalName}(){
+                           @Override
+                           public boolean test(double ${lambda.inputs.head}) throws Exception
+                               ${visitor.visit( lambda )}
+                       }
+                    """
                 case _ ⇒ translateGenericPredicate( )
             }
         } else {
@@ -284,12 +284,12 @@ object LambdaToAnonymousClassTranslator {
             val type1 = generateType(dslType1,javaTranslatorContext, genericErasure)
             val type2 = generateType(dslType2,javaTranslatorContext, genericErasure)
             s"""
-               |new ${classOf[_2_Consumer[_, _]].getCanonicalName}<$type1,$type2>(){
-               |  @Override
-               |  public void accept($type1, $type2) throws Exception
-               |      ${visitor.visit( lambda )}
-               |}
-               |""".stripMargin
+               new ${classOf[_2_Consumer[_, _]].getCanonicalName}<$type1,$type2>(){
+                 @Override
+                 public void accept($type1, $type2) throws Exception
+                     ${visitor.visit( lambda )}
+               }
+            """
         }
         def translateTupleConsumer(tupleType:TupleType): String = {
             val consumerClazzName =
@@ -298,77 +298,77 @@ object LambdaToAnonymousClassTranslator {
                    |""".stripMargin
             val inputs = generateTupleParams( tupleType, lambda, javaTranslatorContext, genericErasure )
             s"""
-               |new $consumerClazzName<${generateTupleTypes( tupleType, javaTranslatorContext, genericErasure )}>(){
-               |    @Override
-               |    public void accept($inputs) throws Exception
-               |       ${visitor.visit( lambda )}
-               |}
-               |""".stripMargin
+               new $consumerClazzName<${generateTupleTypes( tupleType, javaTranslatorContext, genericErasure )}>(){
+                   @Override
+                   public void accept($inputs) throws Exception
+                      ${visitor.visit( lambda )}
+                }
+             """
         }
         def translateGenericConsumer():String={
             val typeStr = generateType(inputType,javaTranslatorContext, genericErasure)
             s"""
-               |new ${classOf[_1_Consumer[_]].getCanonicalName}<$typeStr>(){
-               |  @Override
-               |  public void accept($typeStr ${lambda.inputs.head}) throws Exception
-               |      ${visitor.visit( lambda )}
-               |}
-               |""".stripMargin
+               new ${classOf[_1_Consumer[_]].getCanonicalName}<$typeStr>(){
+                 @Override
+                 public void accept($typeStr ${lambda.inputs.head}) throws Exception
+                     ${visitor.visit( lambda )}
+               }
+            """
         }
         if(unpack) {
             inputType match {
                 case IntType ⇒
                     s"""
-                       |new ${classOf[_IntConsumer]}(){
-                       |    @Override
-                       |    public void accept(int ${lambda.inputs.head}) throws Exception
-                       |         ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_IntConsumer]}(){
+                           @Override
+                           public void accept(int ${lambda.inputs.head}) throws Exception
+                                ${visitor.visit( lambda )}
+                       }
+                    """
                 case DoubleType ⇒
                     s"""
-                       |new ${classOf[_DoubleConsumer]}(){
-                       |    @Override
-                       |    public void accept(double ${lambda.inputs.head}) throws Exception
-                       |         ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_DoubleConsumer]}(){
+                           @Override
+                           public void accept(double ${lambda.inputs.head}) throws Exception
+                                ${visitor.visit( lambda )}
+                       }
+                    """
                 case LongType ⇒
                     s"""
-                       |new ${classOf[_LongConsumer]}(){
-                       |    @Override
-                       |    public void accept(long ${lambda.inputs.head}) throws Exception
-                       |       ${visitor.visit( lambda )}
-                       |}
-                       |""".stripMargin
+                       new ${classOf[_LongConsumer]}(){
+                           @Override
+                           public void accept(long ${lambda.inputs.head}) throws Exception
+                              ${visitor.visit( lambda )}
+                       }
+                    """
                 case tupleType: TupleType ⇒
                     if (tupleType.parameterTypes.length == 2) {
                         val typeStr = generateType(tupleType.parameterTypes.head,javaTranslatorContext, genericErasure)
                         tupleType.parameterTypes.last match {
                             case DoubleType ⇒
                                 s"""
-                                   |new ${classOf[_ObjDoubleConsumer[_]].getCanonicalName}<$typeStr>(){
-                                   |  @Override
-                                   |  public void accept($typeStr ${lambda.inputs.head}, double ${lambda.inputs.last}) throws Exception
-                                   |      ${visitor.visit( lambda )}
-                                   |}
-                                   |""".stripMargin
+                                   new ${classOf[_ObjDoubleConsumer[_]].getCanonicalName}<$typeStr>(){
+                                     @Override
+                                     public void accept($typeStr ${lambda.inputs.head}, double ${lambda.inputs.last}) throws Exception
+                                         ${visitor.visit( lambda )}
+                                   }
+                                """
                             case IntType ⇒
                                 s"""
-                                   |new ${classOf[_ObjIntConsumer[_]].getCanonicalName}<$typeStr>(){
-                                   |  @Override
-                                   |  public void accept($typeStr ${lambda.inputs.head}, int ${lambda.inputs.last}) throws Exception
-                                   |      ${visitor.visit( lambda )}
-                                   |}
-                                   |""".stripMargin
+                                   new ${classOf[_ObjIntConsumer[_]].getCanonicalName}<$typeStr>(){
+                                     @Override
+                                     public void accept($typeStr ${lambda.inputs.head}, int ${lambda.inputs.last}) throws Exception
+                                         ${visitor.visit( lambda )}
+                                   }
+                                 """
                             case LongType ⇒
                                 s"""
-                                   |new ${classOf[_ObjLongConsumer[_]].getCanonicalName}<$typeStr>(){
-                                   |  @Override
-                                   |  public void accept($typeStr ${lambda.inputs.head}, int ${lambda.inputs.last}) throws Exception
-                                   |      ${visitor.visit( lambda )}
-                                   |}
-                                   |""".stripMargin
+                                   new ${classOf[_ObjLongConsumer[_]].getCanonicalName}<$typeStr>(){
+                                     @Override
+                                     public void accept($typeStr ${lambda.inputs.head}, int ${lambda.inputs.last}) throws Exception
+                                         ${visitor.visit( lambda )}
+                                   }
+                                """
                             case _ ⇒
                                 translateTuple2Consumer( tupleType.parameterTypes.head, tupleType.parameterTypes.last )
                         }
@@ -388,32 +388,32 @@ object LambdaToAnonymousClassTranslator {
 
     private def translateDoubleBinaryOperator(lambda: Lambda, visitor: ExpressionVisitor[String]): String = {
         s"""
-           |new ${classOf[_DoubleBinaryOperator].getCanonicalName}(){
-           |     @Override
-           |     public double applyAsDouble(double ${lambda.inputs.head}, double ${lambda.inputs.last}) throws Exception
-           |         ${visitor.visit( lambda )}
-           |}
-           |""".stripMargin
+           new ${classOf[_DoubleBinaryOperator].getCanonicalName}(){
+                @Override
+                public double applyAsDouble(double ${lambda.inputs.head}, double ${lambda.inputs.last}) throws Exception
+                    ${visitor.visit( lambda )}
+           }
+        """
     }
 
     private def translateIntBinaryOperator(lambda: Lambda, visitor: ExpressionVisitor[String]): String = {
         s"""
-           |new ${classOf[_IntBinaryOperator].getCanonicalName}(){
-           |     @Override
-           |     public int applyAsInt((int ${lambda.inputs.head}, int ${lambda.inputs.last}) throws Exception
-           |         ${visitor.visit( lambda )}
-           |}
-           |""".stripMargin
+           new ${classOf[_IntBinaryOperator].getCanonicalName}(){
+                @Override
+                public int applyAsInt((int ${lambda.inputs.head}, int ${lambda.inputs.last}) throws Exception
+                    ${visitor.visit( lambda )}
+           }
+        """
     }
 
     private def translateLongBinaryOperator(lambda: Lambda, visitor: ExpressionVisitor[String]): String = {
         s"""
-           |new ${classOf[_LongBinaryOperator].getCanonicalName}(){
-           |     @Override
-           |     public long applyAsLong(long ${lambda.inputs.head}, long ${lambda.inputs.last}) throws Exception
-           |         ${visitor.visit( lambda )}
-           |}
-           |""".stripMargin
+           new ${classOf[_LongBinaryOperator].getCanonicalName}(){
+                @Override
+                public long applyAsLong(long ${lambda.inputs.head}, long ${lambda.inputs.last}) throws Exception
+                    ${visitor.visit( lambda )}
+           }
+        """
     }
 
     private def basicBinaryOperator(inputType: TupleType, outputType: DslType, targetType: DslType): Boolean = {
@@ -435,23 +435,23 @@ object LambdaToAnonymousClassTranslator {
             val inputs = generateTupleParams( tupleType, lambda, javaTranslatorContext, genericErasure )
             val typeStr = generateType(outputType,javaTranslatorContext, genericErasure)
             s"""
-               |new $functionClazzName<${generateTupleTypes(  TupleType(tupleType.parameterTypes:+outputType), javaTranslatorContext, genericErasure )}>(){
-               |    @Override
-               |    public $typeStr apply($inputs) throws Exception
-               |       ${visitor.visit( lambda )}
-               |}
-               |""".stripMargin
+               new $functionClazzName<${generateTupleTypes(  TupleType(tupleType.parameterTypes:+outputType), javaTranslatorContext, genericErasure )}>(){
+                   @Override
+                   public $typeStr apply($inputs) throws Exception
+                      ${visitor.visit( lambda )}
+               }
+            """
         }
         def translateGenericFunction():String={
             val typeIn = generateType(inputType,javaTranslatorContext, genericErasure)
             val typeOut = generateType(outputType,javaTranslatorContext, genericErasure)
             s"""
-               |new ${classOf[_1_Function[_, _]].getCanonicalName}<$typeIn,$typeOut>(){
-               |     @Override
-               |     public $typeOut apply($typeIn ${lambda.inputs.head}) throws Exception
-               |         ${visitor.visit( lambda )}
-               |}
-               |""".stripMargin
+               new ${classOf[_1_Function[_, _]].getCanonicalName}<$typeIn,$typeOut>(){
+                    @Override
+                    public $typeOut apply($typeIn ${lambda.inputs.head}) throws Exception
+                        ${visitor.visit( lambda )}
+               }
+            """
         }
         if(unpack) {
             inputType match {
@@ -459,109 +459,109 @@ object LambdaToAnonymousClassTranslator {
                     outputType match {
                         case IntType ⇒
                             s"""
-                               |new ${classOf[_IntUnaryOperator].getCanonicalName}(){
-                               |    @Override
-                               |    public int applyAsInt(int ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_IntUnaryOperator].getCanonicalName}(){
+                                   @Override
+                                   public int applyAsInt(int ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case DoubleType ⇒
                             s"""
-                               |new ${classOf[_IntToDoubleFunction].getCanonicalName}(){
-                               |    @Override
-                               |    public double applyAsDouble(int ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_IntToDoubleFunction].getCanonicalName}(){
+                                   @Override
+                                   public double applyAsDouble(int ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case LongType ⇒
                             s"""
-                               |new ${classOf[_IntToLongFunction].getCanonicalName}(){
-                               |    @Override
-                               |    public long applyAsLong(int ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_IntToLongFunction].getCanonicalName}(){
+                                   @Override
+                                   public long applyAsLong(int ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case _ ⇒
                             val typeStr = generateType( outputType, javaTranslatorContext, genericErasure )
                             s"""
-                               |new ${classOf[_IntFunction[_]].getCanonicalName}<$typeStr>(){
-                               |     @Override
-                               |     public $typeStr apply(int ${lambda.inputs.head}) throws Exception
-                               |            ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_IntFunction[_]].getCanonicalName}<$typeStr>(){
+                                    @Override
+                                    public $typeStr apply(int ${lambda.inputs.head}) throws Exception
+                                           ${visitor.visit( lambda )}
+                               }
+                            """
                     }
                 case LongType ⇒
                     outputType match {
                         case IntType ⇒
                             s"""
-                               |new ${classOf[_LongUnaryOperator].getCanonicalName}(){
-                               |    @Override
-                               |    public long applyAsLong(long ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_LongUnaryOperator].getCanonicalName}(){
+                                   @Override
+                                   public long applyAsLong(long ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case DoubleType ⇒
                             s"""
-                               |new ${classOf[_LongToDoubleFunction].getCanonicalName}(){
-                               |    @Override
-                               |    public double applyAsDouble(int ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_LongToDoubleFunction].getCanonicalName}(){
+                                   @Override
+                                   public double applyAsDouble(int ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case LongType ⇒
                             s"""
-                               |new ${classOf[_LongUnaryOperator].getCanonicalName}(){
-                               |    @Override
-                               |    public long applyAsLong(int ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_LongUnaryOperator].getCanonicalName}(){
+                                   @Override
+                                   public long applyAsLong(int ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case _ ⇒
                             val typeStr = generateType( outputType, javaTranslatorContext, genericErasure )
                             s"""
-                               |new ${classOf[_LongFunction[_]].getCanonicalName}<$typeStr>(){
-                               |     @Override
-                               |     public $typeStr apply(long ${lambda.inputs.head}) throws Exception
-                               |            ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_LongFunction[_]].getCanonicalName}<$typeStr>(){
+                                    @Override
+                                    public $typeStr apply(long ${lambda.inputs.head}) throws Exception
+                                           ${visitor.visit( lambda )}
+                               }
+                            """
                     }
                 case DoubleType ⇒
                     outputType match {
                         case IntType ⇒
                             s"""
-                               |new ${classOf[_DoubleToIntFunction].getCanonicalName}(){
-                               |    @Override
-                               |    public int applyAsInt(double ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_DoubleToIntFunction].getCanonicalName}(){
+                                   @Override
+                                   public int applyAsInt(double ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case DoubleType ⇒
                             s"""
-                               |new ${classOf[_DoubleUnaryOperator].getCanonicalName}(){
-                               |    @Override
-                               |    public double applyAsDouble(double ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_DoubleUnaryOperator].getCanonicalName}(){
+                                   @Override
+                                   public double applyAsDouble(double ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                             """
                         case LongType ⇒
                             s"""
-                               |new ${classOf[_DoubleToLongFunction].getCanonicalName}(){
-                               |    @Override
-                               |    public long applyAsLong(double ${lambda.inputs.head}) throws Exception
-                               |      ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_DoubleToLongFunction].getCanonicalName}(){
+                                  @Override
+                                  public long applyAsLong(double ${lambda.inputs.head}) throws Exception
+                                     ${visitor.visit( lambda )}
+                               }
+                            """
                         case _ ⇒
                             val typeStr = generateType( outputType, javaTranslatorContext, genericErasure )
                             s"""
-                               |new ${classOf[_DoubleFunction[_]].getCanonicalName}<$typeStr>(){
-                               |     @Override
-                               |     public $typeStr apply(double ${lambda.inputs.head}) throws Exception
-                               |            ${visitor.visit( lambda )}
-                               |}
-                               |""".stripMargin
+                               new ${classOf[_DoubleFunction[_]].getCanonicalName}<$typeStr>(){
+                                    @Override
+                                    public $typeStr apply(double ${lambda.inputs.head}) throws Exception
+                                           ${visitor.visit( lambda )}
+                               }
+                            """
                     }
                 case tupleType: TupleType ⇒
                     if (basicBinaryOperator( tupleType, outputType, IntType )) {

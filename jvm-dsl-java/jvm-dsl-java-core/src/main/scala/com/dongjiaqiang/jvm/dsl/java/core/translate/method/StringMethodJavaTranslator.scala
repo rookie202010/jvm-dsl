@@ -62,4 +62,11 @@ class StringMethodJavaTranslator(override val programScope: ProgramScope,
 
   override def tail(callee: ValueExpression): String = MonadMethodJavaTranslator.transform(programScope,javaTranslator,monadPath,MethodVisitor.TAIL,StringType,callee)
   override def tailOption(callee: ValueExpression): String = MonadMethodJavaTranslator.transform(programScope,javaTranslator,monadPath,MethodVisitor.TAIL_OPTION,StringType,callee)
+
+  override def startsWith(callee: ValueExpression, param: ValueExpression): String = s"${javaTranslator.visit(callee)}.startsWith(${javaTranslator.visit(param)})"
+
+  override def startsWith(callee: ValueExpression, param: ValueExpression, offset: ValueExpression): String = s"${javaTranslator.visit(callee)}.startsWith(${javaTranslator.visit(param)},${javaTranslator.visit(offset)})"
+
+  override def endsWith(callee: ValueExpression, param: ValueExpression): String = s"${javaTranslator.visit(callee)}.endsWith(${javaTranslator.visit(param)})"
+
 }

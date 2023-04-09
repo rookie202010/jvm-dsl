@@ -134,14 +134,13 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
         case matchCase: MatchCase ⇒
           val code = visitor.visit( matchCase )
           s"""
-             |new ${classOf[_Runnable].getCanonicalName}(){
-             |     @Override
-             |     public void run() throws Exception {
-             |           $code
-             |     }
-             |}.run();
-             |
-             |""".stripMargin
+             new ${classOf[_Runnable].getCanonicalName}(){
+                  @Override
+                  public void run() throws Exception {
+                        $code
+                  }
+             }.run();
+          """
         case async: Async⇒
           val code = visitor.visit(JavaAsync(async.body,async.executor,FutureType(UnitType)))
           s"$code;"
@@ -161,9 +160,9 @@ trait BlockExpressionJavaTranslator extends BlockExpressionVisitor[String] {
       }
     }
     s"""
-       |{
-       |   ${block.expressions.map( help ).mkString("")}
-       |}
-       |""".stripMargin
+      {
+        ${block.expressions.map( help ).mkString("")}
+      }
+    """
   }
 }
